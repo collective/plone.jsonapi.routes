@@ -11,7 +11,7 @@ long_description = (
     open(os.path.join('docs', 'HISTORY.rst')).read()
     + '\n')
 
-setup(name='plone.jsonapi',
+setup(name='plone.jsonapi.routes',
       version=version,
       description="Plone JSON API -- Routes",
       long_description=long_description,
@@ -29,13 +29,13 @@ setup(name='plone.jsonapi',
       license='MIT',
       packages=find_packages('src'),
       package_dir = {'': 'src'},
-      namespace_packages=['plone'],
+      namespace_packages=['plone', 'jsonapi'],
       include_package_data=True,
       zip_safe=False,
       install_requires=[
           'setuptools',
-          'simplejson==2.5.2',
-          'werkzeug==0.9.3',
+          'plone.api',
+          'plone.jsonapi',
           # -*- Extra requirements: -*-
       ],
       entry_points="""
