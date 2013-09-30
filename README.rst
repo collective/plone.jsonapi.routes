@@ -1,5 +1,5 @@
-plone.jsonapi.routes
-=============
+collective.jsonapi.routes
+=========================
 
 :Author: Ramon Bartl
 :Version: 0.1dev
@@ -7,16 +7,6 @@ plone.jsonapi.routes
 
 .. contents:: Table of Contents
    :depth: 2
-
-
-Abstract
---------
-
-plone.jsonapi route provider for Plone Content Types
-
-
-Introduction
-------------
 
 
 
