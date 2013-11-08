@@ -1,21 +1,18 @@
 # -*- coding: utf-8 -*-
 
-from plone.jsonapi import router
+from plone.jsonapi.core import router
 
-from Products.ATContentTypes.interfaces import IATDocument
+from api import url_for
+from api import get_items
 
-from api import *
 
-
-# GET
+# HTTP GET
 @router.add_route("/documents", "documents", methods=["GET"])
 @router.add_route("/documents/<string:uid>", "documents", methods=["GET"])
 def documents(context, request, uid=None):
     """ get documents
     """
-    items = get_contents(IATDocument, request, uid=uid)
-    items = [get_base_info(item, "documents") for item in items]
-
+    items = get_items("Document", request, uid=uid, endpoint="documents")
     return {
         "url": url_for("documents"),
         "count": len(items),
