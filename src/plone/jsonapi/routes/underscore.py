@@ -17,6 +17,41 @@ def fail(error):
     """
     raise RuntimeError(error)
 
+
+def truthy(thing):
+    """ checks if a value is True or not None
+
+        >>> truthy(0)
+        True
+        >>> truthy({})
+        True
+        >>> truthy([])
+        True
+        >>> truthy(None)
+        False
+        >>> truthy(False)
+        False
+    """
+    if thing is False or thing is None:
+        return False
+    return True
+
+def falsy(thing):
+    """ checks if a value is False or None
+
+        >>> falsy(0)
+        False
+        >>> falsy({})
+        False
+        >>> falsy([])
+        False
+        >>> falsy(None)
+        True
+        >>> falsy(False)
+        True
+    """
+    return not truthy(thing)
+
 def is_string(thing):
     """ checks if an object is a string/unicode type
 

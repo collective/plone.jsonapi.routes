@@ -1,0 +1,14 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    i18n_domain="plone.jsonapi.core">
+
+    <adapter
+        for="Products.ATContentTypes.interfaces.IATDocument"
+        factory=".adapters.DocumentInfo"
+        />
+
+</configure>
+
+<!-- vim: set ft=xml ts=2 sw=2 expandtab : -->
+
