@@ -5,6 +5,8 @@ import logging
 from plone import api as ploneapi
 from plone.jsonapi.core import router
 
+from Products.ZCatalog.interfaces import ICatalogBrain
+
 # request helpers
 from plone.jsonapi.routes.request import get_sort_limit
 from plone.jsonapi.routes.request import get_sort_on
@@ -18,8 +20,9 @@ from plone.jsonapi.routes import underscore as _
 
 logger = logging.getLogger("plone.jsonapi.routes")
 
+
 #-----------------------------------------------------------------------------
-# OBJECT INFO
+#   Json API Functions
 #-----------------------------------------------------------------------------
 
 def get_items(portal_type, request, uid=None, endpoint=None):
@@ -34,37 +37,21 @@ def get_items(portal_type, request, uid=None, endpoint=None):
     complete = _.truthy(uid)
     return make_items_for(results, endpoint, complete=complete)
 
+
 def make_items_for(brains, endpoint, complete=False):
     """ return a list of info dicts
     """
     def _block(brain):
-        base = get_base_info(brain, endpoint)
+        info = dict(api_url=url_for(endpoint, uid=get_uid(brain)))
+        info.update(IInfo(brain)()) # call/update with the catalog brain adapter
         if complete:
             obj = brain.getObject()
-            adapter = IInfo(obj)
-            if adapter: base.update(adapter())
-        return base
+            info.update(IInfo(obj)()) # call/update with the object adapter
+        return info
     return map(_block, brains)
 
-def get_base_info(brain, endpoint):
-    """ returns the base information for the given object
-    """
-    logger.info("get_base_info:: -> get base info for %s" % brain.getId)
-    return {
-        "id":      brain.getId,
-        "uid":     brain.UID,
-        "url":     brain.getURL(),
-        "title":   brain.Title,
-        "api_url": url_for(endpoint, uid=brain.UID),
-    }
-
-def url_for(endpoint, **values):
-    """ returns the api url
-    """
-    return router.url_for(endpoint, force_external=True, values=values)
-
 #-----------------------------------------------------------------------------
-# CATALOG
+#   Portal Catalog Helper
 #-----------------------------------------------------------------------------
 
 def get_tool(name):
@@ -101,5 +88,21 @@ def make_query(request, **kw):
 
     logger.info("Catalog Query --> %r", query)
     return query
+
+#-----------------------------------------------------------------------------
+#   Helper Functions
+#-----------------------------------------------------------------------------
+
+def url_for(endpoint, **values):
+    """ returns the api url
+    """
+    return router.url_for(endpoint, force_external=True, values=values)
+
+def get_uid(obj):
+    """ get the UID of the brain/object
+    """
+    if ICatalogBrain.providedBy(obj):
+        return obj.UID
+    return obj.UID()
 
 # vim: set ft=python ts=4 sw=4 expandtab :

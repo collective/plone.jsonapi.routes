@@ -4,6 +4,11 @@
     i18n_domain="plone.jsonapi.core">
 
     <adapter
+        for="Products.ZCatalog.interfaces.ICatalogBrain"
+        factory=".adapters.BaseInfo"
+        />
+
+    <adapter
         for="Products.ATContentTypes.interfaces.IATDocument"
         factory=".adapters.DocumentInfo"
         />

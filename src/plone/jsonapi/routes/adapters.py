@@ -6,44 +6,55 @@ __docformat__ = 'plaintext'
 from zope import interface
 from zope import component
 
-from Products.ATContentTypes.interfaces import IATContentType
+from Products.ZCatalog.interfaces import ICatalogBrain
 from Products.ATContentTypes.interfaces import IATDocument
 
 from interfaces import IInfo
 
 
-class BaseInfo(object):
+class Base(object):
     """ Base Adapter
     """
     interface.implements(IInfo)
-    component.adapts(IATContentType)
 
     def __init__(self, context):
-        self.context = context
-
-    def to_dict(self, obj):
-        return {
-            "created":   obj.created().ISO8601(),
-            "modified":  obj.modified().ISO8601(),
-            "effective": obj.effective().ISO8601(),
-        }
+        self. context = context
 
     def __call__(self):
         return self.to_dict(self.context)
 
 
-class DocumentInfo(BaseInfo):
+class BaseInfo(Base):
+    """ Catalog Brain Adapter
+    """
+    interface.implements(IInfo)
+    component.adapts(ICatalogBrain)
+
+    def to_dict(self, brain):
+        return {
+            "id":          brain.getId,
+            "uid":         brain.UID,
+            "title":       brain.Title,
+            "description": brain.Description,
+            "url":         brain.getURL(),
+            "portal_type": brain.portal_type,
+            "created":     brain.created.ISO8601(),
+            "modified":    brain.modified.ISO8601(),
+            "effective":   brain.effective.ISO8601(),
+            "type":        brain.portal_type,
+            "tags":        brain.subject,
+        }
+
+
+class DocumentInfo(Base):
     """ Document Adapter
     """
     interface.implements(IInfo)
     component.adapts(IATDocument)
 
     def to_dict(self, obj):
-        out = super(DocumentInfo, self).to_dict(obj)
-        out.update({
+        return {
             "text": obj.getText()
-        })
-        return out
-
+        }
 
 # vim: set ft=python ts=4 sw=4 expandtab :
