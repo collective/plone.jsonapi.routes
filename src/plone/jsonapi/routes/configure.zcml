@@ -13,7 +13,11 @@
         factory=".adapters.DocumentInfo"
         />
 
+    <adapter
+        for="Products.ATContentTypes.interfaces.IATEvent"
+        factory=".adapters.EventInfo"
+        />
+
 </configure>
 
 <!-- vim: set ft=xml ts=2 sw=2 expandtab : -->
-

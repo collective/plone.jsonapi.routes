@@ -8,6 +8,7 @@ from zope import component
 
 from Products.ZCatalog.interfaces import ICatalogBrain
 from Products.ATContentTypes.interfaces import IATDocument
+from Products.ATContentTypes.interfaces import IATEvent
 
 from interfaces import IInfo
 
@@ -18,7 +19,10 @@ class Base(object):
     interface.implements(IInfo)
 
     def __init__(self, context):
-        self. context = context
+        self.context = context
+
+    def to_dict(self, context):
+        return {}
 
     def __call__(self):
         return self.to_dict(self.context)
@@ -54,7 +58,29 @@ class DocumentInfo(Base):
 
     def to_dict(self, obj):
         return {
-            "text": obj.getText()
+            "text":          obj.getText(),
+            "presentation":  obj.presentation,
+            "tableContents": obj.tableContents,
+            "text_format":   obj.tableContents,
+            "plain_text":    obj.getText(mimetype="text/plain").decode("utf-8"),
+        }
+
+
+class EventInfo(Base):
+    """ Document Adapter
+    """
+    interface.implements(IInfo)
+    component.adapts(IATEvent)
+
+    def to_dict(self, obj):
+        return {
+            "text":       obj.getText(),
+            "plain_text": obj.getText(mimetype="text/plain").decode("utf-8"),
+            "start":      obj.start().ISO8601(),
+            "end":        obj.end().ISO8601(),
+            "location":   obj.location,
+            "attendees":  obj.attendees,
+            "event_url":  obj.eventUrl,
         }
 
 # vim: set ft=python ts=4 sw=4 expandtab :

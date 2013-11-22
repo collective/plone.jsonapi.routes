@@ -57,7 +57,7 @@ def get_request_data(request):
         >>> get_request_data(request)
         [{}]
     """
-    return _.convert(json.loads(request["BODY"]), _.to_list)
+    return _.convert(json.loads(request.get("BODY", {})), _.to_list)
 
 
 if __name__ == '__main__':
