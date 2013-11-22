@@ -211,11 +211,21 @@ def get_object_by_uid(uid):
     if _.falsy(uid):
         raise RuntimeError("No UID given")
 
-    rc  = get_portal_reference_catalog()
-    obj = rc.lookupObject(uid)
+    obj = None
+    pc = get_portal_catalog()
+    rc = get_portal_reference_catalog()
+    res = pc.search(dict(UID=uid))
+
+    if len(res) > 1:
+        raise ValueError("More than one object found for UID %s" % uid)
+    elif len(res) == 0:
+        # try with the ref catalog
+        obj = rc.lookupObject(uid)
+    else:
+        obj = res[0].getObject()
 
     if obj is None:
-        raise KeyError("No Objects for for UID %s" % uid)
+        raise KeyError("No Objects found for UID %s" % uid)
 
     return obj
 
@@ -232,17 +242,12 @@ def create_object_in_container(container, portal_type, data):
 def update_object_with_data(content, data):
     """ update the content with the values from data
     """
-
-    from zope.event import notify
-    from zope.lifecycleevent import ObjectModifiedEvent
-
     for k, v in data.items():
         field = content.getField(k)
         if field is None:
             raise KeyError("No such field '%s'" % k)
+        if k == "id": v = str(v)
         field.set(content, v)
-
-    notify(ObjectModifiedEvent(content))
     content.reindexObject()
     return content
 
