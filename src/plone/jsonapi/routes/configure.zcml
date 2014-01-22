@@ -1,21 +1,22 @@
 <configure
     xmlns="http://namespaces.zope.org/zope"
     xmlns:browser="http://namespaces.zope.org/browser"
+    xmlns:five="http://namespaces.zope.org/five"
     i18n_domain="plone.jsonapi.core">
 
+    <!-- Zope2 initialization -->
+    <five:registerPackage package="." initialize=".initialize" />
+
+    <!-- Adapter for Catalog Brains -->
     <adapter
         for="Products.ZCatalog.interfaces.ICatalogBrain"
-        factory=".adapters.BaseInfo"
+        factory=".adapters.ZCInfo"
         />
 
+    <!-- Adapter for AT Content Types -->
     <adapter
-        for="Products.ATContentTypes.interfaces.IATDocument"
-        factory=".adapters.DocumentInfo"
-        />
-
-    <adapter
-        for="Products.ATContentTypes.interfaces.IATEvent"
-        factory=".adapters.EventInfo"
+        for="Products.ATContentTypes.interfaces.IATContentType"
+        factory=".adapters.ATInfo"
         />
 
 </configure>

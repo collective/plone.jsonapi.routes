@@ -3,14 +3,17 @@
 __author__ = 'Ramon Bartl <ramon.bartl@googlemail.com>'
 __docformat__ = 'plaintext'
 
+import datetime
+import DateTime
+
+import simplejson as json
+
 from zope import interface
 from zope import component
 
 from Products.ZCatalog.interfaces import ICatalogBrain
-from Products.ATContentTypes.interfaces import IATDocument
-from Products.ATContentTypes.interfaces import IATEvent
-
-from interfaces import IInfo
+from Products.ATContentTypes.interfaces import IATContentType
+from plone.jsonapi.routes.interfaces import IInfo
 
 
 class Base(object):
@@ -20,21 +23,26 @@ class Base(object):
 
     def __init__(self, context):
         self.context = context
+        self.keys = []
 
-    def to_dict(self, context):
-        return {}
+    def to_dict(self):
+        return get_info(self.context, keys=self.keys)
 
     def __call__(self):
-        return self.to_dict(self.context)
+        return self.to_dict()
 
 
-class BaseInfo(Base):
+class ZCInfo(Base):
     """ Catalog Brain Adapter
     """
     interface.implements(IInfo)
     component.adapts(ICatalogBrain)
 
-    def to_dict(self, brain):
+    def __init__(self, context):
+        super(self.__class__, self).__init__(context)
+
+    def to_dict(self):
+        brain = self.context
         return {
             "id":          brain.getId,
             "uid":         brain.UID,
@@ -50,37 +58,62 @@ class BaseInfo(Base):
         }
 
 
-class DocumentInfo(Base):
-    """ Document Adapter
+class ATInfo(Base):
+    """ Archetypes Adapter
     """
     interface.implements(IInfo)
-    component.adapts(IATDocument)
+    component.adapts(IATContentType)
 
-    def to_dict(self, obj):
-        return {
-            "text":          obj.getText(),
-            "presentation":  obj.presentation,
-            "tableContents": obj.tableContents,
-            "text_format":   obj.tableContents,
-            "plain_text":    obj.getText(mimetype="text/plain").decode("utf-8"),
-        }
+    def __init__(self, context):
+        super(self.__class__, self).__init__(context)
+        schema = context.Schema()
+        self.keys = schema.keys()
 
+#---------------------------------------------------------------------------
+#   Functional Helpers
+#---------------------------------------------------------------------------
 
-class EventInfo(Base):
-    """ Document Adapter
+def get_info(obj, keys):
+    """ returns a dictionary of the given keys
     """
-    interface.implements(IInfo)
-    component.adapts(IATEvent)
 
-    def to_dict(self, obj):
-        return {
-            "text":       obj.getText(),
-            "plain_text": obj.getText(mimetype="text/plain").decode("utf-8"),
-            "start":      obj.start().ISO8601(),
-            "end":        obj.end().ISO8601(),
-            "location":   obj.location,
-            "attendees":  obj.attendees,
-            "event_url":  obj.eventUrl,
-        }
+    out = dict()
+    for key in keys:
+        # get the schema field
+        field = obj.getField(key)
+        if field is None:
+            continue
+
+        # extract the value
+        value = field.getAccessor(obj)()
+
+        # XXX - use adapters here
+
+        # handle dates
+        if isinstance(value, (datetime.datetime, datetime.date, DateTime.DateTime)):
+            value = to_iso_date(value)
+
+        if hasattr(value, "filename"):
+            value = value.data.encode("base64")
+
+        try:
+            json.dumps(value)
+        except TypeError:
+            continue
+
+        out[key] = value
+    return out
+
+
+def to_iso_date(date=None):
+    """ get the iso string for python datetime objects
+    """
+    if date is None:
+        return ""
+
+    if isinstance(date, (DateTime.DateTime)):
+        return date.ISO8601()
+
+    return date.isoformat()
 
 # vim: set ft=python ts=4 sw=4 expandtab :

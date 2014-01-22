@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
 
 import logging
+import dateutil
+import datetime
 
 from plone import api as ploneapi
 from plone.jsonapi.core import router
 
+from Products.CMFCore.interfaces import ISiteRoot
 from Products.ZCatalog.interfaces import ICatalogBrain
 
 # request helpers
@@ -23,24 +26,28 @@ logger = logging.getLogger("plone.jsonapi.routes")
 
 
 #-----------------------------------------------------------------------------
-#   Json API Functions
+#   Json API (CRUD) Functions
 #-----------------------------------------------------------------------------
 
 # GET
 def get_items(portal_type, request, uid=None, endpoint=None):
     """ returns a list of items
+
+    1. If the UID is given, fetch the object directly => should return 1 item
+    2. If no UID is given, search for all items of the given portal_type
     """
     # contains the full query with params
     query = make_query(request, portal_type=portal_type)
-    if uid: query["UID"] = uid
+    if uid is not None: query["UID"] = uid
+
     results = search(request, **query)
 
     # if the uid is given, get the complete information set
-    complete = _.truthy(uid)
+    complete = uid and True or False
     return make_items_for(results, endpoint, complete=complete)
 
 
-# CREATE
+### CREATE
 def create_items(portal_type, request, uid=None, endpoint=None):
     """ create items
 
@@ -49,27 +56,23 @@ def create_items(portal_type, request, uid=None, endpoint=None):
     2. If no uid is given, the target folder is the portal.
     """
 
-    items = []
+    # destination where to create the content
+    dest = uid and get_object_by_uid(uid) or None
 
-    dest = get_portal()
-
-    if uid:
-        dest = get_object_by_uid(uid)
-
+    # extract the data from the request
     records = get_request_data(request)
 
+    results = []
     for record in records:
+        if dest is None:
+            # find the container for content creation
+            dest = find_target_container(record, portal_type)
         obj = create_object_in_container(dest, portal_type, record)
-        result = {
-            "id": obj.getId(),
-            "api_url": url_for(endpoint, uid=get_uid(obj)),
-        }
-        items.append(result)
+        results.append(obj)
 
-    return items
+    return make_items_for(results, endpoint=endpoint)
 
-
-# UPDATE
+### UPDATE
 def update_items(portal_type, request, uid=None, endpoint=None):
     """ update items
 
@@ -77,30 +80,34 @@ def update_items(portal_type, request, uid=None, endpoint=None):
        given in request body
     2. If no uid is given, the user wants to update a bunch of objects.
     """
-    items = []
 
-    payload = get_request_data(request)
+    # the data to update
+    records = get_request_data(request)
 
-    records = []
+    objects = []
     if uid:
-        records.append(get_object_by_uid(uid))
+        objects.append(get_object_by_uid(uid))
     else:
-        records = (map(get_object_by_uid, _.pluck(payload, "uid")))
+        # get the objects for the given uids
+        objects = (map(get_object_by_uid, _.pluck(records, "uid")))
 
-    for record in records:
-        changeset = filter(lambda d: get_uid(record) == d.get("uid"), payload)
-        data = changeset and changeset[0] or {}
-        obj = update_object_with_data(record, _.omit(data, "uid"))
-        result = {
-            "id": obj.getId(),
-            "api_url": url_for(endpoint, uid=get_uid(obj)),
-        }
-        items.append(result)
+    results = []
+    for obj in objects:
+        # get the update dataset for this object
+        record = filter(lambda d: get_uid(obj) == d.get("uid"), records)
+        record = record and record[0] or {}
 
-    return items
+        # do a wf transition
+        if record.get("transition", None):
+            t = record.get("transition")
+            logger.info(">>> Do Transition '%s' for Enquiry %s", t, obj.getId())
+            do_action_for(obj, t)
 
+        obj = update_object_with_data(obj, record)
+        results.append(obj)
+    return make_items_for(results, endpoint=endpoint)
 
-# DELETE
+### DELETE
 def delete_items(portal_type, request, uid=None, endpoint=None):
     """ delete items
 
@@ -113,37 +120,121 @@ def delete_items(portal_type, request, uid=None, endpoint=None):
     3. we could check if the portal_type matches, just to be sure the user
        wants to delete the right content.
     """
-    records = []
-    items = []
 
+    objects = []
     if uid:
-        records.append(get_object_by_uid(uid))
+        objects.append(get_object_by_uid(uid))
     else:
         payload = get_request_data(request)
-        records = (map(get_object_by_uid, _.pluck(payload, "uid")))
+        objects = (map(get_object_by_uid, _.pluck(payload, "uid")))
 
-    for record in records:
-        result = {"id": record.getId()}
-        result["deleted"] = ploneapi.content.delete(record) == None and True or False
-        items.append(result)
+    results = []
+    for obj in objects:
+        result = {"id": obj.getId()}
+        result["deleted"] = ploneapi.content.delete(obj) == None and True or False
+        results.append(result)
 
-    return items
+    return results
 
+#-----------------------------------------------------------------------------
+#   Data Functions
+#-----------------------------------------------------------------------------
 
-def make_items_for(brains, endpoint, complete=False):
+def make_items_for(brains_or_objects, endpoint, complete=True):
     """ return a list of info dicts
     """
     def _block(brain):
         info = dict(api_url=url_for(endpoint, uid=get_uid(brain)))
-        info.update(IInfo(brain)()) # call/update with the catalog brain adapter
+        # update with std. catalog metadata
+        info.update(IInfo(brain)())
+
+        # switch to wake up the object and complete the informations with the
+        # data of the content adapter
         if complete:
-            obj = brain.getObject()
-            info.update(IInfo(obj)()) # call/update with the object adapter
+            obj = get_object(brain)
+            info.update(IInfo(obj)())
+            info.update(get_parent_info(obj))
         return info
-    return map(_block, brains)
+
+    return map(_block, brains_or_objects)
+
+
+def get_parent_info(obj):
+    """ returns the infos for the parent object
+    """
+
+    parent   = get_parent(obj)
+    endpoint = get_endpoint(parent.portal_type)
+
+    if ISiteRoot.providedBy(parent):
+        return {
+            "parent_id":  parent.getId(),
+            "parent_uid": 0
+        }
+
+    return {
+        "parent_id":  parent.getId(),
+        "parent_uid": get_uid(parent),
+        "parent_url": url_for(endpoint, uid=get_uid(parent))
+    }
+
+def get_subcontents(parent, ptype):
+    """ returns the contained contents
+    """
+
+    # get the contained objects
+    children = parent.listFolderContents(
+            contentFilter={"portal_type": [ptype]})
+
+    # get the endpoint for the searched results
+    endpoint = get_endpoint(ptype)
+
+    items = []
+    for child in children:
+        info = dict(api_url=url_for(endpoint, uid=get_uid(child)))
+        info.update(IInfo(child)())
+        info.update(get_parent_info(child))
+        items.append(info)
+
+    return {
+        "url":   url_for(endpoint),
+        "count": len(items),
+        "items": items
+    }
 
 #-----------------------------------------------------------------------------
 #   Portal Catalog Helper
+#-----------------------------------------------------------------------------
+
+def search(*args, **kw):
+    """ search the portal catalog """
+    pc = get_portal_catalog()
+    return pc(*args, **kw)
+
+def make_query(request, **kw):
+    """ generates a content type query suitable for the portal catalog
+    """
+
+    # build the catalog query
+    query = {
+        "sort_limit":      get_sort_limit(request),
+        "sort_on":         get_sort_on(request),
+        "sort_order":      get_sort_order(request),
+        "SearchableText":  get_query(request),
+    }
+
+    # inject keyword args
+    query.update(kw)
+
+    # inject the creator if given
+    if get_creator(request):
+        query["Creator"] = get_creator(request)
+
+    logger.info("Catalog Query --> %r", query)
+    return query
+
+#-----------------------------------------------------------------------------
+#   Functional Helpers
 #-----------------------------------------------------------------------------
 
 def get_portal():
@@ -162,36 +253,13 @@ def get_portal_reference_catalog():
     """ return reference_catalog tool """
     return get_tool("reference_catalog")
 
-def search(*args, **kw):
-    """ search the portal catalog """
-    pc = get_portal_catalog()
-    return pc(*args, **kw)
+def get_portal_types_tool():
+    """ return the portal types tool """
+    return get_tool("portal_types")
 
-def make_query(request, **kw):
-    """ generates a content type query suitable for the portal catalog
-    """
-
-    # build the catalog query
-    query = {
-        "sort_limit":     get_sort_limit(request),
-        "sort_on":        get_sort_on(request),
-        "sort_order":     get_sort_order(request),
-        "SearchableText": get_query(request),
-    }
-
-    # inject keyword args
-    query.update(kw)
-
-    # inject the creator if given
-    if get_creator(request):
-        query["Creator"] = get_creator(request)
-
-    logger.info("Catalog Query --> %r", query)
-    return query
-
-#-----------------------------------------------------------------------------
-#   Helper Functions
-#-----------------------------------------------------------------------------
+def get_portal_workflow():
+    """ return portal_workflow tool """
+    return get_tool("portal_workflow")
 
 def url_for(endpoint, **values):
     """ returns the api url
@@ -203,12 +271,42 @@ def get_uid(obj):
     """
     if ICatalogBrain.providedBy(obj):
         return obj.UID
+    if ISiteRoot.providedBy(obj):
+        return "siteroot"
     return obj.UID()
+
+def get_schema(portal_type):
+    """ return the schema of this type """
+    pt = get_portal_types_tool()
+    fti = pt.getTypeInfo(portal_type)
+    return fti.lookupSchema()
+
+def get_object(brain_or_object):
+    """ return the referenced object """
+    if not ICatalogBrain.providedBy(brain_or_object):
+        return brain_or_object
+    return brain_or_object.getObject()
+
+def get_parent(brain_or_object):
+    """ return the referenced object """
+    obj = get_object(brain_or_object)
+    return obj.aq_parent
+
+def get_endpoint(portal_type):
+    """ get the endpoint for this type """
+    # handle portal types with dots
+    portal_type = portal_type.split(".").pop()
+    # remove whitespaces
+    portal_type = portal_type.replace(" ", "")
+    # lower and pluralize
+    portal_type = portal_type.lower() + "s"
+
+    return portal_type
 
 def get_object_by_uid(uid):
     """ return the object by uid
     """
-    if _.falsy(uid):
+    if not uid:
         raise RuntimeError("No UID given")
 
     obj = None
@@ -229,26 +327,73 @@ def get_object_by_uid(uid):
 
     return obj
 
-def create_object_in_container(container, portal_type, data):
+def find_target_container(record, portal_type):
+    """ find the target container for this record
+
+    """
+    parent_uid = record.get("parent_uid")
+
+    if parent_uid:
+        # if we have an parent_uid, we use it
+        return get_object_by_uid(parent_uid)
+
+    if parent_uid == 0:
+        return get_portal()
+
+    raise RuntimeError("Could not find a suitable place to create the content")
+
+def do_action_for(obj, transition):
+    """ perform wf transition """
+    return ploneapi.content.transition(obj, transition)
+
+def get_current_user():
+    """ return the current logged in user """
+    return ploneapi.user.get_current()
+
+def create_object_in_container(container, portal_type, record):
     """ creates an object with the given data in the container
     """
+    schema = get_schema(portal_type)
+    save_data = get_schema_save_data(schema, record)
+
     from AccessControl import Unauthorized
     try:
         return ploneapi.content.create(
-                container=container, type=portal_type, save_id=False, **data)
+                container=container, type=portal_type, save_id=True, **save_data)
     except Unauthorized:
         raise RuntimeError("You are not allowed to create this content")
 
-def update_object_with_data(content, data):
-    """ update the content with the values from data
+def update_object_with_data(content, record):
+    """ update the content with the values from records
     """
-    for k, v in data.items():
-        field = content.getField(k)
-        if field is None:
-            raise KeyError("No such field '%s'" % k)
-        if k == "id": v = str(v)
-        field.set(content, v)
+    schema = get_schema(content.portal_type)
+    save_data = get_schema_save_data(schema, record)
+
+    for k, v in save_data.items():
+        setattr(content, k, v)
     content.reindexObject()
     return content
+
+def get_schema_save_data(schema, record):
+    """ filter the given record by checking if the key exists in the given schema.
+    """
+    values = dict()
+    for k, v in record.iteritems():
+        field = schema.get(k)
+
+        logger.info("get_schema_save_data::processing key=%r, value=%r, field=%r", k, v, field)
+        if field is None:
+            logger.info("get_schema_save_data::skipping key=%r", k)
+            continue
+
+        values[k] = v
+
+        # parsing dates
+        if field._type == datetime.date and v:
+            dt = dateutil.parser.parse(v)
+            logger.info("parsing %r to datetime => %r", v, dt)
+            values[k] = dt
+
+    return values
 
 # vim: set ft=python ts=4 sw=4 expandtab :
