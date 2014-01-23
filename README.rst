@@ -13,15 +13,15 @@ Introduction
 ------------
 
 This is an add-on package for plone.jsonapi.core_ which provides some basic
-URLs for Plone standard contents and more.
+URLs for Plone standard contents (and more).
 
 
 Motivation
 ----------
 
 The routes package is built on top of the plone.jsonapi.core_ package to allow
-Plone developers to build modern web UIs which communicate through a restful
-API with their Plone sites.
+Plone developers to build modern (JavaScript) web UIs which communicate through
+a RESTful_ API with their Plone site.
 
 
 Compatibility
@@ -33,21 +33,14 @@ The plone.jsonapi.routes_ should work with Plone_ 3 and 4.
 Installation
 ------------
 
-There is currently no "official" release on pypi, so you have to use
-`mr.developer` to include plone.jsonapi.routes_ to your buildout config.
+The official release is on pypi, so you have to simply include
+plone.jsonapi.routes_ to your buildout config.
 
 Example::
 
     [buildout]
 
-    extensions =
-        mr.developer
-
-    auto-checkout = *
-
-    [sources]
-    plone.jsonapi.core   = git https://github.com/ramonski/plone.jsonapi.core.git branch=develop
-    plone.jsonapi.routes = git https://github.com/ramonski/plone.jsonapi.routes.git branch=develop
+    ...
 
     [instance]
     ...
@@ -55,6 +48,7 @@ Example::
         ...
         plone.jsonapi.core
         plone.jsonapi.routes
+
 
 API URL
 -------
@@ -64,6 +58,11 @@ plone.jsonapi.core_ root URL (`@@API`) with the base ``/plone/api/1.0``, for exa
 ``http://localhost:8080/Plone/@@API/plone/api/1.0/api.json``.
 
 .. note:: Please see the documentation of plone.jsonapi.core_ for the API root URL.
+
+
+There is also an overview of the registered routes which can be accessed here:
+
+http://localhost:8080/Plone/@@API/plone/api/1.0/api.json
 
 
 API Routes
@@ -549,5 +548,6 @@ MIT - do what you want
 .. _Utility: http://developer.plone.org/components/utilities.html
 .. _CRUD: http://en.wikipedia.org/wiki/CRUD
 .. _curl: http://curl.haxx.se/
+.. _RESTful: http://en.wikipedia.org/wiki/Representational_state_transfer
 
 .. vim: set ft=rst ts=4 sw=4 expandtab :
