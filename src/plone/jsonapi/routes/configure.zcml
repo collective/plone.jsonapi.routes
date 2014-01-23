@@ -1,0 +1,24 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    xmlns:five="http://namespaces.zope.org/five"
+    i18n_domain="plone.jsonapi.core">
+
+    <!-- Zope2 initialization -->
+    <five:registerPackage package="." initialize=".initialize" />
+
+    <!-- Adapter for Catalog Brains -->
+    <adapter
+        for="Products.ZCatalog.interfaces.ICatalogBrain"
+        factory=".adapters.ZCInfo"
+        />
+
+    <!-- Adapter for AT Content Types -->
+    <adapter
+        for="Products.ATContentTypes.interfaces.IATContentType"
+        factory=".adapters.ATInfo"
+        />
+
+</configure>
+
+<!-- vim: set ft=xml ts=2 sw=2 expandtab : -->
