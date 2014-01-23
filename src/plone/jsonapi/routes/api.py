@@ -279,7 +279,16 @@ def get_schema(portal_type):
     """ return the schema of this type """
     pt = get_portal_types_tool()
     fti = pt.getTypeInfo(portal_type)
-    return fti.lookupSchema()
+    try:
+        # only dexterity
+        return fti.lookupSchema()
+    except AttributeError:
+        # XXX how to get the schema???
+        import random
+        factory = get_tool("portal_factory")
+        tempfolder = factory._getTempFolder(portal_type)
+        _ = tempfolder.invokeFactory(portal_type, id=str(random.randint(0, 99999999)))
+        return tempfolder[_].schema
 
 def get_object(brain_or_object):
     """ return the referenced object """
@@ -370,13 +379,17 @@ def update_object_with_data(content, record):
     save_data = get_schema_save_data(schema, record)
 
     for k, v in save_data.items():
-        setattr(content, k, v)
+        field = schema.get(k)
+        mutator = field.getMutator(content)
+        mutator(v)
+        #setattr(content, k, v)
     content.reindexObject()
     return content
 
 def get_schema_save_data(schema, record):
     """ filter the given record by checking if the key exists in the given schema.
     """
+
     values = dict()
     for k, v in record.iteritems():
         field = schema.get(k)
@@ -389,10 +402,10 @@ def get_schema_save_data(schema, record):
         values[k] = v
 
         # parsing dates
-        if field._type == datetime.date and v:
-            dt = dateutil.parser.parse(v)
-            logger.info("parsing %r to datetime => %r", v, dt)
-            values[k] = dt
+        #if field._type == datetime.date and v:
+        #    dt = dateutil.parser.parse(v)
+        #    logger.info("parsing %r to datetime => %r", v, dt)
+        #    values[k] = dt
 
     return values
 
