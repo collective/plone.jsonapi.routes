@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import logging
-import dateutil
-import datetime
 
 from plone import api as ploneapi
 from plone.jsonapi.core import router
@@ -277,18 +275,12 @@ def get_uid(obj):
 
 def get_schema(portal_type):
     """ return the schema of this type """
-    pt = get_portal_types_tool()
-    fti = pt.getTypeInfo(portal_type)
-    try:
-        # only dexterity
-        return fti.lookupSchema()
-    except AttributeError:
-        # XXX how to get the schema???
-        import random
-        factory = get_tool("portal_factory")
-        tempfolder = factory._getTempFolder(portal_type)
-        _ = tempfolder.invokeFactory(portal_type, id=str(random.randint(0, 99999999)))
-        return tempfolder[_].schema
+    # XXX how to get the schema???
+    import random
+    factory = get_tool("portal_factory")
+    tempfolder = factory._getTempFolder(portal_type)
+    _ = tempfolder.invokeFactory(portal_type, id=str(random.randint(0, 99999999)))
+    return tempfolder[_].schema
 
 def get_object(brain_or_object):
     """ return the referenced object """
@@ -382,7 +374,6 @@ def update_object_with_data(content, record):
         field = schema.get(k)
         mutator = field.getMutator(content)
         mutator(v)
-        #setattr(content, k, v)
     content.reindexObject()
     return content
 
@@ -400,12 +391,6 @@ def get_schema_save_data(schema, record):
             continue
 
         values[k] = v
-
-        # parsing dates
-        #if field._type == datetime.date and v:
-        #    dt = dateutil.parser.parse(v)
-        #    logger.info("parsing %r to datetime => %r", v, dt)
-        #    values[k] = dt
 
     return values
 
