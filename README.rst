@@ -2,7 +2,7 @@ plone.jsonapi.routes
 ====================
 
 :Author: Ramon Bartl
-:Version: 0.1dev
+:Version: 0.1
 
 
 .. contents:: Table of Contents
@@ -93,6 +93,32 @@ CRUD_ URL Scheme:
                this is omitted, the API expects a parameter `parent_uid` in the
                request body JSON. If this is also not found, an API Error will
                be returned.
+
+
+Response Format
+---------------
+
+The response format is for all resources the same.
+
+Example::
+
+    {
+        url: "http://localhost:8080/Plone/@@API/plone/api/1.0/documents",
+        count: 0,
+        _runtime: 0.0021538734436035156,
+        items: [ ]
+    }
+
+**url**
+    The resource root url
+**count**
+    Count of found results
+**_runtime**
+    The processing time in milliseconds after the request was received until
+    the respone was prepared.
+**items**
+    An array of result items
+
 
 Content URLs
 ------------
