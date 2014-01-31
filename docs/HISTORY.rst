@@ -4,6 +4,7 @@ Changelog
 0.2 - unreleased
 ----------------
 
+- https://github.com/ramonski/plone.jsonapi.routes/issues/4: Update on UID Urls not working
 - https://github.com/ramonski/plone.jsonapi.routes/issues/1: Started with some basic browsertests
 
 

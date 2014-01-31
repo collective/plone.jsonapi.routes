@@ -92,8 +92,13 @@ def update_items(portal_type, request, uid=None, endpoint=None):
     results = []
     for obj in objects:
         # get the update dataset for this object
-        record = filter(lambda d: get_uid(obj) == d.get("uid"), records)
-        record = record and record[0] or {}
+
+        if uid:
+            record = records and records[0] or {}
+        else:
+            # the uid is inside the payload
+            record = filter(lambda d: get_uid(obj) == d.get("uid"), records)
+            record = record and record[0] or {}
 
         # do a wf transition
         if record.get("transition", None):
