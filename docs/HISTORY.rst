@@ -4,7 +4,7 @@ Changelog
 0.2 - unreleased
 ----------------
 
-- no changes yet
+- https://github.com/ramonski/plone.jsonapi.routes/issues/1: Started with some basic browsertests
 
 
 0.1 - 2014-01-23
