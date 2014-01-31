@@ -2,7 +2,7 @@ plone.jsonapi.routes
 ====================
 
 :Author: Ramon Bartl
-:Version: 0.1
+:Version: 0.2dev
 
 
 .. contents:: Table of Contents
