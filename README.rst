@@ -27,7 +27,7 @@ a RESTful_ API with their Plone site.
 Compatibility
 -------------
 
-The plone.jsonapi.routes_ should work with Plone_ 3 and 4.
+The plone.jsonapi.routes_ is compatible with Plone_ 4.
 
 
 Installation
