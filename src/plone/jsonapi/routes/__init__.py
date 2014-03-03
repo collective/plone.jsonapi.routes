@@ -52,7 +52,7 @@ def get_api_routes_for(segment):
 
 @add_route(BASE_URL, "api", methods=["GET"])
 @add_plone_route("api.json", "api", methods=["GET"])
-def api(context, request):
+def api_json(context, request):
     """ API URLs
     """
     items = get_api_routes_for(BASE_URL)
