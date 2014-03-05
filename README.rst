@@ -33,7 +33,7 @@ The plone.jsonapi.routes_ is compatible with Plone_ 4.
 Installation
 ------------
 
-The official release is on pypi, so you have to simply include
+The official release is on pypi_, so you have to simply include
 plone.jsonapi.routes_ to your buildout config.
 
 Example::
@@ -48,6 +48,9 @@ Example::
         ...
         plone.jsonapi.core
         plone.jsonapi.routes
+
+
+The routes for the standard Plone_ content types get registered on startup.
 
 
 API URL
@@ -75,23 +78,58 @@ provide **all** an interface for CRUD_ operations.
 
 CRUD_ URL Scheme:
 
-+-----------+---------------------------------------------+--------+---------+
-| OPERATION | URL                                         | METHOD | PAYLOAD |
-+===========+=============================================+========+=========+
-| VIEW      | <BASE_URL>/<RESOURCE>/<uid:optional>        | GET    | --      |
-+-----------+---------------------------------------------+--------+---------+
-| CREATE    | <BASE_URL>/<RESOURCE>/create/<uid:optional> | POST   | JSON    |
-+-----------+---------------------------------------------+--------+---------+
-| UPDATE    | <BASE_URL>/<RESOURCE>/update/<uid:optional> | POST   | JSON    |
-+-----------+---------------------------------------------+--------+---------+
-| DELETE    | <BASE_URL>/<RESOURCE>/delete/<uid:optional> | POST   | JSON    |
-+-----------+---------------------------------------------+--------+---------+
++-----------+---------------------------------------------+--------+
+| OPERATION | URL                                         | METHOD |
++===========+=============================================+========+
+| VIEW      | <BASE_URL>/<RESOURCE>/<uid:optional>        | GET    |
++-----------+---------------------------------------------+--------+
+| CREATE    | <BASE_URL>/<RESOURCE>/create/<uid:optional> | POST   |
++-----------+---------------------------------------------+--------+
+| UPDATE    | <BASE_URL>/<RESOURCE>/update/<uid:optional> | POST   |
++-----------+---------------------------------------------+--------+
+| DELETE    | <BASE_URL>/<RESOURCE>/delete/<uid:optional> | POST   |
++-----------+---------------------------------------------+--------+
 
 .. important:: the optional UID of the create, update and delete URLs is to
                specify the target container where to create the content.  If
                this is omitted, the API expects a parameter `parent_uid` in the
                request body JSON. If this is also not found, an API Error will
                be returned.
+
+
+Request Parameters
+------------------
+
+All `GET` resources acceppt request parameters.
+
++------------+----------+------------------------------------------------------------+
+| Parameter  | Type     | Description                                                |
++============+==========+============================================================+
+| limit      | number   | limit the search results                                   |
++------------+----------+------------------------------------------------------------+
+| sort_on    | index    | sort the results by the given catalog index                |
++------------+----------+------------------------------------------------------------+
+| sort_order | asc/desc | sort ascending/descending                                  |
++------------+----------+------------------------------------------------------------+
+| q          | query    | search the SearchableText index for the given query string |
++------------+----------+------------------------------------------------------------+
+| creator    | username | search for items which were created by the given user      |
++------------+----------+------------------------------------------------------------+
+
+Examples
+~~~~~~~~
+
+- Search for documents and return 10 results
+  http://localhost:8080/Plone/@@API/plone/api/1.0/documents?limit=10
+
+- Search all content created by admin
+  http://localhost:8080/Plone/@@API/plone/api/1.0/documents?creator=admin
+
+- Search for documents which contain the text `Open-Source`
+  http://localhost:8080/Plone/@@API/plone/api/1.0/documents?q=Open-Source
+
+- Search for all documents created by admin which contain the text `Open-Source`
+  http://localhost:8080/Plone/@@API/plone/api/1.0/documents?q=Open-Source&creator=admin
 
 
 Response Format
@@ -129,182 +167,45 @@ All content informations are dynamically gathered by the contents schema
 definition through the `IInfo` adapter.  It is possible to define a more
 specific adapter for your content type to control the data returned by the API.
 
-
-Folders
-~~~~~~~
-
-:RESOURCE: `folders`
-
-API Resource for `Folders`
-
-+--------+---------------------------+------+
-| VIEW   | <BASE_URL>/folders/       | GET  |
-+--------+---------------------------+------+
-| CREATE | <BASE_URL>/folders/create | POST |
-+--------+---------------------------+------+
-| UPDATE | <BASE_URL>/folders/update | POST |
-+--------+---------------------------+------+
-| DELETE | <BASE_URL>/folders/delete | POST |
-+--------+---------------------------+------+
-
-
-Documents
-~~~~~~~~~
-
-:RESOURCE: `documents`
-
-API Resource for `Documents`
-
-+--------+-----------------------------+------+
-| VIEW   | <BASE_URL>/documents/       | GET  |
-+--------+-----------------------------+------+
-| CREATE | <BASE_URL>/documents/create | POST |
-+--------+-----------------------------+------+
-| UPDATE | <BASE_URL>/documents/update | POST |
-+--------+-----------------------------+------+
-| DELETE | <BASE_URL>/documents/delete | POST |
-+--------+-----------------------------+------+
++-------------+--------------------------------------------------+
+| Resource    | Description                                      |
++=============+==================================================+
+| folders     | Resource for all Folder contents                 |
++-------------+--------------------------------------------------+
+| documents   | Resource for all Page contents                   |
++-------------+--------------------------------------------------+
+| events      | Resource for all Event contents                  |
++-------------+--------------------------------------------------+
+| files       | Resource for all File contents                   |
++-------------+--------------------------------------------------+
+| Images      | Resource for all Image contents                  |
++-------------+--------------------------------------------------+
+| Links       | Resource for all Link contents                   |
++-------------+--------------------------------------------------+
+| newsitems   | Resource for all News Item contents              |
++-------------+--------------------------------------------------+
+| topics      | Resource for all Collection (old style) contents |
++-------------+--------------------------------------------------+
+| collections | Resource for all Collection contents             |
++-------------+--------------------------------------------------+
 
 
-Events
-~~~~~~
+Special URLs
+------------
 
-:RESOURCE: `events`
+:BASE_URL: `/plone/api/1.0`
+:SCHEME:   `BASE_URL/RESOURCE`
 
+Beside the content URLs described above, there are some other resources
+available in this extension.
 
-API Resource for `Events`
-
-+--------+--------------------------+------+
-| VIEW   | <BASE_URL>/events/       | GET  |
-+--------+--------------------------+------+
-| CREATE | <BASE_URL>/events/create | POST |
-+--------+--------------------------+------+
-| UPDATE | <BASE_URL>/events/update | POST |
-+--------+--------------------------+------+
-| DELETE | <BASE_URL>/events/delete | POST |
-+--------+--------------------------+------+
-
-
-Files
-~~~~~
-
-:RESOURCE: `files`
-
-API Resource for `Files`
-
-+--------+-------------------------+------+
-| VIEW   | <BASE_URL>/files/       | GET  |
-+--------+-------------------------+------+
-| CREATE | <BASE_URL>/files/create | POST |
-+--------+-------------------------+------+
-| UPDATE | <BASE_URL>/files/update | POST |
-+--------+-------------------------+------+
-| DELETE | <BASE_URL>/files/delete | POST |
-+--------+-------------------------+------+
-
-
-Images
-~~~~~~
-
-:RESOURCE: `images`
-
-API Resource for `Images`
-
-+--------+--------------------------+------+
-| VIEW   | <BASE_URL>/images/       | GET  |
-+--------+--------------------------+------+
-| CREATE | <BASE_URL>/images/create | POST |
-+--------+--------------------------+------+
-| UPDATE | <BASE_URL>/images/update | POST |
-+--------+--------------------------+------+
-| DELETE | <BASE_URL>/images/delete | POST |
-+--------+--------------------------+------+
-
-
-Links
-~~~~~
-
-:RESOURCE: `links`
-
-API Resource for `Links`
-
-+--------+-------------------------+------+
-| VIEW   | <BASE_URL>/links/       | GET  |
-+--------+-------------------------+------+
-| CREATE | <BASE_URL>/links/create | POST |
-+--------+-------------------------+------+
-| UPDATE | <BASE_URL>/links/update | POST |
-+--------+-------------------------+------+
-| DELETE | <BASE_URL>/links/delete | POST |
-+--------+-------------------------+------+
-
-
-News Items
-~~~~~~~~~~
-
-:RESOURCE: `newsitems`
-
-API Resource for `News Items`
-
-+--------+-----------------------------+------+
-| VIEW   | <BASE_URL>/newsitems/       | GET  |
-+--------+-----------------------------+------+
-| CREATE | <BASE_URL>/newsitems/create | POST |
-+--------+-----------------------------+------+
-| UPDATE | <BASE_URL>/newsitems/update | POST |
-+--------+-----------------------------+------+
-| DELETE | <BASE_URL>/newsitems/delete | POST |
-+--------+-----------------------------+------+
-
-
-Topics
-~~~~~~
-
-:RESOURCE: `topics`
-
-API Resource for `Topics`
-
-+--------+--------------------------+------+
-| VIEW   | <BASE_URL>/topics/       | GET  |
-+--------+--------------------------+------+
-| CREATE | <BASE_URL>/topics/create | POST |
-+--------+--------------------------+------+
-| UPDATE | <BASE_URL>/topics/update | POST |
-+--------+--------------------------+------+
-| DELETE | <BASE_URL>/topics/delete | POST |
-+--------+--------------------------+------+
-
-
-Collections
-~~~~~~~~~~~
-
-:RESOURCE: `collections`
-
-API Resource for `Collections`
-
-+--------+-------------------------------+------+
-| VIEW   | <BASE_URL>/collections/       | GET  |
-+--------+-------------------------------+------+
-| CREATE | <BASE_URL>/collections/create | POST |
-+--------+-------------------------------+------+
-| UPDATE | <BASE_URL>/collections/update | POST |
-+--------+-------------------------------+------+
-| DELETE | <BASE_URL>/collections/delete | POST |
-+--------+-------------------------------+------+
-
-
-Users
-~~~~~
-
-:RESOURCE: `users`
-
-API Resource for `Plone Users`
-
-+-------------+--------------------------+-----+
-| VIEW        | <BASE_URL>/users         | GET |
-+-------------+--------------------------+-----+
-| GET CURRENT | <BASE_URL>/users/current | GET |
-+-------------+--------------------------+-----+
++---------------+--------------------------------+
+| Resource      | Description                    |
++===============+================================+
+| users         | Resourece for all Plone Users  |
++---------------+--------------------------------+
+| users/current | Get the current logged in user |
++---------------+--------------------------------+
 
 
 Examples
@@ -549,5 +450,6 @@ MIT - do what you want
 .. _CRUD: http://en.wikipedia.org/wiki/CRUD
 .. _curl: http://curl.haxx.se/
 .. _RESTful: http://en.wikipedia.org/wiki/Representational_state_transfer
+.. _pypi: http://pypi.python.org
 
 .. vim: set ft=rst ts=4 sw=4 expandtab :
