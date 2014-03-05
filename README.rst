@@ -212,230 +212,70 @@ available in this extension.
 +---------------+--------------------------------+
 
 
-Examples
---------
+Write your own API
+------------------
 
-These examples show the basic usage of the API.
-All examples are done from the command line using curl_.
+This package is designed to provide an easy way for you to write your own JSON
+API for your custom Dexterity_ content types.
 
-.. important:: Using curl_ without the `--cookie` parameter acts like an anonymous
-               request. So the contents of the Plone site need to be published.
-               To create/update/delelete contents in Plone, the curl_ requests
-               need to be authenticated. Thus, I copied the `__ac` cookie value
-               from my browser to the `--cookie` parameter of curl_.
+The plone.jsonapi.example_ package shows how to do so.
 
-Imagine an empty Plone site with just 2 Folders:
 
-    - Folder 1
-    - Folder 2
+Example
+~~~~~~~
 
-Now lets list these folder. Therefore we use the `documents` resource of the API::
+Lets say you want to provide a simple CRUD_ JSON API for your custom Dexterity_
+content type. You want to access the API directly from the plone.jsonapi.core_
+root URL (`http://localhost:8080/Plone/@@API/`).
 
-    curl -XGET http://localhost:8080/Plone/@@API/plone/api/1.0/folders | python -mjson.tool
 
-    {
-        "_runtime": 0.0024950504302978516,
-        "count": 2,
-        "items": [
-            {
-                "api_url": "http://localhost:8080/Plone/@@API/plone/api/1.0/folders/1b3e6ccde22b48778d5af5768ee49983",
-                "created": "2014-01-23T10:10:53+01:00",
-                "description": "The first Folder",
-                "effective": "2014-01-23T10:11:15+01:00",
-                "id": "folder-1",
-                "modified": "2014-01-23T10:11:15+01:00",
-                "portal_type": "Folder",
-                "tags": [],
-                "title": "Folder 1",
-                "type": "Folder",
-                "uid": "1b3e6ccde22b48778d5af5768ee49983",
-                "url": "http://localhost:8080/Plone/folder-1"
-            },
-            {
-                "api_url": "http://localhost:8080/Plone/@@API/plone/api/1.0/folders/0198f943bd2b48a8970b04d637f74888",
-                "created": "2014-01-23T10:11:05+01:00",
-                "description": "The second Folder",
-                "effective": "2014-01-23T10:11:15+01:00",
-                "id": "folder-2",
-                "modified": "2014-01-23T10:11:15+01:00",
-                "portal_type": "Folder",
-                "tags": [],
-                "title": "Folder 2",
-                "type": "Folder",
-                "uid": "0198f943bd2b48a8970b04d637f74888",
-                "url": "http://localhost:8080/Plone/folder-2"
-            }
-        ],
-        "url": "http://localhost:8080/Plone/@@API/plone/api/1.0/folders"
-    }
+First of all, you need to import the CRUD_ functions of plone.jsonapi.routes_::
 
-As you can see, the two folders get listed. Also note, that for reasons of
-performance, the request to a root URL of a resource contains only the catalog
-results. The objects don't get waked up until we request a specific item.
+    from plone.jsonapi.routes.api import get_items
+    from plone.jsonapi.routes.api import create_items
+    from plone.jsonapi.routes.api import update_items
+    from plone.jsonapi.routes.api import delete_items
 
-Now we will request a specific folder, which will wake up the object to show more detailed informations::
+To register your custom routes, you need to import the `router` module of
+plone.jsonapi.core_. The `add_route` decorator of this module will register
+your function with the api framework::
 
-    curl -XGET http://localhost:8080/Plone/@@API/plone/api/1.0/folders/1b3e6ccde22b48778d5af5768ee49983 | python -mjson.tool
+    from plone.jsonapi.core import router
 
-    {
-        "_runtime": 0.008948087692260742,
-        "count": 1,
-        "items": [
-            {
-                "allowDiscussion": false,
-                "api_url": "http://localhost:8080/Plone/@@API/plone/api/1.0/folders/1b3e6ccde22b48778d5af5768ee49983",
-                "constrainTypesMode": 0,
-                "contributors": [],
-                "created": "2014-01-23T10:10:53+01:00",
-                "creation_date": "2014-01-23T10:10:53+01:00",
-                "creators": [
-                    "admin"
-                ],
-                "description": "The first Folder",
-                "effective": "2014-01-23T10:11:15+01:00",
-                "effectiveDate": "2014-01-23T10:11:15+01:00",
-                "excludeFromNav": false,
-                "expirationDate": null,
-                "id": "folder-1",
-                "immediatelyAddableTypes": [],
-                "language": "de",
-                "locallyAllowedTypes": [],
-                "location": "",
-                "modification_date": "2014-01-23T10:11:15+01:00",
-                "modified": "2014-01-23T10:11:15+01:00",
-                "nextPreviousEnabled": false,
-                "parent_id": "Plone",
-                "parent_uid": 0,
-                "portal_type": "Folder",
-                "relatedItems": [],
-                "rights": "",
-                "subject": [],
-                "tags": [],
-                "title": "Folder 1",
-                "type": "Folder",
-                "uid": "1b3e6ccde22b48778d5af5768ee49983",
-                "url": "http://localhost:8080/Plone/folder-1"
-            }
-        ],
-        "url": "http://localhost:8080/Plone/@@API/plone/api/1.0/folders"
-    }
+The next step is to provide the functions which get called by the
+plone.jsonapi.core_ framework::
 
-The response of a specific resource is much more detailed since we gather the
-schema fields of the object.  Also note, that if the content is located below
-the Plone site root, the parent_uid will be 0.
+    @router.add_route("/example", "example_route", methods=["GET"])
+    def get(context, request):
+        return {}
 
-Now lets create a document below this folder. Therefore, the request needs to
-be authenticated. I simply "steal" the **__ac** cookie value of my
-authenticated browser session::
+Lets go through this...
 
-    curl -XPOST -H "Content-Type: application/json" -d '{"parent_uid":"1b3e6ccde22b48778d5af5768ee49983", "title":"A Document below Folder 1"}' http://localhost:8080/Plone/@@API/plone/api/1.0/documents/create  --cookie "__ac=NjE2NDZkNjk2ZTo2MTY0NmQ2OTZl" | python -mjson.tool
+The `@router.add_route(...)` registers the decorated function with the framework.
+So the function will be invoked when someone sends a request on `@@API/example`.
+The framework registers the decorated function with the key `example_route`.
+We also provide the HTTP Method `GET` which tells the framework that we only
+want to get invoked on a HTTP GET request.
 
-    {
-        "_runtime": 0.08417892456054688,
-        "count": 1,
-        "items": [
-            {
-                "allowDiscussion": false,
-                "api_url": "http://localhost:8080/Plone/@@API/plone/api/1.0/documents/c1b61148a3a3489c9ae5f18a8b552ceb",
-                "contributors": [],
-                "creation_date": "2014-01-23T11:54:02+01:00",
-                "creators": [
-                    "admin"
-                ],
-                "description": "",
-                "effectiveDate": null,
-                "excludeFromNav": false,
-                "expirationDate": null,
-                "id": "a-document-below-folder-1",
-                "language": "de",
-                "location": "",
-                "modification_date": "2014-01-23T11:54:02+01:00",
-                "parent_id": "folder-1",
-                "parent_uid": "1b3e6ccde22b48778d5af5768ee49983",
-                "parent_url": "http://localhost:8080/Plone/@@API/plone/api/1.0/folders/1b3e6ccde22b48778d5af5768ee49983",
-                "presentation": false,
-                "relatedItems": [],
-                "rights": "",
-                "subject": [],
-                "tableContents": false,
-                "text": "",
-                "title": "A Document below Folder 1"
-            }
-        ],
-        "url": "http://localhost:8080/Plone/@@API/plone/api/1.0/documents/create"
-    }
+At the moment we return an empty dictionary. Lets provide something mode useful here::
 
-Note how the `parent_uid` is updated to the one of `Folder 1` and the generated
-`api_url` points to the correct `folders` resource here.
+    @router.add_route("/example", "example_route", methods=["GET"])
+    def get(context, request=None):
+        items = get_items("my.custom.type", request, uid=None, endpoint="example")
+        return {
+            "count": len(items),
+            "items": items,
+        }
 
-Now lets update this document. Therefore we post a new JSON object with the
-informations to the documents api url::
 
-    curl -XPOST -H "Content-Type: application/json" -d '{"uid": "c1b61148a3a3489c9ae5f18a8b552ceb", "description":"The description changed", "text": "Some Text"}' http://localhost:8080/Plone/@@API/plone/api/1.0/documents/update  --cookie "__ac=NjE2NDZkNjk2ZTo2MTY0NmQ2OTZl" | python -mjson.tool
 
-    {
-        "_runtime": 0.049546003341674805,
-        "count": 1,
-        "items": [
-            {
-                "allowDiscussion": false,
-                "api_url": "http://localhost:8080/Plone/@@API/plone/api/1.0/documents/c1b61148a3a3489c9ae5f18a8b552ceb",
-                "contributors": [],
-                "creation_date": "2014-01-23T11:54:02+01:00",
-                "creators": [
-                    "admin"
-                ],
-                "description": "The description changed",
-                "effectiveDate": null,
-                "excludeFromNav": false,
-                "expirationDate": null,
-                "id": "a-document-below-folder-1",
-                "language": "de",
-                "location": "",
-                "modification_date": "2014-01-23T12:11:33+01:00",
-                "parent_id": "folder-1",
-                "parent_uid": "1b3e6ccde22b48778d5af5768ee49983",
-                "parent_url": "http://localhost:8080/Plone/@@API/plone/api/1.0/folders/1b3e6ccde22b48778d5af5768ee49983",
-                "presentation": false,
-                "relatedItems": [],
-                "rights": "",
-                "subject": [],
-                "tableContents": false,
-                "text": "<p>Some Text</p>",
-                "title": "A Document below Folder 1"
-            }
-        ],
-        "url": "http://localhost:8080/Plone/@@API/plone/api/1.0/documents/update"
-    }
 
-Note how the description and text changed!
+See it in action
+----------------
 
-Finally, lets delete the item::
+A small tec demo is available on youtube:
 
-    curl -XPOST -H "Content-Type: application/json" -d '{"uid": "c1b61148a3a3489c9ae5f18a8b552ceb"}' http://localhost:8080/Plone/@@API/plone/api/1.0/documents/delete  --cookie "__ac=NjE2NDZkNjk2ZTo2MTY0NmQ2OTZl" | python -mjson.tool
-
-    {
-        "_runtime": 0.0047149658203125,
-        "count": 1,
-        "items": [
-            {
-                "deleted": true,
-                "id": "a-document-below-folder-1"
-            }
-        ],
-        "url": "http://localhost:8080/Plone/@@API/plone/api/1.0/documents/delete"
-    }
-
-The document is now gone::
-
-    curl -XGET http://localhost:8080/Plone/@@API/plone/api/1.0/documents | python -mjson.tool
-
-    {
-        "_runtime": 0.0019440650939941406,
-        "count": 0,
-        "items": [],
-        "url": "http://localhost:8080/Plone/@@API/plone/api/1.0/documents"
-    }
+http://www.youtube.com/watch?v=MiwgkWLMUqk
 
 
 License
@@ -449,6 +289,7 @@ MIT - do what you want
 .. _Werkzeug: http://werkzeug.pocoo.org
 .. _plone.jsonapi.core: https://github.com/ramonski/plone.jsonapi.core
 .. _plone.jsonapi.routes: https://github.com/ramonski/plone.jsonapi.routes
+.. _plone.jsonapi.example: https://github.com/ramonski/plone.jsonapi.example
 .. _mr.developer: https://pypi.python.org/pypi/mr.developer
 .. _Utility: http://developer.plone.org/components/utilities.html
 .. _CRUD: http://en.wikipedia.org/wiki/CRUD
