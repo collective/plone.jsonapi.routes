@@ -300,8 +300,7 @@ invokes the function directly with the provided UID as the parameter. The
 `get_items` tries to find the object with the given UID to provide all
 informations of the waked up object.
 
-.. note:: API URLs which contain the UID are automatically generated with the
-provided endpoint
+.. note:: API URLs which contain the UID are automatically generated with the provided endpoint
 
 
 The `CREATE`, `UPDATE` and `DELETE` functionality is basically identical with
