@@ -2,7 +2,7 @@ plone.jsonapi.routes
 ====================
 
 :Author: Ramon Bartl
-:Version: 0.2dev
+:Version: 0.2
 
 
 .. contents:: Table of Contents
@@ -244,7 +244,7 @@ your function with the api framework::
 The next step is to provide the a function which get called by the
 plone.jsonapi.core_ framework::
 
-    @router.add_route("/example", "example_route", methods=["GET"])
+    @router.add_route("/example", "example", methods=["GET"])
     def get(context, request):
         return {}
 
@@ -253,7 +253,7 @@ Lets go through this step by step...
 The `@router.add_route(...)` registers the decorated function with the framework.
 So the function will be invoked when someone sends a request to `@@API/example`.
 
-The framework registers the decorated function with the key `example_route`.
+The framework registers the decorated function with the key `example`.
 We also provide the HTTP Method `GET` which tells the framework that we only
 want to get invoked on a HTTP GET request.
 
@@ -264,7 +264,7 @@ headers from the original request.
 
 At the moment we return an empty dictionary. Lets provide something more useful here::
 
-    @router.add_route("/example", "example_route", methods=["GET"])
+    @router.add_route("/example", "example", methods=["GET"])
     def get(context, request=None):
         items = get_items("my.custom.type", request, uid=None, endpoint="example")
         return {
@@ -286,8 +286,8 @@ set of an object.
 Now we need a way to handle the uid with this function. Therefore we can simple
 add another `add_route` decorator around this function::
 
-    @router.add_route("/example", "example_route", methods=["GET"])
-    @router.add_route("/example/<string:uid>", "example_route", methods=["GET"])
+    @router.add_route("/example", "example", methods=["GET"])
+    @router.add_route("/example/<string:uid>", "example", methods=["GET"])
     def get(context, request=None, uid=None):
         items = get_items("my.custom.type", request, uid=uid, endpoint="example")
         return {
@@ -300,8 +300,42 @@ invokes the function directly with the provided UID as the parameter. The
 `get_items` tries to find the object with the given UID to provide all
 informations of the waked up object.
 
-.. note:: API URLs which contain the UID are automatically generated with the provided endpoint
+.. note:: API URLs which contain the UID are automatically generated with the
+provided endpoint
 
+
+The `CREATE`, `UPDATE` and `DELETE` functionality is basically identical with
+the basic `VIEW` function above, so here in short::
+
+    # CREATE
+    @router.add_route("/example/create", "example_create", methods=["POST"])
+    @router.add_route("/example/create/<string:uid>", "example_create", methods=["POST"])
+    def create(context, request, uid=None):
+        items = create_items("plone.example.todo", request, uid=uid, endpoint="example")
+        return {
+            "count": len(items),
+            "items": items,
+        }
+
+    # UPDATE
+    @router.add_route("/example/update", "example_update", methods=["POST"])
+    @router.add_route("/example/update/<string:uid>", "example_update", methods=["POST"])
+    def update(context, request, uid=None):
+        items = update_items("plone.example.todo", request, uid=uid, endpoint="example")
+        return {
+            "count": len(items),
+            "items": items,
+        }
+
+    # DELETE
+    @router.add_route("/example/delete", "example_delete", methods=["POST"])
+    @router.add_route("/example/delete/<string:uid>", "example_delete", methods=["POST"])
+    def delete(context, request, uid=None):
+        items = delete_items("plone.example.todo", request, uid=uid, endpoint="example")
+        return {
+            "count": len(items),
+            "items": items,
+        }
 
 
 See it in action
