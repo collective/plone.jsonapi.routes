@@ -120,15 +120,19 @@ Examples
 ~~~~~~~~
 
 - Search for documents and return 10 results
+
   http://localhost:8080/Plone/@@API/plone/api/1.0/documents?limit=10
 
 - Search all content created by admin
+
   http://localhost:8080/Plone/@@API/plone/api/1.0/documents?creator=admin
 
 - Search for documents which contain the text `Open-Source`
+
   http://localhost:8080/Plone/@@API/plone/api/1.0/documents?q=Open-Source
 
 - Search for all documents created by admin which contain the text `Open-Source`
+
   http://localhost:8080/Plone/@@API/plone/api/1.0/documents?q=Open-Source&creator=admin
 
 
