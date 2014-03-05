@@ -10,13 +10,19 @@
     <!-- Adapter for Catalog Brains -->
     <adapter
         for="Products.ZCatalog.interfaces.ICatalogBrain"
-        factory=".adapters.ZCInfo"
+        factory=".adapters.ZCDataProvider"
         />
 
     <!-- Adapter for AT Content Types -->
     <adapter
         for="Products.ATContentTypes.interfaces.IATContentType"
-        factory=".adapters.ATInfo"
+        factory=".adapters.ATDataProvider"
+        />
+
+    <!-- Adapter for Dexterity Content Types -->
+    <adapter
+        for="plone.dexterity.interfaces.IDexterityContent"
+        factory=".adapters.DexterityDataProvider"
         />
 
 </configure>

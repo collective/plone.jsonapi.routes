@@ -7,6 +7,7 @@ from plone.jsonapi.core import router
 
 from Products.CMFCore.interfaces import ISiteRoot
 from Products.ZCatalog.interfaces import ICatalogBrain
+from Products.ATContentTypes.interfaces import IATContentType
 
 # request helpers
 from plone.jsonapi.routes.request import get_sort_limit
@@ -92,8 +93,13 @@ def update_items(portal_type, request, uid=None, endpoint=None):
     results = []
     for obj in objects:
         # get the update dataset for this object
-        record = filter(lambda d: get_uid(obj) == d.get("uid"), records)
-        record = record and record[0] or {}
+
+        if uid:
+            record = records and records[0] or {}
+        else:
+            # the uid is inside the payload
+            record = filter(lambda d: get_uid(obj) == d.get("uid"), records)
+            record = record and record[0] or {}
 
         # do a wf transition
         if record.get("transition", None):
@@ -273,14 +279,13 @@ def get_uid(obj):
         return "siteroot"
     return obj.UID()
 
-def get_schema(portal_type):
+def get_schema(obj):
     """ return the schema of this type """
-    # XXX how to get the schema???
-    import random
-    factory = get_tool("portal_factory")
-    tempfolder = factory._getTempFolder(portal_type)
-    _ = tempfolder.invokeFactory(portal_type, id=str(random.randint(0, 99999999)))
-    return tempfolder[_].schema
+    if IATContentType.providedBy(obj):
+        return obj.schema
+    pt = get_portal_types_tool()
+    fti = pt.getTypeInfo(obj.portal_type)
+    return fti.lookupSchema()
 
 def get_object(brain_or_object):
     """ return the referenced object """
@@ -354,44 +359,37 @@ def get_current_user():
 def create_object_in_container(container, portal_type, record):
     """ creates an object with the given data in the container
     """
-    schema = get_schema(portal_type)
-    save_data = get_schema_save_data(schema, record)
-
     from AccessControl import Unauthorized
     try:
-        return ploneapi.content.create(
-                container=container, type=portal_type, save_id=True, **save_data)
+        title = record.get("title")
+        obj = ploneapi.content.create(
+                container=container, type=portal_type, title=title, save_id=True)
+        return update_object_with_data(obj, record)
     except Unauthorized:
         raise RuntimeError("You are not allowed to create this content")
 
 def update_object_with_data(content, record):
     """ update the content with the values from records
     """
-    schema = get_schema(content.portal_type)
-    save_data = get_schema_save_data(schema, record)
+    schema = get_schema(content)
+    is_atct = IATContentType.providedBy(content)
 
-    for k, v in save_data.items():
-        field = schema.get(k)
-        mutator = field.getMutator(content)
-        mutator(v)
-    content.reindexObject()
-    return content
-
-def get_schema_save_data(schema, record):
-    """ filter the given record by checking if the key exists in the given schema.
-    """
-
-    values = dict()
-    for k, v in record.iteritems():
+    for k, v in record.items():
         field = schema.get(k)
 
-        logger.info("get_schema_save_data::processing key=%r, value=%r, field=%r", k, v, field)
+        logger.info("update_object_with_data::processing key=%r, value=%r, field=%r", k, v, field)
         if field is None:
-            logger.info("get_schema_save_data::skipping key=%r", k)
+            logger.info("update_object_with_data::skipping key=%r", k)
             continue
 
-        values[k] = v
+        if is_atct:
+            # XXX handle security
+            mutator = field.getMutator(content)
+            mutator(v)
+        else:
+            setattr(content, k, v)
 
-    return values
+    content.reindexObject()
+    return content
 
 # vim: set ft=python ts=4 sw=4 expandtab :

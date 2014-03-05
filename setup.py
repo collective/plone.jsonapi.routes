@@ -3,7 +3,7 @@
 import os
 from setuptools import setup, find_packages
 
-version = '0.1'
+version = '0.2'
 
 long_description = (
     open('README.rst').read()
@@ -35,9 +35,15 @@ setup(name='plone.jsonapi.routes',
       install_requires=[
           'setuptools',
           'plone.api',
-          'plone.jsonapi.core',
+          'plone.jsonapi.core>=0.3',
           # -*- Extra requirements: -*-
       ],
+      extras_require={
+          'test': [
+               'plone.app.testing',
+               'unittest2',
+           ]
+      },
       entry_points="""
       # -*- Entry points: -*-
       [z3c.autoinclude.plugin]

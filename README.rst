@@ -2,7 +2,7 @@ plone.jsonapi.routes
 ====================
 
 :Author: Ramon Bartl
-:Version: 0.1
+:Version: 0.2
 
 
 .. contents:: Table of Contents
@@ -27,13 +27,13 @@ a RESTful_ API with their Plone site.
 Compatibility
 -------------
 
-The plone.jsonapi.routes_ should work with Plone_ 3 and 4.
+The plone.jsonapi.routes_ is compatible with Plone_ 4.
 
 
 Installation
 ------------
 
-The official release is on pypi, so you have to simply include
+The official release is on pypi_, so you have to simply include
 plone.jsonapi.routes_ to your buildout config.
 
 Example::
@@ -48,6 +48,9 @@ Example::
         ...
         plone.jsonapi.core
         plone.jsonapi.routes
+
+
+The routes for the standard Plone_ content types get registered on startup.
 
 
 API URL
@@ -75,23 +78,62 @@ provide **all** an interface for CRUD_ operations.
 
 CRUD_ URL Scheme:
 
-+-----------+---------------------------------------------+--------+---------+
-| OPERATION | URL                                         | METHOD | PAYLOAD |
-+===========+=============================================+========+=========+
-| VIEW      | <BASE_URL>/<RESOURCE>/<uid:optional>        | GET    | --      |
-+-----------+---------------------------------------------+--------+---------+
-| CREATE    | <BASE_URL>/<RESOURCE>/create/<uid:optional> | POST   | JSON    |
-+-----------+---------------------------------------------+--------+---------+
-| UPDATE    | <BASE_URL>/<RESOURCE>/update/<uid:optional> | POST   | JSON    |
-+-----------+---------------------------------------------+--------+---------+
-| DELETE    | <BASE_URL>/<RESOURCE>/delete/<uid:optional> | POST   | JSON    |
-+-----------+---------------------------------------------+--------+---------+
++-----------+---------------------------------------------+--------+
+| OPERATION | URL                                         | METHOD |
++===========+=============================================+========+
+| VIEW      | <BASE_URL>/<RESOURCE>/<uid:optional>        | GET    |
++-----------+---------------------------------------------+--------+
+| CREATE    | <BASE_URL>/<RESOURCE>/create/<uid:optional> | POST   |
++-----------+---------------------------------------------+--------+
+| UPDATE    | <BASE_URL>/<RESOURCE>/update/<uid:optional> | POST   |
++-----------+---------------------------------------------+--------+
+| DELETE    | <BASE_URL>/<RESOURCE>/delete/<uid:optional> | POST   |
++-----------+---------------------------------------------+--------+
 
 .. important:: the optional UID of the create, update and delete URLs is to
                specify the target container where to create the content.  If
                this is omitted, the API expects a parameter `parent_uid` in the
                request body JSON. If this is also not found, an API Error will
                be returned.
+
+
+Request Parameters
+------------------
+
+All `GET` resources acceppt request parameters.
+
++------------+----------+------------------------------------------------------------+
+| Parameter  | Type     | Description                                                |
++============+==========+============================================================+
+| limit      | number   | limit the search results                                   |
++------------+----------+------------------------------------------------------------+
+| sort_on    | index    | sort the results by the given catalog index                |
++------------+----------+------------------------------------------------------------+
+| sort_order | asc/desc | sort ascending/descending                                  |
++------------+----------+------------------------------------------------------------+
+| q          | query    | search the SearchableText index for the given query string |
++------------+----------+------------------------------------------------------------+
+| creator    | username | search for items which were created by the given user      |
++------------+----------+------------------------------------------------------------+
+
+Examples
+~~~~~~~~
+
+- Search for documents and return 10 results
+
+  http://localhost:8080/Plone/@@API/plone/api/1.0/documents?limit=10
+
+- Search all content created by admin
+
+  http://localhost:8080/Plone/@@API/plone/api/1.0/documents?creator=admin
+
+- Search for documents which contain the text `Open-Source`
+
+  http://localhost:8080/Plone/@@API/plone/api/1.0/documents?q=Open-Source
+
+- Search for all documents created by admin which contain the text `Open-Source`
+
+  http://localhost:8080/Plone/@@API/plone/api/1.0/documents?q=Open-Source&creator=admin
 
 
 Response Format
@@ -129,408 +171,178 @@ All content informations are dynamically gathered by the contents schema
 definition through the `IInfo` adapter.  It is possible to define a more
 specific adapter for your content type to control the data returned by the API.
 
++-------------+--------------------------------------------------+
+| Resource    | Description                                      |
++=============+==================================================+
+| folders     | Resource for all Folder contents                 |
++-------------+--------------------------------------------------+
+| documents   | Resource for all Page contents                   |
++-------------+--------------------------------------------------+
+| events      | Resource for all Event contents                  |
++-------------+--------------------------------------------------+
+| files       | Resource for all File contents                   |
++-------------+--------------------------------------------------+
+| images      | Resource for all Image contents                  |
++-------------+--------------------------------------------------+
+| links       | Resource for all Link contents                   |
++-------------+--------------------------------------------------+
+| newsitems   | Resource for all News Item contents              |
++-------------+--------------------------------------------------+
+| topics      | Resource for all Collection (old style) contents |
++-------------+--------------------------------------------------+
+| collections | Resource for all Collection contents             |
++-------------+--------------------------------------------------+
 
-Folders
+
+Special URLs
+------------
+
+:BASE_URL: `/plone/api/1.0`
+:SCHEME:   `BASE_URL/RESOURCE`
+
+Beside the content URLs described above, there are some other resources
+available in this extension.
+
++---------------+--------------------------------+
+| Resource      | Description                    |
++===============+================================+
+| users         | Resourece for all Plone Users  |
++---------------+--------------------------------+
+| users/current | Get the current logged in user |
++---------------+--------------------------------+
+
+
+Write your own API
+------------------
+
+This package is designed to provide an easy way for you to write your own JSON
+API for your custom Dexterity_ content types.
+
+The plone.jsonapi.example_ package shows how to do so.
+
+
+Example
 ~~~~~~~
 
-:RESOURCE: `folders`
+Lets say you want to provide a simple CRUD_ JSON API for your custom Dexterity_
+content type. You want to access the API directly from the plone.jsonapi.core_
+root URL (`http://localhost:8080/Plone/@@API/`).
+
+First of all, you need to import the CRUD_ functions of plone.jsonapi.routes_::
+
+    from plone.jsonapi.routes.api import get_items
+    from plone.jsonapi.routes.api import create_items
+    from plone.jsonapi.routes.api import update_items
+    from plone.jsonapi.routes.api import delete_items
+
+To register your custom routes, you need to import the `router` module of
+plone.jsonapi.core_. The `add_route` decorator of this module will register
+your function with the api framework::
+
+    from plone.jsonapi.core import router
+
+The next step is to provide the a function which get called by the
+plone.jsonapi.core_ framework::
+
+    @router.add_route("/example", "example", methods=["GET"])
+    def get(context, request):
+        return {}
+
+Lets go through this step by step...
+
+The `@router.add_route(...)` registers the decorated function with the framework.
+So the function will be invoked when someone sends a request to `@@API/example`.
+
+The framework registers the decorated function with the key `example`.
+We also provide the HTTP Method `GET` which tells the framework that we only
+want to get invoked on a HTTP GET request.
+
+When the function gets invoked, the framework provides a context and a request.
+The context is usually the Plone_ site root, because this is where the base
+view (`@@API`) is registered. The request contains all needed parameters and
+headers from the original request.
+
+At the moment we return an empty dictionary. Lets provide something more useful here::
+
+    @router.add_route("/example", "example", methods=["GET"])
+    def get(context, request=None):
+        items = get_items("my.custom.type", request, uid=None, endpoint="example")
+        return {
+            "count": len(items),
+            "items": items,
+        }
+
+The `get_items` function of the `plone.jsonapi.routes.api` module does all the
+heavy lifting here. It searches the catalog for `my.custom.type` contents,
+parses the request for any additional parameters or returns all informations of
+the "waked up" object if the `uid` is given.
+
+The return value is a list of dictionaries, where each dictionary represents
+the information of one result, be it a catalog result or the full information
+set of an object.
+
+.. note:: without the uid given, only catalog brains are returned
+
+Now we need a way to handle the uid with this function. Therefore we can simple
+add another `add_route` decorator around this function::
+
+    @router.add_route("/example", "example", methods=["GET"])
+    @router.add_route("/example/<string:uid>", "example", methods=["GET"])
+    def get(context, request=None, uid=None):
+        items = get_items("my.custom.type", request, uid=uid, endpoint="example")
+        return {
+            "count": len(items),
+            "items": items,
+        }
+
+This function handles now URLs like `@@API/example/4b7a1f...` as well and
+invokes the function directly with the provided UID as the parameter. The
+`get_items` tries to find the object with the given UID to provide all
+informations of the waked up object.
+
+.. note:: API URLs which contain the UID are automatically generated with the provided endpoint
+
+
+The `CREATE`, `UPDATE` and `DELETE` functionality is basically identical with
+the basic `VIEW` function above, so here in short::
+
+    # CREATE
+    @router.add_route("/example/create", "example_create", methods=["POST"])
+    @router.add_route("/example/create/<string:uid>", "example_create", methods=["POST"])
+    def create(context, request, uid=None):
+        items = create_items("plone.example.todo", request, uid=uid, endpoint="example")
+        return {
+            "count": len(items),
+            "items": items,
+        }
+
+    # UPDATE
+    @router.add_route("/example/update", "example_update", methods=["POST"])
+    @router.add_route("/example/update/<string:uid>", "example_update", methods=["POST"])
+    def update(context, request, uid=None):
+        items = update_items("plone.example.todo", request, uid=uid, endpoint="example")
+        return {
+            "count": len(items),
+            "items": items,
+        }
 
-API Resource for `Folders`
+    # DELETE
+    @router.add_route("/example/delete", "example_delete", methods=["POST"])
+    @router.add_route("/example/delete/<string:uid>", "example_delete", methods=["POST"])
+    def delete(context, request, uid=None):
+        items = delete_items("plone.example.todo", request, uid=uid, endpoint="example")
+        return {
+            "count": len(items),
+            "items": items,
+        }
 
-+--------+---------------------------+------+
-| VIEW   | <BASE_URL>/folders/       | GET  |
-+--------+---------------------------+------+
-| CREATE | <BASE_URL>/folders/create | POST |
-+--------+---------------------------+------+
-| UPDATE | <BASE_URL>/folders/update | POST |
-+--------+---------------------------+------+
-| DELETE | <BASE_URL>/folders/delete | POST |
-+--------+---------------------------+------+
 
+See it in action
+----------------
 
-Documents
-~~~~~~~~~
+A small tec demo is available on youtube:
 
-:RESOURCE: `documents`
-
-API Resource for `Documents`
-
-+--------+-----------------------------+------+
-| VIEW   | <BASE_URL>/documents/       | GET  |
-+--------+-----------------------------+------+
-| CREATE | <BASE_URL>/documents/create | POST |
-+--------+-----------------------------+------+
-| UPDATE | <BASE_URL>/documents/update | POST |
-+--------+-----------------------------+------+
-| DELETE | <BASE_URL>/documents/delete | POST |
-+--------+-----------------------------+------+
-
-
-Events
-~~~~~~
-
-:RESOURCE: `events`
-
-
-API Resource for `Events`
-
-+--------+--------------------------+------+
-| VIEW   | <BASE_URL>/events/       | GET  |
-+--------+--------------------------+------+
-| CREATE | <BASE_URL>/events/create | POST |
-+--------+--------------------------+------+
-| UPDATE | <BASE_URL>/events/update | POST |
-+--------+--------------------------+------+
-| DELETE | <BASE_URL>/events/delete | POST |
-+--------+--------------------------+------+
-
-
-Files
-~~~~~
-
-:RESOURCE: `files`
-
-API Resource for `Files`
-
-+--------+-------------------------+------+
-| VIEW   | <BASE_URL>/files/       | GET  |
-+--------+-------------------------+------+
-| CREATE | <BASE_URL>/files/create | POST |
-+--------+-------------------------+------+
-| UPDATE | <BASE_URL>/files/update | POST |
-+--------+-------------------------+------+
-| DELETE | <BASE_URL>/files/delete | POST |
-+--------+-------------------------+------+
-
-
-Images
-~~~~~~
-
-:RESOURCE: `images`
-
-API Resource for `Images`
-
-+--------+--------------------------+------+
-| VIEW   | <BASE_URL>/images/       | GET  |
-+--------+--------------------------+------+
-| CREATE | <BASE_URL>/images/create | POST |
-+--------+--------------------------+------+
-| UPDATE | <BASE_URL>/images/update | POST |
-+--------+--------------------------+------+
-| DELETE | <BASE_URL>/images/delete | POST |
-+--------+--------------------------+------+
-
-
-Links
-~~~~~
-
-:RESOURCE: `links`
-
-API Resource for `Links`
-
-+--------+-------------------------+------+
-| VIEW   | <BASE_URL>/links/       | GET  |
-+--------+-------------------------+------+
-| CREATE | <BASE_URL>/links/create | POST |
-+--------+-------------------------+------+
-| UPDATE | <BASE_URL>/links/update | POST |
-+--------+-------------------------+------+
-| DELETE | <BASE_URL>/links/delete | POST |
-+--------+-------------------------+------+
-
-
-News Items
-~~~~~~~~~~
-
-:RESOURCE: `newsitems`
-
-API Resource for `News Items`
-
-+--------+-----------------------------+------+
-| VIEW   | <BASE_URL>/newsitems/       | GET  |
-+--------+-----------------------------+------+
-| CREATE | <BASE_URL>/newsitems/create | POST |
-+--------+-----------------------------+------+
-| UPDATE | <BASE_URL>/newsitems/update | POST |
-+--------+-----------------------------+------+
-| DELETE | <BASE_URL>/newsitems/delete | POST |
-+--------+-----------------------------+------+
-
-
-Topics
-~~~~~~
-
-:RESOURCE: `topics`
-
-API Resource for `Topics`
-
-+--------+--------------------------+------+
-| VIEW   | <BASE_URL>/topics/       | GET  |
-+--------+--------------------------+------+
-| CREATE | <BASE_URL>/topics/create | POST |
-+--------+--------------------------+------+
-| UPDATE | <BASE_URL>/topics/update | POST |
-+--------+--------------------------+------+
-| DELETE | <BASE_URL>/topics/delete | POST |
-+--------+--------------------------+------+
-
-
-Collections
-~~~~~~~~~~~
-
-:RESOURCE: `collections`
-
-API Resource for `Collections`
-
-+--------+-------------------------------+------+
-| VIEW   | <BASE_URL>/collections/       | GET  |
-+--------+-------------------------------+------+
-| CREATE | <BASE_URL>/collections/create | POST |
-+--------+-------------------------------+------+
-| UPDATE | <BASE_URL>/collections/update | POST |
-+--------+-------------------------------+------+
-| DELETE | <BASE_URL>/collections/delete | POST |
-+--------+-------------------------------+------+
-
-
-Users
-~~~~~
-
-:RESOURCE: `users`
-
-API Resource for `Plone Users`
-
-+-------------+--------------------------+-----+
-| VIEW        | <BASE_URL>/users         | GET |
-+-------------+--------------------------+-----+
-| GET CURRENT | <BASE_URL>/users/current | GET |
-+-------------+--------------------------+-----+
-
-
-Examples
---------
-
-These examples show the basic usage of the API.
-All examples are done from the command line using curl_.
-
-.. important:: Using curl_ without the `--cookie` parameter acts like an anonymous
-               request. So the contents of the Plone site need to be published.
-               To create/update/delelete contents in Plone, the curl_ requests
-               need to be authenticated. Thus, I copied the `__ac` cookie value
-               from my browser to the `--cookie` parameter of curl_.
-
-Imagine an empty Plone site with just 2 Folders:
-
-    - Folder 1
-    - Folder 2
-
-Now lets list these folder. Therefore we use the `documents` resource of the API::
-
-    curl -XGET http://localhost:8080/Plone/@@API/plone/api/1.0/folders | python -mjson.tool
-
-    {
-        "_runtime": 0.0024950504302978516,
-        "count": 2,
-        "items": [
-            {
-                "api_url": "http://localhost:8080/Plone/@@API/plone/api/1.0/folders/1b3e6ccde22b48778d5af5768ee49983",
-                "created": "2014-01-23T10:10:53+01:00",
-                "description": "The first Folder",
-                "effective": "2014-01-23T10:11:15+01:00",
-                "id": "folder-1",
-                "modified": "2014-01-23T10:11:15+01:00",
-                "portal_type": "Folder",
-                "tags": [],
-                "title": "Folder 1",
-                "type": "Folder",
-                "uid": "1b3e6ccde22b48778d5af5768ee49983",
-                "url": "http://localhost:8080/Plone/folder-1"
-            },
-            {
-                "api_url": "http://localhost:8080/Plone/@@API/plone/api/1.0/folders/0198f943bd2b48a8970b04d637f74888",
-                "created": "2014-01-23T10:11:05+01:00",
-                "description": "The second Folder",
-                "effective": "2014-01-23T10:11:15+01:00",
-                "id": "folder-2",
-                "modified": "2014-01-23T10:11:15+01:00",
-                "portal_type": "Folder",
-                "tags": [],
-                "title": "Folder 2",
-                "type": "Folder",
-                "uid": "0198f943bd2b48a8970b04d637f74888",
-                "url": "http://localhost:8080/Plone/folder-2"
-            }
-        ],
-        "url": "http://localhost:8080/Plone/@@API/plone/api/1.0/folders"
-    }
-
-As you can see, the two folders get listed. Also note, that for reasons of
-performance, the request to a root URL of a resource contains only the catalog
-results. The objects don't get waked up until we request a specific item.
-
-Now we will request a specific folder, which will wake up the object to show more detailed informations::
-
-    curl -XGET http://localhost:8080/Plone/@@API/plone/api/1.0/folders/1b3e6ccde22b48778d5af5768ee49983 | python -mjson.tool
-
-    {
-        "_runtime": 0.008948087692260742,
-        "count": 1,
-        "items": [
-            {
-                "allowDiscussion": false,
-                "api_url": "http://localhost:8080/Plone/@@API/plone/api/1.0/folders/1b3e6ccde22b48778d5af5768ee49983",
-                "constrainTypesMode": 0,
-                "contributors": [],
-                "created": "2014-01-23T10:10:53+01:00",
-                "creation_date": "2014-01-23T10:10:53+01:00",
-                "creators": [
-                    "admin"
-                ],
-                "description": "The first Folder",
-                "effective": "2014-01-23T10:11:15+01:00",
-                "effectiveDate": "2014-01-23T10:11:15+01:00",
-                "excludeFromNav": false,
-                "expirationDate": null,
-                "id": "folder-1",
-                "immediatelyAddableTypes": [],
-                "language": "de",
-                "locallyAllowedTypes": [],
-                "location": "",
-                "modification_date": "2014-01-23T10:11:15+01:00",
-                "modified": "2014-01-23T10:11:15+01:00",
-                "nextPreviousEnabled": false,
-                "parent_id": "Plone",
-                "parent_uid": 0,
-                "portal_type": "Folder",
-                "relatedItems": [],
-                "rights": "",
-                "subject": [],
-                "tags": [],
-                "title": "Folder 1",
-                "type": "Folder",
-                "uid": "1b3e6ccde22b48778d5af5768ee49983",
-                "url": "http://localhost:8080/Plone/folder-1"
-            }
-        ],
-        "url": "http://localhost:8080/Plone/@@API/plone/api/1.0/folders"
-    }
-
-The response of a specific resource is much more detailed since we gather the
-schema fields of the object.  Also note, that if the content is located below
-the Plone site root, the parent_uid will be 0.
-
-Now lets create a document below this folder. Therefore, the request needs to
-be authenticated. I simply "steal" the **__ac** cookie value of my
-authenticated browser session::
-
-    curl -XPOST -H "Content-Type: application/json" -d '{"parent_uid":"1b3e6ccde22b48778d5af5768ee49983", "title":"A Document below Folder 1"}' http://localhost:8080/Plone/@@API/plone/api/1.0/documents/create  --cookie "__ac=NjE2NDZkNjk2ZTo2MTY0NmQ2OTZl" | python -mjson.tool
-
-    {
-        "_runtime": 0.08417892456054688,
-        "count": 1,
-        "items": [
-            {
-                "allowDiscussion": false,
-                "api_url": "http://localhost:8080/Plone/@@API/plone/api/1.0/documents/c1b61148a3a3489c9ae5f18a8b552ceb",
-                "contributors": [],
-                "creation_date": "2014-01-23T11:54:02+01:00",
-                "creators": [
-                    "admin"
-                ],
-                "description": "",
-                "effectiveDate": null,
-                "excludeFromNav": false,
-                "expirationDate": null,
-                "id": "a-document-below-folder-1",
-                "language": "de",
-                "location": "",
-                "modification_date": "2014-01-23T11:54:02+01:00",
-                "parent_id": "folder-1",
-                "parent_uid": "1b3e6ccde22b48778d5af5768ee49983",
-                "parent_url": "http://localhost:8080/Plone/@@API/plone/api/1.0/folders/1b3e6ccde22b48778d5af5768ee49983",
-                "presentation": false,
-                "relatedItems": [],
-                "rights": "",
-                "subject": [],
-                "tableContents": false,
-                "text": "",
-                "title": "A Document below Folder 1"
-            }
-        ],
-        "url": "http://localhost:8080/Plone/@@API/plone/api/1.0/documents/create"
-    }
-
-Note how the `parent_uid` is updated to the one of `Folder 1` and the generated
-`api_url` points to the correct `folders` resource here.
-
-Now lets update this document. Therefore we post a new JSON object with the
-informations to the documents api url::
-
-    curl -XPOST -H "Content-Type: application/json" -d '{"uid": "c1b61148a3a3489c9ae5f18a8b552ceb", "description":"The description changed", "text": "Some Text"}' http://localhost:8080/Plone/@@API/plone/api/1.0/documents/update  --cookie "__ac=NjE2NDZkNjk2ZTo2MTY0NmQ2OTZl" | python -mjson.tool
-
-    {
-        "_runtime": 0.049546003341674805,
-        "count": 1,
-        "items": [
-            {
-                "allowDiscussion": false,
-                "api_url": "http://localhost:8080/Plone/@@API/plone/api/1.0/documents/c1b61148a3a3489c9ae5f18a8b552ceb",
-                "contributors": [],
-                "creation_date": "2014-01-23T11:54:02+01:00",
-                "creators": [
-                    "admin"
-                ],
-                "description": "The description changed",
-                "effectiveDate": null,
-                "excludeFromNav": false,
-                "expirationDate": null,
-                "id": "a-document-below-folder-1",
-                "language": "de",
-                "location": "",
-                "modification_date": "2014-01-23T12:11:33+01:00",
-                "parent_id": "folder-1",
-                "parent_uid": "1b3e6ccde22b48778d5af5768ee49983",
-                "parent_url": "http://localhost:8080/Plone/@@API/plone/api/1.0/folders/1b3e6ccde22b48778d5af5768ee49983",
-                "presentation": false,
-                "relatedItems": [],
-                "rights": "",
-                "subject": [],
-                "tableContents": false,
-                "text": "<p>Some Text</p>",
-                "title": "A Document below Folder 1"
-            }
-        ],
-        "url": "http://localhost:8080/Plone/@@API/plone/api/1.0/documents/update"
-    }
-
-Note how the description and text changed!
-
-Finally, lets delete the item::
-
-    curl -XPOST -H "Content-Type: application/json" -d '{"uid": "c1b61148a3a3489c9ae5f18a8b552ceb"}' http://localhost:8080/Plone/@@API/plone/api/1.0/documents/delete  --cookie "__ac=NjE2NDZkNjk2ZTo2MTY0NmQ2OTZl" | python -mjson.tool
-
-    {
-        "_runtime": 0.0047149658203125,
-        "count": 1,
-        "items": [
-            {
-                "deleted": true,
-                "id": "a-document-below-folder-1"
-            }
-        ],
-        "url": "http://localhost:8080/Plone/@@API/plone/api/1.0/documents/delete"
-    }
-
-The document is now gone::
-
-    curl -XGET http://localhost:8080/Plone/@@API/plone/api/1.0/documents | python -mjson.tool
-
-    {
-        "_runtime": 0.0019440650939941406,
-        "count": 0,
-        "items": [],
-        "url": "http://localhost:8080/Plone/@@API/plone/api/1.0/documents"
-    }
+http://www.youtube.com/watch?v=MiwgkWLMUqk
 
 
 License
@@ -544,10 +356,12 @@ MIT - do what you want
 .. _Werkzeug: http://werkzeug.pocoo.org
 .. _plone.jsonapi.core: https://github.com/ramonski/plone.jsonapi.core
 .. _plone.jsonapi.routes: https://github.com/ramonski/plone.jsonapi.routes
+.. _plone.jsonapi.example: https://github.com/ramonski/plone.jsonapi.example
 .. _mr.developer: https://pypi.python.org/pypi/mr.developer
 .. _Utility: http://developer.plone.org/components/utilities.html
 .. _CRUD: http://en.wikipedia.org/wiki/CRUD
 .. _curl: http://curl.haxx.se/
 .. _RESTful: http://en.wikipedia.org/wiki/Representational_state_transfer
+.. _pypi: http://pypi.python.org
 
 .. vim: set ft=rst ts=4 sw=4 expandtab :

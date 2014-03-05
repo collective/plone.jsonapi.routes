@@ -10,6 +10,10 @@ class IInfo(interface.Interface):
     """ JSON Info Interface
     """
 
+    def to_dict():
+        """ return the dictionary representation of the object
+        """
+
     def __call__():
         """ return the dictionary representation of the object
         """

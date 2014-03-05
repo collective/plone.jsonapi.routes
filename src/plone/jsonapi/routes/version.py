@@ -12,12 +12,14 @@ def version():
     return dist.version
 
 __version__ = version()
-__build__ = 50
-__date__ = '2014-01-23'
+__build__ = 60
+__date__ = '2014-03-05'
 
 
 @add_plone_route("/version", "ploneapiversion", methods=["GET"])
 def apiversion(context, request):
+    """ get the current version of this package
+    """
     return {
         "url":     api.url_for("ploneapiversion"),
         "version": __version__,

@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
+
+import re
 import logging
+
+from plone.jsonapi.core.browser.router import add_route
 from plone.jsonapi.core.browser.router import DefaultRouter
 
 from api import url_for
@@ -25,23 +29,36 @@ def add_plone_route(rule, endpoint=None, **kw):
     return wrapper
 
 
-# API JSON
-@add_plone_route("/api.json", "api_json", methods=["GET"])
-def api_json(context, request, uid=None):
-    """ get the api
+def get_api_routes_for(segment):
+    """ return a list of all routes registered for the given url segment
     """
-    items = []
-    for rule in DefaultRouter.url_map.iter_rules():
-        if rule.rule.startswith(BASE_URL):
-            items.append({
-                "endpoint": rule.endpoint,
-                "url":      url_for(rule.endpoint),
-                "methods":  list(rule.methods),
-                "arguments": list(rule.arguments),
+    adapter = DefaultRouter.get_adapter()
+
+    out = []
+    rx = re.compile(r".*%s/[\w]+$" % segment)
+
+    for rule in adapter.map.iter_rules():
+        if rx.match(rule.rule):
+            endpoint = rule.endpoint
+            info = DefaultRouter.view_functions.get(endpoint).__doc__
+            url  = DefaultRouter.url_for(endpoint, force_external=True)
+            out.append({
+                "url":  url,
+                "info": info and info.strip() or "No description available",
+                "methods": ",".join(rule.methods),
             })
+    return out
+
+
+@add_route(BASE_URL, "api", methods=["GET"])
+@add_plone_route("api.json", "api", methods=["GET"])
+def api_json(context, request):
+    """ API URLs
+    """
+    items = get_api_routes_for(BASE_URL)
 
     return {
-        "url": url_for("api_json"),
+        "url": DefaultRouter.url_for("api", force_external=True),
         "count": len(items),
         "items": items,
     }
@@ -59,9 +76,9 @@ def initialize(context):
     prefix = providers.__name__ + "."
     for importer, modname, ispkg in pkgutil.iter_modules(providers.__path__, prefix):
         module = __import__(modname, fromlist="dummy")
-        logger.info("INITIALIZED ROUTE PROVIDER [%s]" % module.__name__)
+        logger.info("INITIALIZED ROUTE PROVIDER ---> %s" % module.__name__)
 
     import version
-    logger.info("INITIALIZED ROUTE PROVIDER [%s]" % version.__name__)
+    logger.info("INITIALIZED ROUTE PROVIDER ---> %s" % version.__name__)
 
 # vim: set ft=python ts=4 sw=4 expandtab :
