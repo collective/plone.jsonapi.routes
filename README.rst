@@ -182,9 +182,9 @@ specific adapter for your content type to control the data returned by the API.
 +-------------+--------------------------------------------------+
 | files       | Resource for all File contents                   |
 +-------------+--------------------------------------------------+
-| Images      | Resource for all Image contents                  |
+| images      | Resource for all Image contents                  |
 +-------------+--------------------------------------------------+
-| Links       | Resource for all Link contents                   |
+| links       | Resource for all Link contents                   |
 +-------------+--------------------------------------------------+
 | newsitems   | Resource for all News Item contents              |
 +-------------+--------------------------------------------------+
@@ -228,7 +228,6 @@ Lets say you want to provide a simple CRUD_ JSON API for your custom Dexterity_
 content type. You want to access the API directly from the plone.jsonapi.core_
 root URL (`http://localhost:8080/Plone/@@API/`).
 
-
 First of all, you need to import the CRUD_ functions of plone.jsonapi.routes_::
 
     from plone.jsonapi.routes.api import get_items
@@ -242,22 +241,28 @@ your function with the api framework::
 
     from plone.jsonapi.core import router
 
-The next step is to provide the functions which get called by the
+The next step is to provide the a function which get called by the
 plone.jsonapi.core_ framework::
 
     @router.add_route("/example", "example_route", methods=["GET"])
     def get(context, request):
         return {}
 
-Lets go through this...
+Lets go through this step by step...
 
 The `@router.add_route(...)` registers the decorated function with the framework.
-So the function will be invoked when someone sends a request on `@@API/example`.
+So the function will be invoked when someone sends a request to `@@API/example`.
+
 The framework registers the decorated function with the key `example_route`.
 We also provide the HTTP Method `GET` which tells the framework that we only
 want to get invoked on a HTTP GET request.
 
-At the moment we return an empty dictionary. Lets provide something mode useful here::
+When the function gets invoked, the framework provides a context and a request.
+The context is usually the Plone_ site root, because this is where the base
+view (`@@API`) is registered. The request contains all needed parameters and
+headers from the original request.
+
+At the moment we return an empty dictionary. Lets provide something more useful here::
 
     @router.add_route("/example", "example_route", methods=["GET"])
     def get(context, request=None):
@@ -267,6 +272,35 @@ At the moment we return an empty dictionary. Lets provide something mode useful 
             "items": items,
         }
 
+The `get_items` function of the `plone.jsonapi.routes.api` module does all the
+heavy lifting here. It searches the catalog for `my.custom.type` contents,
+parses the request for any additional parameters or returns all informations of
+the "waked up" object if the `uid` is given.
+
+The return value is a list of dictionaries, where each dictionary represents
+the information of one result, be it a catalog result or the full information
+set of an object.
+
+.. note:: without the uid given, only catalog brains are returned
+
+Now we need a way to handle the uid with this function. Therefore we can simple
+add another `add_route` decorator around this function::
+
+    @router.add_route("/example", "example_route", methods=["GET"])
+    @router.add_route("/example/<string:uid>", "example_route", methods=["GET"])
+    def get(context, request=None, uid=None):
+        items = get_items("my.custom.type", request, uid=uid, endpoint="example")
+        return {
+            "count": len(items),
+            "items": items,
+        }
+
+This function handles now URLs like `@@API/example/4b7a1f...` as well and
+invokes the function directly with the provided UID as the parameter. The
+`get_items` tries to find the object with the given UID to provide all
+informations of the waked up object.
+
+.. note:: API URLs which contain the UID are automatically generated with the provided endpoint
 
 
 
