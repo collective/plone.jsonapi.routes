@@ -60,7 +60,7 @@ class ZCDataProvider(Base):
             "modified":    brain.modified.ISO8601(),
             "effective":   brain.effective.ISO8601(),
             "type":        brain.portal_type,
-            "tags":        brain.subject,
+            "tags":        brain.Subject,
         }
 
 
