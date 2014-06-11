@@ -1,6 +1,14 @@
 Changelog
 =========
 
+0.3 - unreleased
+----------------
+
+**FIXED ISSUES**
+
+- https://github.com/collective/plone.jsonapi.routes/pull/11: Typo in brain adapter
+
+
 0.2 - 2014-03-05
 ----------------
 
