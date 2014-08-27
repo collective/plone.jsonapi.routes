@@ -18,8 +18,8 @@ from plone.jsonapi.routes.request import get_creator
 from plone.jsonapi.routes.request import get_request_data
 
 from plone.jsonapi.routes.interfaces import IInfo
-
 from plone.jsonapi.routes import underscore as _
+
 
 logger = logging.getLogger("plone.jsonapi.routes")
 
@@ -35,6 +35,7 @@ def get_items(portal_type, request, uid=None, endpoint=None):
     1. If the UID is given, fetch the object directly => should return 1 item
     2. If no UID is given, search for all items of the given portal_type
     """
+
     # contains the full query with params
     query = make_query(request, portal_type=portal_type)
     if uid is not None: query["UID"] = uid
