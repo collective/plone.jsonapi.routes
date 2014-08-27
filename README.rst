@@ -52,6 +52,10 @@ Example::
 
 The routes for the standard Plone_ content types get registered on startup.
 
+The following URL should be available after startup:
+
+http://localhost:8080/Plone/@@API/plone/api/1.0
+
 
 API URL
 -------
