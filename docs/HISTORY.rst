@@ -6,6 +6,8 @@ Changelog
 
 **FIXED ISSUES**
 
+- https://github.com/collective/plone.jsonapi.routes/issues/16: Files can not be created/updated with base64 encoded data
+
 - https://github.com/collective/plone.jsonapi.routes/issues/10: Fails on NamedBlobFile dexterity fields
 
 - https://github.com/collective/plone.jsonapi.routes/pull/11: Typo in brain adapter

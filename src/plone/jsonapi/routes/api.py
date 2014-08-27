@@ -309,6 +309,12 @@ def get_endpoint(portal_type):
 
     return portal_type
 
+def is_file_field(field):
+    # XXX find a better way to distinguish file/image fields
+    if field.__name__ in ["file", "image"]:
+        return True
+    return False
+
 def get_object_by_uid(uid):
     """ return the object by uid
     """
@@ -375,12 +381,18 @@ def update_object_with_data(content, record):
     is_atct = IATContentType.providedBy(content)
 
     for k, v in record.items():
-        field = schema.get(k)
+
+        # fetch the field
+        field = content.getField(k) or schema.get(k)
 
         logger.info("update_object_with_data::processing key=%r, value=%r, field=%r", k, v, field)
         if field is None:
             logger.info("update_object_with_data::skipping key=%r", k)
             continue
+
+        if is_file_field(field):
+            logger.info("update_object_with_data:: File field detected ('%r'), base64 decoding value", field)
+            v = str(v).decode("base64")
 
         if is_atct:
             # XXX handle security
