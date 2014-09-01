@@ -149,7 +149,7 @@ def make_items_for(brains_or_objects, endpoint, complete=True):
     """ return a list of info dicts
     """
     def _block(brain):
-        info = dict(api_url=url_for(endpoint, uid=get_uid(brain)))
+        info = dict(api_url=url_for(endpoint, uid=get_uid(brain)), uid=get_uid(brain))
         # update with std. catalog metadata
         info.update(IInfo(brain)())
 
