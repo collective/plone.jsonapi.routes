@@ -12,6 +12,8 @@ Changelog
 
 - https://github.com/collective/plone.jsonapi.routes/pull/11: Typo in brain adapter
 
+- https://github.com/collective/plone.jsonapi.routes/issues/14: Missing UIDs for complete objects
+
 **ENHANCEMENTS**
 
 - https://github.com/collective/plone.jsonapi.routes/issues/3: Add buildout configs inside package
