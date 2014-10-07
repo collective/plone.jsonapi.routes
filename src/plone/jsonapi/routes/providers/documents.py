@@ -7,6 +7,7 @@ from plone.jsonapi.routes.api import get_items
 from plone.jsonapi.routes.api import create_items
 from plone.jsonapi.routes.api import update_items
 from plone.jsonapi.routes.api import delete_items
+from plone.jsonapi.routes.decorators import returns_plone_items_for
 
 from plone.jsonapi.routes.api import url_for
 
@@ -14,15 +15,11 @@ from plone.jsonapi.routes.api import url_for
 # GET
 @add_plone_route("/documents", "documents", methods=["GET"])
 @add_plone_route("/documents/<string:uid>", "documents", methods=["GET"])
+@returns_plone_items_for("documents")
 def get(context, request, uid=None):
     """ get documents
     """
-    items = get_items("Document", request, uid=uid, endpoint="documents")
-    return {
-        "url": url_for("documents"),
-        "count": len(items),
-        "items": items,
-    }
+    return get_items("Document", request, uid=uid, endpoint="documents")
 
 
 # CREATE

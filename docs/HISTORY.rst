@@ -16,6 +16,10 @@ Changelog
 
 **ENHANCEMENTS**
 
+- https://github.com/collective/plone.jsonapi.routes/issues/19: Need to do a GET on a file using file path without using uid
+
+- https://github.com/collective/plone.jsonapi.routes/issues/18: destination handling
+
 - https://github.com/collective/plone.jsonapi.routes/issues/3: Add buildout configs inside package
 
 

@@ -3,6 +3,7 @@
 __author__ = 'Ramon Bartl <ramon.bartl@googlemail.com>'
 __docformat__ = 'plaintext'
 
+import logging
 import datetime
 import DateTime
 
@@ -20,6 +21,8 @@ from Products.ZCatalog.interfaces import ICatalogBrain
 from Products.ATContentTypes.interfaces import IATContentType
 
 from plone.jsonapi.routes.interfaces import IInfo
+
+logger = logging.getLogger("plone.jsonapi.routes")
 
 
 class Base(object):
