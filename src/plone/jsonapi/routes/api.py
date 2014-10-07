@@ -30,7 +30,7 @@ logger = logging.getLogger("plone.jsonapi.routes")
 #-----------------------------------------------------------------------------
 
 # GET
-def get_items(portal_type, request, uid=None, endpoint=None):
+def get_items(portal_type, request, uid=None, endpoint=None, complete=False):
     """ returns a list of items
 
     1. If the UID is given, fetch the object directly => should return 1 item
@@ -40,8 +40,9 @@ def get_items(portal_type, request, uid=None, endpoint=None):
     # fetch the catalog results for this request
     results = get_search_results(request, portal_type=portal_type, uid=uid)
 
-    # if the uid is given, get the complete information set
-    complete = uid and True or False
+    if not complete:
+        # if the uid is given, get the complete information set
+        complete = uid and True or False
 
     return make_items_for(results, endpoint, complete=complete)
 
