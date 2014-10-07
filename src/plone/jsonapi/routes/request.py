@@ -43,7 +43,7 @@ def get_batch_size(request):
 def get_batch_start(request):
     """ returns the 'start' from the request
     """
-    return _.convert(request.form.get("start"), _.to_int) or 0
+    return _.convert(request.form.get("b_start"), _.to_int) or 0
 
 
 def get_sort_on(request, allowed_indexes=None):

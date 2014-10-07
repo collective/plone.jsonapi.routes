@@ -3,7 +3,7 @@
 from plone.jsonapi.routes import add_plone_route
 
 # CRUD
-from plone.jsonapi.routes.api import get_items
+from plone.jsonapi.routes.api import get_batched
 from plone.jsonapi.routes.api import create_items
 from plone.jsonapi.routes.api import update_items
 from plone.jsonapi.routes.api import delete_items
@@ -17,12 +17,7 @@ from plone.jsonapi.routes.api import url_for
 def get(context, request, uid=None):
     """ get topics
     """
-    items = get_items("Topic", request, uid=uid, endpoint="topics")
-    return {
-        "url": url_for("topics"),
-        "count": len(items),
-        "items": items,
-    }
+    return get_batched("Topic", request, uid=uid, endpoint="topics")
 
 
 # CREATE

@@ -16,6 +16,8 @@ Changelog
 
 **ENHANCEMENTS**
 
+- https://github.com/collective/plone.jsonapi.routes/issues/12: Add batching
+
 - https://github.com/collective/plone.jsonapi.routes/issues/13: Add a flag to return the full fledged object results immediately
 
 - https://github.com/collective/plone.jsonapi.routes/issues/19: Need to do a GET on a file using file path without using uid
