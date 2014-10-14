@@ -15,9 +15,10 @@ Table of Contents:
 
    installation
    api/index
-   HISTORY
+   links
    CONTRIBUTORS
    LICENSE
+   HISTORY
 
 
 
