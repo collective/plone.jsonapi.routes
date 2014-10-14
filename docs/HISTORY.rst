@@ -1,6 +1,37 @@
 Changelog
 =========
 
+0.3 - 2014-10-14
+----------------
+
+**FIXED ISSUES**
+
+- https://github.com/collective/plone.jsonapi.routes/issues/16: Files can not be created/updated with base64 encoded data
+
+- https://github.com/collective/plone.jsonapi.routes/issues/10: Fails on NamedBlobFile dexterity fields
+
+- https://github.com/collective/plone.jsonapi.routes/pull/11: Typo in brain adapter
+
+- https://github.com/collective/plone.jsonapi.routes/issues/14: Missing UIDs for complete objects
+
+**ENHANCEMENTS**
+
+- https://github.com/collective/plone.jsonapi.routes/issues/12: Add batching
+
+- https://github.com/collective/plone.jsonapi.routes/issues/13: Add a flag to return the full fledged object results immediately
+
+- https://github.com/collective/plone.jsonapi.routes/issues/19: Need to do a GET on a file using file path without using uid
+
+- https://github.com/collective/plone.jsonapi.routes/issues/18: destination handling
+
+- https://github.com/collective/plone.jsonapi.routes/issues/3: Add buildout configs inside package
+
+
+**DOCUMENTATION**
+
+- https://github.com/collective/plone.jsonapi.routes/issues/2: Sphinx documentation started
+
+
 0.2 - 2014-03-05
 ----------------
 

@@ -2,7 +2,7 @@ plone.jsonapi.routes
 ====================
 
 :Author: Ramon Bartl
-:Version: 0.2
+:Version: 0.3
 
 
 .. contents:: Table of Contents
@@ -51,6 +51,10 @@ Example::
 
 
 The routes for the standard Plone_ content types get registered on startup.
+
+The following URL should be available after startup:
+
+http://localhost:8080/Plone/@@API/plone/api/1.0
 
 
 API URL
@@ -289,11 +293,7 @@ add another `add_route` decorator around this function::
     @router.add_route("/example", "example", methods=["GET"])
     @router.add_route("/example/<string:uid>", "example", methods=["GET"])
     def get(context, request=None, uid=None):
-        items = get_items("my.custom.type", request, uid=uid, endpoint="example")
-        return {
-            "count": len(items),
-            "items": items,
-        }
+        return get_batched("my.custom.type", request, uid=uid, endpoint="example")
 
 This function handles now URLs like `@@API/example/4b7a1f...` as well and
 invokes the function directly with the provided UID as the parameter. The
@@ -354,9 +354,9 @@ MIT - do what you want
 .. _Plone: http://plone.org
 .. _Dexterity: https://pypi.python.org/pypi/plone.dexterity
 .. _Werkzeug: http://werkzeug.pocoo.org
-.. _plone.jsonapi.core: https://github.com/ramonski/plone.jsonapi.core
-.. _plone.jsonapi.routes: https://github.com/ramonski/plone.jsonapi.routes
-.. _plone.jsonapi.example: https://github.com/ramonski/plone.jsonapi.example
+.. _plone.jsonapi.core: https://github.com/collective/plone.jsonapi.core
+.. _plone.jsonapi.routes: https://github.com/collective/plone.jsonapi.routes
+.. _plone.jsonapi.example: https://github.com/collective/plone.jsonapi.example
 .. _mr.developer: https://pypi.python.org/pypi/mr.developer
 .. _Utility: http://developer.plone.org/components/utilities.html
 .. _CRUD: http://en.wikipedia.org/wiki/CRUD

@@ -68,7 +68,7 @@ def get_user_info(username=None, short=True):
 @add_plone_route("/users", "users", methods=["GET"])
 @add_plone_route("/users/<string:username>", "users", methods=["GET"])
 def get(context, request, username=None):
-    """ NSK users route
+    """ Plone users route
     """
 
     items = []

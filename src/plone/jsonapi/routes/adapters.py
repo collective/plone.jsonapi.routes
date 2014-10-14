@@ -3,6 +3,7 @@
 __author__ = 'Ramon Bartl <ramon.bartl@googlemail.com>'
 __docformat__ = 'plaintext'
 
+import logging
 import datetime
 import DateTime
 
@@ -20,6 +21,8 @@ from Products.ZCatalog.interfaces import ICatalogBrain
 from Products.ATContentTypes.interfaces import IATContentType
 
 from plone.jsonapi.routes.interfaces import IInfo
+
+logger = logging.getLogger("plone.jsonapi.routes")
 
 
 class Base(object):
@@ -60,7 +63,7 @@ class ZCDataProvider(Base):
             "modified":    brain.modified.ISO8601(),
             "effective":   brain.effective.ISO8601(),
             "type":        brain.portal_type,
-            "tags":        brain.subject,
+            "tags":        brain.Subject,
         }
 
 
@@ -138,7 +141,7 @@ def get_file_dict(field):
     return {
         "data": field.data.encode("base64"),
         "size": len(field.data),
-        "content_type": field.content_type
+        "content_type": getattr(field, "content_type", "application/octet-stream"),
     }
 
 
