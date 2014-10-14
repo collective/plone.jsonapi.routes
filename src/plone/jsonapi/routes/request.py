@@ -17,7 +17,10 @@ def get_uid(request):
 def get_complete(request):
     """ returns the 'complete' from the request
     """
-    return _.convert(request.form.get("complete"), _.to_int) or False
+    complete = request.form.get("complete", "no")
+    if complete.lower() in ["y", "yes", "1", "true"]:
+        return True
+    return False
 
 
 def get_parent_uid(request):

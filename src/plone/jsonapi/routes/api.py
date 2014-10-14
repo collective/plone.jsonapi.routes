@@ -19,6 +19,7 @@ from query import make_query, search
 from plone.jsonapi.routes.request import get_batch_size
 from plone.jsonapi.routes.request import get_batch_start
 from plone.jsonapi.routes.request import get_request_data
+from plone.jsonapi.routes.request import get_complete
 
 from plone.jsonapi.routes.interfaces import IInfo
 from plone.jsonapi.routes import underscore as _
@@ -32,7 +33,7 @@ logger = logging.getLogger("plone.jsonapi.routes")
 #-----------------------------------------------------------------------------
 
 ### GET
-def get_items(portal_type, request, uid=None, endpoint=None, complete=False):
+def get_items(portal_type, request, uid=None, endpoint=None):
     """ returns a list of items
 
     1. If the UID is given, fetch the object directly => should return 1 item
@@ -42,6 +43,7 @@ def get_items(portal_type, request, uid=None, endpoint=None, complete=False):
     # fetch the catalog results for this request
     results = get_search_results(request, portal_type=portal_type, uid=uid)
 
+    complete = get_complete(request)
     if not complete:
         # if the uid is given, get the complete information set
         complete = uid and True or False
@@ -50,7 +52,7 @@ def get_items(portal_type, request, uid=None, endpoint=None, complete=False):
 
 
 ### GET BATCHED
-def get_batched(portal_type, request, uid=None, endpoint=None, complete=False):
+def get_batched(portal_type, request, uid=None, endpoint=None):
     """ returns a batched result record (dictionary)
     """
     # fetch the catalog results for this request
@@ -60,6 +62,7 @@ def get_batched(portal_type, request, uid=None, endpoint=None, complete=False):
     size  = get_batch_size(request)
     start = get_batch_start(request)
 
+    complete = get_complete(request)
     if not complete:
         # if the uid is given, get the complete information set
         complete = uid and True or False
