@@ -91,15 +91,17 @@ the ``portal_catalog`` tool (`portal_catalog/manage_catalogIndexes`) can be used
 Additionally, the following request parameters can be used as well.
 
 +-----------+------------------+------------------------------------------------------------+
-| Parameter | Type             | Description                                                |
+| Key       | Value            | Description                                                |
 +===========+==================+============================================================+
-| q         | query            | search the SearchableText index for the given query string |
+| q         | searchterm       | search the SearchableText index for the given query string |
 +-----------+------------------+------------------------------------------------------------+
-| path      | physical path    | specifiy a physical path to only return results below it   |
+| path      | /physical/path   | specifiy a physical path to only return results below it   |
 +-----------+------------------+------------------------------------------------------------+
-| depth     | path query depth | specify the depth in combination with the path parameter   |
+| depth     | 0..n             | specify the depth in combination with the path parameter   |
 +-----------+------------------+------------------------------------------------------------+
-| limit     | number           | limit the results to the given number                      |
+| limit     | 1..n             | limit the results to the given number                      |
++-----------+------------------+------------------------------------------------------------+
+| complete  | yes/y/1/True     | flag to return the full object results immediately         |
 +-----------+------------------+------------------------------------------------------------+
 
 
