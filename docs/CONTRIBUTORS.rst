@@ -1,2 +1,6 @@
-Ramon Bartl, Author
-Jan Müller
+Contributors
+============
+
+Thanks to all the contributors
+
+- Jan Müller

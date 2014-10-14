@@ -27,6 +27,11 @@ Changelog
 - https://github.com/collective/plone.jsonapi.routes/issues/3: Add buildout configs inside package
 
 
+**DOCUMENTATION**
+
+- https://github.com/collective/plone.jsonapi.routes/issues/2: Sphinx documentation started
+
+
 0.2 - 2014-03-05
 ----------------
 

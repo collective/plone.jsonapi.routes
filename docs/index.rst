@@ -1,15 +1,15 @@
-.. plone.jsonapi.routes documentation master file, created by
-   sphinx-quickstart on Tue Oct 14 17:47:06 2014.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+====================
+plone.jsonapi.routes
+====================
 
-Welcome to plone.jsonapi.routes's documentation!
-================================================
-
-Contents:
+Table of Contents:
 
 .. toctree::
    :maxdepth: 2
+
+   HISTORY
+   CONTRIBUTORS
+   LICENSE
 
 
 
@@ -19,4 +19,3 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-
