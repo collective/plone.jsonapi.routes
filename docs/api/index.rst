@@ -6,6 +6,23 @@ plone.jsonapi.routes. It also covers all the request parameters that can be
 applied to these resources to refine the results.
 
 
+Concept
+-------
+
+The API aims to be **as fast as possible**. So the concept of the API is to
+postpone "expensive" operations until the user really requests it. To do so,
+the API was built with a **two step** architecture.
+
+An expensive operation is generally to wake up an object to retrieve all its
+field values. So the solution is return only the fields of the catalog results
+in the first step. If the user requests the API URL of a specific object, the
+object will be loaded and all the fields of the object will be returned.
+
+
+.. note:: since version 0.3, you can add a `complete=yes` paramter to bypass
+          the two step behavior.
+
+
 BASE URL
 --------
 
