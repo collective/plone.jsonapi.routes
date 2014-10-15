@@ -110,6 +110,8 @@ Beside the *content resources*, there are some special resources available.
 +==========+==================+==========================+
 | users    | username/current | Resource for Plone Users |
 +----------+------------------+--------------------------+
+| version  |                  | Get the current Version  |
++----------+------------------+--------------------------+
 
 
 Parameters
