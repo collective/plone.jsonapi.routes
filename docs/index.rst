@@ -14,7 +14,7 @@ Table of Contents:
    :maxdepth: 2
 
    installation
-   api/index
+   api
    links
    CONTRIBUTORS
    LICENSE
