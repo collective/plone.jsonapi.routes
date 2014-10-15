@@ -33,7 +33,7 @@ The plone.jsonapi.routes_ is compatible with Plone_ 4.
 Documentation
 -------------
 
-Please see the `docs` folder for further documentation.
+http://plonejsonapiroutes.readthedocs.org
 
 
 See it in action
