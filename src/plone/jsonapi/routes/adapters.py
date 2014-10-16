@@ -138,10 +138,14 @@ def get_value(field):
 def get_file_dict(field):
     """ file representation of the given data
     """
+
+    data = field.data.encode("base64")
+    content_type = getattr(field, "content_type", "application/octet-stream")
+
     return {
-        "data": field.data.encode("base64"),
+        "data": data,
         "size": len(field.data),
-        "content_type": getattr(field, "content_type", "application/octet-stream"),
+        "content_type": content_type
     }
 
 

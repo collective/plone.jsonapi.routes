@@ -73,6 +73,9 @@ def get(context, request, username=None):
 
     items = []
 
+    if ploneapi.user.is_anonymous():
+        raise RuntimeError("Not allowed for anonymous users")
+
     # list all users if no username was given
     if username is None:
         users = ploneapi.user.get_users()
