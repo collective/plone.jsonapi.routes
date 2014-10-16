@@ -36,9 +36,9 @@ Example: ``http://localhost:8080/Plone/@@API/plone/api/1.0/api.json``
 .. note:: Please see the documentation of plone.jsonapi.core for the root URL.
 
 
-There is also an overview of the registered routes which can be accessed here:
+There is also an overview of the registered routes, e.g.
 
-http://localhost:8080/Plone/@@API/plone/api/1.0/api.json
+``http://localhost:8080/Plone/@@API/plone/api/1.0/api.json``
 
 
 Operations

@@ -14,6 +14,7 @@ Table of Contents:
    :maxdepth: 2
 
    installation
+   quickstart
    api
    links
    CONTRIBUTORS
