@@ -2,9 +2,9 @@ Quickstart
 ==========
 
 This chapter gives a good introduction about `plone.jsonapi.routes` It assumes
-you already have Flask installed. Since all the coming examples are executed
-directly in Google Chrome, it assumes that you have also installed JSONView and the
-Advanced Rest Client Application.
+you already have `Plone` and `plone.jsonapi.routes` installed. Since all the
+coming examples are executed directly in Google Chrome, it assumes that you
+have also installed JSONView and the Advanced Rest Client Application.
 
 
 Environment
