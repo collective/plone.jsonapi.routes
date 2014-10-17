@@ -25,6 +25,8 @@ the object will be loaded and all the fields of the object will be returned.
           the two step behavior and retrieve the full object data immediately.
 
 
+.. _BASE_URL:
+
 Base URL
 --------
 
@@ -61,6 +63,8 @@ request.
 | DELETE    | <BASE URL>/<RESOURCE>/delete/<uid:optional> | POST   |
 +-----------+---------------------------------------------+--------+
 
+
+.. _Resources:
 
 Resources
 ---------
@@ -113,6 +117,8 @@ Beside the *content resources*, there are some special resources available.
 | version  |                  | Get the current Version  |
 +----------+------------------+--------------------------+
 
+
+.. _Parameters:
 
 Parameters
 ----------
@@ -186,6 +192,58 @@ they're supported or not.
 .. note:: Custom added indexes can also be used, as long as they accept a
           single string value as query.
 
+
+.. _Response_Format:
+
+Response Format
+---------------
+
+The response format is for all resources the same.
+
+.. code-block:: javascript
+
+    {
+        count: 1, // number of found items
+        pagesize: 25, // items per page
+        items: [  // List of all item objexts
+            {
+                id: "front-page", // item data
+                ...
+            }
+        ],
+        page: 1, // current page
+        _runtime: 0.00381,  // calculation time to generate the data
+        next: null,  // URL to the next batch
+        pages: 1,  //  number of total pages
+        previous: null  // URL to the previous batch
+    }
+
+
+**count**
+    The number of found items -- can be more than displayed on one site
+
+**pagesize**
+    Number of items per page
+
+**items**
+    List of found items -- only catalog brain keys unless you add a
+    `complete=yes` parameter to the request or request an URL with an UID at
+    the end.
+
+**page**
+    The current page of the batched result set
+
+**_runtime**
+    The time in milliseconds needed to generate the data
+
+**next**
+    The URL to the next batch
+
+**pages**
+    The number of pages in the batch
+
+**previous**
+    The URL to the previous batch
 
 
 .. _`Plone docs`: http://docs.plone.org/develop/plone/searching_and_indexing/query.html#query-by-path
