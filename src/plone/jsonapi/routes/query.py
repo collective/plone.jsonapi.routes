@@ -3,6 +3,9 @@
 # Copyright (c) Nexiles GmbH
 
 import logging
+import types
+
+from DateTime import DateTime
 
 from plone import api
 
@@ -66,7 +69,7 @@ def build_query(request, **kw):
     # check what we can use from the reqeust
     for idx in get_catalog_indexes():
         val = request.form.get(idx)
-        if val: query[idx] = val
+        if val: query[idx] = to_index_value(val, idx)
 
     # build a default catalog query
     query.update({
@@ -119,6 +122,28 @@ def get_catalog_indexes():
     """ return the list of indexes of the portal catalog
     """
     return get_portal_catalog().indexes()
+
+
+def get_index(name):
+    """ get the index object by name
+    """
+    return get_portal_catalog()._catalog.getIndex(name)
+
+
+def to_index_value(value, index):
+    """ convert the value for the given index
+    """
+    if type(index) in types.StringTypes:
+        index = get_index(index)
+
+    if index.meta_type == "DateIndex":
+        return DateTime(value)
+    if index.meta_type == "BooleanIndex":
+        return bool(value)
+    if index.meta_type == "KeywordIndex":
+        return value.split(",")
+
+    return value
 
 
 def search(query, **kw):

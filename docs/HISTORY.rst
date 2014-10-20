@@ -4,7 +4,9 @@ Changelog
 0.4 - unreleased
 ----------------
 
-- no changes yet
+**ENHANCEMENTS**
+
+- https://github.com/collective/plone.jsonapi.routes/issues/20: Support query for DateTime Indexes
 
 
 0.3 - 2014-10-14
