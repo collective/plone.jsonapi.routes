@@ -7,6 +7,7 @@ Changelog
 **FIXED ISSUES**
 
 - https://github.com/collective/plone.jsonapi.routes/issues/22: Absoulte url is missing in update/create response
+- https://github.com/collective/plone.jsonapi.routes/issues/21: Image Route throws an error
 
 **ENHANCEMENTS**
 

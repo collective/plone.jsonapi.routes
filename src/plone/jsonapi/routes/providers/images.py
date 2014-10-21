@@ -17,7 +17,7 @@ from plone.jsonapi.routes.api import url_for
 def get(context, request, uid=None):
     """ get images
     """
-    get_batched("Image", request, uid=uid, endpoint="images")
+    return get_batched("Image", request, uid=uid, endpoint="images")
 
 
 # CREATE
