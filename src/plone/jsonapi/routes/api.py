@@ -195,6 +195,7 @@ def make_items_for(brains_or_objects, endpoint, complete=True):
         uid = get_uid(brain_or_object)
         info.update({
             "uid": uid,
+            "url": get_url(brain_or_object),
             "api_url": url_for(endpoint, uid=uid),
         })
 
@@ -358,6 +359,14 @@ def url_for(endpoint, **values):
     """ returns the api url
     """
     return router.url_for(endpoint, force_external=True, values=values)
+
+
+def get_url(obj):
+    """ get the absolute url for this object
+    """
+    if is_brain(obj):
+        return obj.getURL()
+    return obj.absolute_url()
 
 
 def get_uid(obj):

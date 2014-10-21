@@ -4,6 +4,10 @@ Changelog
 0.4 - unreleased
 ----------------
 
+**FIXED ISSUES**
+
+- https://github.com/collective/plone.jsonapi.routes/issues/22: Absoulte url is missing in update/create response
+
 **ENHANCEMENTS**
 
 - https://github.com/collective/plone.jsonapi.routes/issues/20: Support query for DateTime Indexes
