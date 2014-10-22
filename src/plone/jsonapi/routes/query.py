@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-#
-# Copyright (c) Nexiles GmbH
+
+__author__ = 'Ramon Bartl <ramon.bartl@googlemail.com>'
+__docformat__ = 'plaintext'
 
 import logging
 import types

@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-#
-# File: decorators.py
 
 __author__ = 'Ramon Bartl <ramon.bartl@googlemail.com>'
 __docformat__ = 'plaintext'

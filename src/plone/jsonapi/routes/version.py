@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-__author__ = 'Ramon Bartl <ramon.bartl@nexiles.com>'
+__author__    = 'Ramon Bartl <ramon.bartl@nexiles.com>'
 __docformat__ = 'plaintext'
 
 import pkg_resources

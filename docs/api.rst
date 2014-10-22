@@ -145,49 +145,15 @@ All content resources accept to be filtered by request parameters.
 |          |                | Bypasses the *two step* behavior of the API                            |
 +----------+----------------+------------------------------------------------------------------------+
 
-It is also possible to use Plone Catalog Indexes directly. At the moment, the
-API only supports really basic index types. So date type indexes aren't
-supported yet. Also 
 
-Below is a list of the most relevant catalog indexes and the current state if
-they're supported or not.
+Using Plone Indexes
+~~~~~~~~~~~~~~~~~~~
 
-+----------------+----------------+-------------+
-| Index Name     | Index type     | Supported   |
-+================+================+=============+
-| Creator        | FieldIndex     | Y           |
-+----------------+----------------+-------------+
-| Description    | ZCTextIndex    | Y           |
-+----------------+----------------+-------------+
-| SearchableText | ZCTextIndex    | N (use `q`) |
-+----------------+----------------+-------------+
-| Subject        | KeywordIndex   | Y           |
-+----------------+----------------+-------------+
-| Title          | ZCTextIndex    | Y           |
-+----------------+----------------+-------------+
-| UID            | UUIDIndex      | Y           |
-+----------------+----------------+-------------+
-| id             | FieldIndex     | Y           |
-+----------------+----------------+-------------+
-| review_state   | FieldIndex     | Y           |
-+----------------+----------------+-------------+
-| Date           | DateIndex      | N           |
-+----------------+----------------+-------------+
-| created        | DateIndex      | N           |
-+----------------+----------------+-------------+
-| modified       | DateIndex      | N           |
-+----------------+----------------+-------------+
-| effective      | DateIndex      | N           |
-+----------------+----------------+-------------+
-| start          | DateIndex      | N           |
-+----------------+----------------+-------------+
-| end            | DateIndex      | N           |
-+----------------+----------------+-------------+
-| effectiveRange | DateRangeIndex | N           |
-+----------------+----------------+-------------+
-| expires        | DateIndex      | N           |
-+----------------+----------------+-------------+
+It is also possible to use the Plone catalog indexes directly as request
+parameters.
 
+.. versionadded:: 0.4
+    Suport for DateIndex, KeywordIndex and BooleanIndex
 
 .. note:: Custom added indexes can also be used, as long as they accept a
           single string value as query.
