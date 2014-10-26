@@ -96,6 +96,18 @@ def get_depth(request):
     return  _.convert(request.form.get("depth", 0), _.to_int)
 
 
+def get_recent_created(request):
+    """ returns the 'recent_created' from the request
+    """
+    return request.form.get("recent_created", None)
+
+
+def get_recent_modified(request):
+    """ returns the 'recent_modified' from the request
+    """
+    return request.form.get("recent_modified", None)
+
+
 def get_request_data(request):
     """ extract and convert the json data from the request
 

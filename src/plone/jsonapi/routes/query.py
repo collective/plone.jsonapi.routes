@@ -16,6 +16,8 @@ from plone.jsonapi.routes.request import get_query
 from plone.jsonapi.routes.request import get_sort_on
 from plone.jsonapi.routes.request import get_sort_limit
 from plone.jsonapi.routes.request import get_sort_order
+from plone.jsonapi.routes.request import get_recent_created
+from plone.jsonapi.routes.request import get_recent_modified
 
 HAS_ADVANCED_QUERY = True
 try:
@@ -84,12 +86,37 @@ def build_query(request, **kw):
     path = get_path(request)
     if path:
         depth = get_depth(request)
-        query["path"] = dict(query=path, depth=depth)
+        query["path"] = {'query': path, 'depth': depth}
+
+    # special handling for recent created/modified
+    recent_created = get_recent_created(request)
+    if recent_created:
+        date = calculate_delta_date(recent_created)
+        query["created"] = {'query': date, 'range': 'min'}
+
+    recent_modified = get_recent_modified(request)
+    if recent_modified:
+        date = calculate_delta_date(recent_modified)
+        query["modified"] = {'query': date, 'range': 'min'}
 
     # update the query with the given keywords
     update_query_with_kw(query, **kw)
 
     return query
+
+
+def calculate_delta_date(literal):
+    """ calculate the date in the past from the given literal
+    """
+    mapping = {
+        "today":      0,
+        "yesterday":  1,
+        "this-week":  7,
+        "this-month": 30,
+        "this-year":  365,
+    }
+    today = DateTime(DateTime().Date()) # current date without the time
+    return today - mapping.get(literal, 0)
 
 
 def update_query_with_kw(query, **kw):

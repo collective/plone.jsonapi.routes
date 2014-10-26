@@ -127,23 +127,31 @@ Parameters
 
 All content resources accept to be filtered by request parameters.
 
-+----------+----------------+------------------------------------------------------------------------+
-| Key      | Value          | Description                                                            |
-+==========+================+========================================================================+
-| q        | searchterm     | Search the SearchableText index for the given query string             |
-+----------+----------------+------------------------------------------------------------------------+
-| path     | /physical/path | Specifiy a physical path to only return results below it.              |
-|          |                | See how to `Query by path`_ in the `Plone docs`_ for details.          |
-+----------+----------------+------------------------------------------------------------------------+
-| depth    | 0..n           | Specify the depth of a path query. Only relevant when using            |
-|          |                | the path parameter.                                                    |
-+----------+----------------+------------------------------------------------------------------------+
-| limit    | 1..n           | Limit the results to the given `limit` number.                         |
-|          |                | This will return batched results with `x` pages and `n` items per page |
-+----------+----------------+------------------------------------------------------------------------+
-| complete | yes/y/1/True   | Flag to return the full object results immediately.                    |
-|          |                | Bypasses the *two step* behavior of the API                            |
-+----------+----------------+------------------------------------------------------------------------+
++-----------------+-----------------------+-------------------------------------------------------------------------+
+| Key             | Value                 | Description                                                             |
++=================+=======================+=========================================================================+
+| q               | searchterm            | Search the SearchableText index for the given query string              |
++-----------------+-----------------------+-------------------------------------------------------------------------+
+| path            | /physical/path        | Specifiy a physical path to only return results below it.               |
+|                 |                       | See how to `Query by path`_ in the `Plone docs`_ for details.           |
++-----------------+-----------------------+-------------------------------------------------------------------------+
+| depth           | 0..n                  | Specify the depth of a path query. Only relevant when using             |
+|                 |                       | the path parameter.                                                     |
++-----------------+-----------------------+-------------------------------------------------------------------------+
+| limit           | 1..n                  | Limit the results to the given `limit` number.                          |
+|                 |                       | This will return batched results with `x` pages and `n` items per page  |
++-----------------+-----------------------+-------------------------------------------------------------------------+
+| complete        | yes/y/1/True          | Flag to return the full object results immediately.                     |
+|                 |                       | Bypasses the *two step* behavior of the API                             |
++-----------------+-----------------------+-------------------------------------------------------------------------+
+| recent_created  | today, yesterday      | Specify a recent created date range, to find all items created within   |
+|                 | this-week, this-month | this date range until today.                                            |
+|                 | this-year             | This uses internally `'range': 'min'` query.                            |
++-----------------+-----------------------+-------------------------------------------------------------------------+
+| recent_modified | today, yesterday      | Specify a recent modified date range, to find all items modified within |
+|                 | this-week, this-month | this date range until today.                                            |
+|                 | this-year             | This uses internally `'range': 'min'` query.                            |
++-----------------+-----------------------+-------------------------------------------------------------------------+
 
 
 Using Plone Indexes
@@ -153,7 +161,8 @@ It is also possible to use the Plone catalog indexes directly as request
 parameters.
 
 .. versionadded:: 0.4
-    Suport for DateIndex, KeywordIndex and BooleanIndex
+    Support for DateIndex, KeywordIndex and BooleanIndex.
+    Support for 'recent_modified' and 'recent_created' literals.
 
 .. note:: Custom added indexes can also be used, as long as they accept a
           single string value as query.

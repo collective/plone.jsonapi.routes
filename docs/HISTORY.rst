@@ -12,6 +12,7 @@ Changelog
 **ENHANCEMENTS**
 
 - https://github.com/collective/plone.jsonapi.routes/issues/20: Support query for DateTime Indexes
+- https://github.com/collective/plone.jsonapi.routes/issues/23: Support query for created/modified DateTime ranges
 
 
 0.3 - 2014-10-14
