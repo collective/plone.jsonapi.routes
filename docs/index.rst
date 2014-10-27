@@ -16,6 +16,7 @@ Table of Contents:
    installation
    quickstart
    api
+   customizing
    links
    CONTRIBUTORS
    LICENSE
