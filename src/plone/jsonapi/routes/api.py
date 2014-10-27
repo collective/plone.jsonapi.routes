@@ -196,6 +196,7 @@ def make_items_for(brains_or_objects, endpoint, complete=True):
 
         # inject additional inforamtions
         uid = get_uid(brain_or_object)
+        endpoint = get_endpoint(get_portal_type(brain_or_object))
         info.update({
             "uid": uid,
             "url": get_url(brain_or_object),
@@ -391,6 +392,12 @@ def get_schema(obj):
     pt = get_portal_types_tool()
     fti = pt.getTypeInfo(obj.portal_type)
     return fti.lookupSchema()
+
+
+def get_portal_type(obj):
+    """ return the portal type of this object
+    """
+    return obj.portal_type
 
 
 def get_object(brain_or_object):

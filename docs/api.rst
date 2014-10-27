@@ -109,13 +109,15 @@ Special Resources
 
 Beside the *content resources*, there are some special resources available.
 
-+----------+------------------+--------------------------+
-| Resource | Action           | Description              |
-+==========+==================+==========================+
-| users    | username/current | Resource for Plone Users |
-+----------+------------------+--------------------------+
-| version  |                  | Get the current Version  |
-+----------+------------------+--------------------------+
++----------+--------------------+----------------------------------------+
+| Resource | Action             | Description                            |
++==========+====================+========================================+
+| users    | <username>,current | Resource for Plone Users               |
++----------+--------------------+----------------------------------------+
+| search   |                    | Search over all standard content types |
++----------+--------------------+----------------------------------------+
+| version  |                    | Get the current Version                |
++----------+--------------------+----------------------------------------+
 
 
 .. _Parameters:
