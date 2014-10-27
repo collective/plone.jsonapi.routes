@@ -196,11 +196,17 @@ def make_items_for(brains_or_objects, endpoint, complete=True):
 
         # inject additional inforamtions
         uid = get_uid(brain_or_object)
-        endpoint = get_endpoint(get_portal_type(brain_or_object))
+
+        # might be None for mixed type catalog results, e.g. in the search route
+        scoped_endpoint = endpoint
+        if scoped_endpoint is None:
+            scoped_endpoint = get_endpoint(get_portal_type(brain_or_object))
+
+        # mandatory informations for *all* types
         info.update({
             "uid": uid,
             "url": get_url(brain_or_object),
-            "api_url": url_for(endpoint, uid=uid),
+            "api_url": url_for(scoped_endpoint, uid=uid),
         })
 
         # switch to wake up the object and complete the informations with the
@@ -232,30 +238,6 @@ def get_parent_info(obj):
         "parent_id":  parent.getId(),
         "parent_uid": get_uid(parent),
         "parent_url": url_for(endpoint, uid=get_uid(parent))
-    }
-
-def get_subcontents(parent, ptype):
-    """ returns the contained contents
-    """
-
-    # get the contained objects
-    children = parent.listFolderContents(
-            contentFilter={"portal_type": [ptype]})
-
-    # get the endpoint for the searched results
-    endpoint = get_endpoint(ptype)
-
-    items = []
-    for child in children:
-        info = dict(api_url=url_for(endpoint, uid=get_uid(child)))
-        info.update(IInfo(child)())
-        info.update(get_parent_info(child))
-        items.append(info)
-
-    return {
-        "url":   url_for(endpoint),
-        "count": len(items),
-        "items": items
     }
 
 #-----------------------------------------------------------------------------
@@ -362,8 +344,12 @@ def is_atct(obj):
 def url_for(endpoint, **values):
     """ returns the api url
     """
-    return router.url_for(endpoint, force_external=True, values=values)
-
+    try:
+        return router.url_for(endpoint, force_external=True, values=values)
+    except:
+        # XXX plone.jsonapi.core should catch the BuildError of Werkzeug and
+        #     throw another error which can be handled here.
+        return None
 
 def get_url(obj):
     """ get the absolute url for this object

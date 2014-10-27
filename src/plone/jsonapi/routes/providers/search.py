@@ -5,23 +5,11 @@ from plone.jsonapi.routes import add_plone_route
 # CRUD
 from plone.jsonapi.routes.api import get_batched
 
-DEFAULT_TYPES = [
-    "Collection",
-    "Document",
-    "Event",
-    "File",
-    "Folder",
-    "Image",
-    "Link",
-    "News Item",
-    "Topic",
-]
 
 @add_plone_route("/search", "search", methods=["GET"])
-def get(context, request, uid=None):
+def get(context, request):
     """ search all contents
     """
-
-    return get_batched(DEFAULT_TYPES, request, uid=uid, endpoint="search")
+    return get_batched(None, request)
 
 # vim: set ft=python ts=4 sw=4 expandtab :

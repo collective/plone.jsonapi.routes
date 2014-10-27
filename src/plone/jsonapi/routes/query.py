@@ -133,6 +133,9 @@ def update_query_with_kw(query, **kw):
         if k not in indexes:
             logger.warn("Skipping unknown keyword parameter '%s=%s'" % (k, v))
             continue
+        if v is None:
+            logger.warn("Skipping value 'None' in keyword parameter '%s=%s'" % (k, v))
+            continue
         logger.info("Adding '%s=%s' to query" % (k, v))
         query[k] = v
 
