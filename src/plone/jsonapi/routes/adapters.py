@@ -219,12 +219,4 @@ def to_transition_info(transition):
         "url":     transition["url"],
     }
 
-
-def to_iso_date(date=None):
-    """ get the iso string for python datetime objects
-    """
-    if date is None:
-        return ""
-    return date.isoformat()
-
 # vim: set ft=python ts=4 sw=4 expandtab :
