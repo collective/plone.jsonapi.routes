@@ -14,6 +14,12 @@ Changelog
 - https://github.com/collective/plone.jsonapi.routes/issues/20: Support query for DateTime Indexes
 - https://github.com/collective/plone.jsonapi.routes/issues/23: Support query for created/modified DateTime ranges
 
+**OTHER CHANGES**
+
+- added `recent_modified` and `recent_created` handling
+- added unittests for the `api` and `request` module
+- no more request passing anymore - all handled by the request module now
+
 
 0.3 - 2014-10-14
 ----------------

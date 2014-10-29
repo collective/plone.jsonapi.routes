@@ -145,7 +145,7 @@ All content resources accept to be filtered by request parameters.
 +-----------------+-----------------------+-------------------------------------------------------------------------+
 | sort_on         | catalog index         | Sort the results by the given index                                     |
 +-----------------+-----------------------+-------------------------------------------------------------------------+
-| sort_order      | asc / desc            | Sort ascrending or descending (default: ascending)                      |
+| sort_order      | asc / desc            | Sort ascrending or descending (default: descending)                     |
 +-----------------+-----------------------+-------------------------------------------------------------------------+
 | sort_limit      | 1..n                  | Limit the result set to n items.                                        |
 |                 |                       | The portal catalog will only return n items.                            |

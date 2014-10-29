@@ -38,7 +38,7 @@ package.
     def get(context, request, uid=None):
         """ get all todos
         """
-        return get_batched("Todo", request, uid=uid, endpoint="todo")
+        return get_batched("Todo", uid=uid, endpoint="todo")
 
 
 .. versionadded:: 0.3
@@ -79,7 +79,7 @@ a Python `<list>` instead of a complete mapping as above.
     def create(context, request, uid=None):
         """ create todos
         """
-        items = create_items("Todo", request, uid=uid, endpoint="todos")
+        items = create_items("Todo", uid=uid, endpoint="todos")
         return {
             "url": url_for("todos_create"),
             "count": len(items),
@@ -92,7 +92,7 @@ a Python `<list>` instead of a complete mapping as above.
     def update(context, request, uid=None):
         """ update todos
         """
-        items = update_items("Todo", request, uid=uid, endpoint="todos")
+        items = update_items("Todo", uid=uid, endpoint="todos")
         return {
             "url": url_for("todos_update"),
             "count": len(items),
@@ -105,7 +105,7 @@ a Python `<list>` instead of a complete mapping as above.
     def delete(context, request, uid=None):
         """ delete todos
         """
-        items = delete_items("Todo", request, uid=uid, endpoint="todos")
+        items = delete_items("Todo", uid=uid, endpoint="todos")
         return {
             "url": url_for("todos_delete"),
             "count": len(items),
