@@ -33,9 +33,10 @@ class TestLayer(PloneSandboxLayer):
         workflow.setDefaultChain('simple_publication_workflow')
 
         # add a folder, so we can test with it
-        portal.invokeFactory("Folder",
-                             "folder",
-                             title="Test Folder")
+        _ = portal.invokeFactory("Folder", "folder", title="Test Folder")
+        folder = portal[_]
+        for i in range(50):
+            folder.invokeFactory("Document", "document-%d" % i, title="Test Document %d" % i)
 
 TEST_FIXTURE = TestLayer()
 INTEGRATION_TESTING = IntegrationTesting(bases=(TEST_FIXTURE,),
@@ -52,6 +53,8 @@ class APITestCase(unittest.TestCase):
         self.app     = self.layer.get("app")
         self.portal  = self.layer.get("portal")
         self.request = self.layer.get("request")
+
+        self.test_folder = self.portal.folder
 
         initialize(self.portal)
         router.DefaultRouter.initialize(self.portal, self.request)

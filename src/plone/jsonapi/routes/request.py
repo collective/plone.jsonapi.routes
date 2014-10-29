@@ -56,7 +56,7 @@ def get_sort_on(allowed_indexes=None):
     """ returns the 'sort_on' from the request
     """
     request = get_request()
-    sort_on = request.form.get("sort")
+    sort_on = request.form.get("sort_on")
     if allowed_indexes and sort_on not in allowed_indexes:
         logger.warn("Index '%s' is not in allowed_indexes" % sort_on)
         return "id"
@@ -67,7 +67,7 @@ def get_sort_order():
     """ returns the 'sort_order' from the request
     """
     request = get_request()
-    sort_order = request.form.get("dir")
+    sort_order = request.form.get("sort_order")
     if sort_order in ["ASC", "ascending", "a", "asc", "up", "high"]:
         return "ascending"
     if sort_order in ["DESC", "descending", "d", "desc", "down", "low"]:
@@ -121,6 +121,6 @@ def get_request_data():
     returns a list of dictionaries
     """
     request = get_request()
-    return _.convert(json.loads(request.get("BODY", {})), _.to_list)
+    return _.convert(json.loads(request.get("BODY", "{}")), _.to_list)
 
 # vim: set ft=python ts=4 sw=4 expandtab :
