@@ -143,6 +143,13 @@ All content resources accept to be filtered by request parameters.
 | limit           | 1..n                  | Limit the results to the given `limit` number.                          |
 |                 |                       | This will return batched results with `x` pages and `n` items per page  |
 +-----------------+-----------------------+-------------------------------------------------------------------------+
+| sort_on         | catalog index         | Sort the results by the given index                                     |
++-----------------+-----------------------+-------------------------------------------------------------------------+
+| sort_order      | asc / desc            | Sort ascrending or descending (default: ascending)                      |
++-----------------+-----------------------+-------------------------------------------------------------------------+
+| sort_limit      | 1..n                  | Limit the result set to n items.                                        |
+|                 |                       | The portal catalog will only return n items.                            |
++-----------------+-----------------------+-------------------------------------------------------------------------+
 | complete        | yes/y/1/True          | Flag to return the full object results immediately.                     |
 |                 |                       | Bypasses the *two step* behavior of the API                             |
 +-----------------+-----------------------+-------------------------------------------------------------------------+
