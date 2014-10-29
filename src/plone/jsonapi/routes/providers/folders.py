@@ -17,7 +17,7 @@ from plone.jsonapi.routes.api import url_for
 def get(context, request, uid=None):
     """ get folders
     """
-    return get_batched("Folder", request, uid=uid, endpoint="folders")
+    return get_batched("Folder", uid=uid, endpoint="folders")
 
 
 # CREATE
@@ -26,7 +26,7 @@ def get(context, request, uid=None):
 def create(context, request, uid=None):
     """ create folders
     """
-    items = create_items("Folder", request, uid=uid, endpoint="folders")
+    items = create_items("Folder", uid=uid, endpoint="folders")
     return {
         "url": url_for("folders_create"),
         "count": len(items),
@@ -40,7 +40,7 @@ def create(context, request, uid=None):
 def update(context, request, uid=None):
     """ update folders
     """
-    items = update_items("Folder", request, uid=uid, endpoint="folders")
+    items = update_items("Folder", uid=uid, endpoint="folders")
     return {
         "url": url_for("folders_update"),
         "count": len(items),
@@ -54,7 +54,7 @@ def update(context, request, uid=None):
 def delete(context, request, uid=None):
     """ delete folders
     """
-    items = delete_items("Folder", request, uid=uid, endpoint="folders")
+    items = delete_items("Folder", uid=uid, endpoint="folders")
     return {
         "url": url_for("folders_delete"),
         "count": len(items),

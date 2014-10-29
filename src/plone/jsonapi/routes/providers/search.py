@@ -10,6 +10,6 @@ from plone.jsonapi.routes.api import get_batched
 def get(context, request):
     """ search all contents
     """
-    return get_batched(None, request)
+    return get_batched([])
 
 # vim: set ft=python ts=4 sw=4 expandtab :

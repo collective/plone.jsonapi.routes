@@ -19,10 +19,7 @@ from Products.CMFPlone.PloneBatch import Batch
 from query import make_query, search
 
 # request helpers
-from plone.jsonapi.routes.request import get_batch_size
-from plone.jsonapi.routes.request import get_batch_start
-from plone.jsonapi.routes.request import get_request_data
-from plone.jsonapi.routes.request import get_complete
+from plone.jsonapi.routes import request as req
 
 from plone.jsonapi.routes.interfaces import IInfo
 from plone.jsonapi.routes import underscore as _
@@ -36,17 +33,17 @@ logger = logging.getLogger("plone.jsonapi.routes")
 #-----------------------------------------------------------------------------
 
 ### GET
-def get_items(portal_type, request, uid=None, endpoint=None):
+def get_items(portal_type, request=None, uid=None, endpoint=None):
     """ returns a list of items
 
     1. If the UID is given, fetch the object directly => should return 1 item
     2. If no UID is given, search for all items of the given portal_type
     """
 
-    # fetch the catalog results for this request
-    results = get_search_results(request, portal_type=portal_type, uid=uid)
+    # fetch the catalog results
+    results = get_search_results(portal_type=portal_type, uid=uid)
 
-    complete = get_complete(request)
+    complete = req.get_complete()
     if not complete:
         # if the uid is given, get the complete information set
         complete = uid and True or False
@@ -55,17 +52,18 @@ def get_items(portal_type, request, uid=None, endpoint=None):
 
 
 ### GET BATCHED
-def get_batched(portal_type, request, uid=None, endpoint=None):
+def get_batched(portal_type, request=None, uid=None, endpoint=None):
     """ returns a batched result record (dictionary)
     """
-    # fetch the catalog results for this request
-    results = get_search_results(request, portal_type=portal_type, uid=uid)
+
+    # fetch the catalog results
+    results = get_search_results(portal_type=portal_type, uid=uid)
 
     # fetch the batch params from the request
-    size  = get_batch_size(request)
-    start = get_batch_start(request)
+    size  = req.get_batch_size()
+    start = req.get_batch_start()
 
-    complete = get_complete(request)
+    complete = req.get_complete()
     if not complete:
         # if the uid is given, get the complete information set
         complete = uid and True or False
@@ -75,7 +73,7 @@ def get_batched(portal_type, request, uid=None, endpoint=None):
 
 
 ### CREATE
-def create_items(portal_type, request, uid=None, endpoint=None):
+def create_items(portal_type, request=None, uid=None, endpoint=None):
     """ create items
 
     1. If the uid is given, get the object and create the content in there
@@ -90,7 +88,7 @@ def create_items(portal_type, request, uid=None, endpoint=None):
     dest = uid and get_object_by_uid(uid) or None
 
     # extract the data from the request
-    records = get_request_data(request)
+    records = req.get_request_data()
 
     results = []
     for record in records:
@@ -104,7 +102,7 @@ def create_items(portal_type, request, uid=None, endpoint=None):
 
 
 ### UPDATE
-def update_items(portal_type, request, uid=None, endpoint=None):
+def update_items(portal_type, request=None, uid=None, endpoint=None):
     """ update items
 
     1. If the uid is given, the user wants to update the object with the data
@@ -113,7 +111,7 @@ def update_items(portal_type, request, uid=None, endpoint=None):
     """
 
     # the data to update
-    records = get_request_data(request)
+    records = req.get_request_data()
 
     objects = []
     if uid:
@@ -145,7 +143,7 @@ def update_items(portal_type, request, uid=None, endpoint=None):
 
 
 ### DELETE
-def delete_items(portal_type, request, uid=None, endpoint=None):
+def delete_items(portal_type, request=None, uid=None, endpoint=None):
     """ delete items
 
     1. If the uid is given, we can ignore the request body and delete the
@@ -162,7 +160,7 @@ def delete_items(portal_type, request, uid=None, endpoint=None):
     if uid:
         objects.append(get_object_by_uid(uid))
     else:
-        payload = get_request_data(request)
+        payload = req.get_request_data()
         objects = (map(get_object_by_uid, _.pluck(payload, "uid")))
 
     results = []
@@ -177,12 +175,12 @@ def delete_items(portal_type, request, uid=None, endpoint=None):
 #   Data Functions
 #-----------------------------------------------------------------------------
 
-def get_search_results(request, **kw):
+def get_search_results(**kw):
     """ search the catalog and return the results
 
     The request may contain additional query parameters
     """
-    query = make_query(request, **kw)
+    query = make_query(**kw)
     return search(query)
 
 
@@ -263,7 +261,7 @@ def get_batch(sequence, size, start=0, endpoint=None, complete=False):
 def make_next_url(batch):
     if not batch.has_next:
         return None
-    request = get_request()
+    request = req.get_request()
     params = request.form
     params["b_start"] = batch.pagenumber * batch.pagesize
     return "%s?%s" % (request.URL, urllib.urlencode(params))
@@ -272,7 +270,7 @@ def make_next_url(batch):
 def make_prev_url(batch):
     if not batch.has_previous:
         return None
-    request = get_request()
+    request = req.get_request()
     params = request.form
     params["b_start"] = max(batch.pagenumber - 2, 0) * batch.pagesize
     return "%s?%s" % (request.URL, urllib.urlencode(params))
@@ -285,12 +283,6 @@ def get_portal():
     """ get the Plone site
     """
     return ploneapi.portal.getSite()
-
-
-def get_request():
-    """ get the current request
-    """
-    return ploneapi.env.getRequest()
 
 
 def get_tool(name):

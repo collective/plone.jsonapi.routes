@@ -10,14 +10,8 @@ from DateTime import DateTime
 
 from plone import api
 
-from plone.jsonapi.routes.request import get_path
-from plone.jsonapi.routes.request import get_depth
-from plone.jsonapi.routes.request import get_query
-from plone.jsonapi.routes.request import get_sort_on
-from plone.jsonapi.routes.request import get_sort_limit
-from plone.jsonapi.routes.request import get_sort_order
-from plone.jsonapi.routes.request import get_recent_created
-from plone.jsonapi.routes.request import get_recent_modified
+from plone.jsonapi.routes import request as req
+from plone.jsonapi.routes import underscore as _
 
 HAS_ADVANCED_QUERY = True
 try:
@@ -29,28 +23,28 @@ except ImportError:
 logger = logging.getLogger("plone.jsonapi.routes.query")
 
 
-def make_query(request, **kw):
+def make_query(**kw):
     """ generates a catalog query
     """
 
     if HAS_ADVANCED_QUERY:
         logger.debug("AdvancedQuery installed: We could do magic here ...")
-        #return make_advanced_query(request, **kw)
+        #return make_advanced_query(**kw)
 
     logger.debug("Building standard query")
-    return make_standard_query(request, **kw)
+    return make_standard_query(**kw)
 
 
-def make_standard_query(request, **kw):
+def make_standard_query(**kw):
     """ generates a query for the portal catalog
     """
     # build a default query from the request parameters and the keywords
-    query = build_query(request, **kw)
+    query = build_query(**kw)
     logger.info("Catalog Query --> %r", query)
     return query
 
 
-def make_advanced_query(request, **kw):
+def make_advanced_query(**kw):
     """ generates an advaced query
     """
     raise NotImplementedError("Usage of AdvancedQuery is not supported yet")
@@ -60,7 +54,7 @@ def make_advanced_query(request, **kw):
 #   Standard Query Builders
 #-----------------------------------------------------------------------------
 
-def build_query(request, **kw):
+def build_query(**kw):
     """ build a query spec suitable for the portal_catalog tool
     """
 
@@ -70,31 +64,32 @@ def build_query(request, **kw):
     query = dict()
 
     # check what we can use from the reqeust
+    request = req.get_request()
     for idx in get_catalog_indexes():
         val = request.form.get(idx)
         if val: query[idx] = to_index_value(val, idx)
 
     # build a default catalog query
     query.update({
-        "sort_limit":      get_sort_limit(request),
-        "sort_on":         get_sort_on(request),
-        "sort_order":      get_sort_order(request),
-        "SearchableText":  get_query(request),
+        "sort_limit":      req.get_sort_limit(),
+        "sort_on":         req.get_sort_on(),
+        "sort_order":      req.get_sort_order(),
+        "SearchableText":  req.get_query(),
     })
 
     # special handling for the physical path
-    path = get_path(request)
+    path = req.get_path()
     if path:
-        depth = get_depth(request)
+        depth = req.get_depth()
         query["path"] = {'query': path, 'depth': depth}
 
     # special handling for recent created/modified
-    recent_created = get_recent_created(request)
+    recent_created = req.get_recent_created()
     if recent_created:
         date = calculate_delta_date(recent_created)
         query["created"] = {'query': date, 'range': 'min'}
 
-    recent_modified = get_recent_modified(request)
+    recent_modified = req.get_recent_modified()
     if recent_modified:
         date = calculate_delta_date(recent_modified)
         query["modified"] = {'query': date, 'range': 'min'}
@@ -128,6 +123,10 @@ def update_query_with_kw(query, **kw):
         # handle uid
         if k.lower() == "uid":
             if v: query["UID"] = v
+            continue
+        # handle portal_type
+        if k.lower() == "portal_type":
+            if v: query["portal_type"] = _.to_list(v)
             continue
         # and the rest
         if k not in indexes:

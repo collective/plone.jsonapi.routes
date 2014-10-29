@@ -17,7 +17,7 @@ from plone.jsonapi.routes.api import url_for
 def get(context, request, uid=None):
     """ get events
     """
-    return get_batched("Event", request, uid=uid, endpoint="events")
+    return get_batched("Event", uid=uid, endpoint="events")
 
 
 # CREATE
@@ -26,7 +26,7 @@ def get(context, request, uid=None):
 def create(context, request, uid=None):
     """ create events
     """
-    items = create_items("Event", request, uid=uid, endpoint="events")
+    items = create_items("Event", uid=uid, endpoint="events")
     return {
         "url": url_for("events_create"),
         "count": len(items),
@@ -40,7 +40,7 @@ def create(context, request, uid=None):
 def update(context, request, uid=None):
     """ update events
     """
-    items = update_items("Event", request, uid=uid, endpoint="events")
+    items = update_items("Event", uid=uid, endpoint="events")
     return {
         "url": url_for("events_update"),
         "count": len(items),
@@ -54,7 +54,7 @@ def update(context, request, uid=None):
 def delete(context, request, uid=None):
     """ delete events
     """
-    items = delete_items("Event", request, uid=uid, endpoint="events")
+    items = delete_items("Event", uid=uid, endpoint="events")
     return {
         "url": url_for("events_delete"),
         "count": len(items),
