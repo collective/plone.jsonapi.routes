@@ -63,7 +63,7 @@ the URL, e.g `http://localhost:8080/Plone/@@API/todo/a3f3f9efd0b4df190d16ea63d`.
 
 The `get_batched` function we call inside our function will do all the heavy
 lifting for us.  We simply need to pass in the `portal_type` as the first
-argument, the `request`, the `UID` and the `endpoint`.
+argument, the `UID` and the `endpoint`.
 
 To be able to create, update and delete our `Todo` content type, it is
 neccessary to provide the following functions as well. The behavior is analogue
