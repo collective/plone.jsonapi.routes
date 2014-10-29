@@ -153,6 +153,9 @@ All content resources accept to be filtered by request parameters.
 | complete        | yes/y/1/True          | Flag to return the full object results immediately.                     |
 |                 |                       | Bypasses the *two step* behavior of the API                             |
 +-----------------+-----------------------+-------------------------------------------------------------------------+
+| children        | yes/y/1/True          | Flag to return the folder contents of a folder below the `children` key |
+|                 |                       | Only visible if complete flag is true or if an UID is provided          |
++-----------------+-----------------------+-------------------------------------------------------------------------+
 | recent_created  | today, yesterday      | Specify a recent created date range, to find all items created within   |
 |                 | this-week, this-month | this date range until today.                                            |
 |                 | this-year             | This uses internally `'range': 'min'` query.                            |

@@ -29,6 +29,16 @@ def get_complete():
     return False
 
 
+def get_children():
+    """ returns the 'children' from the request
+    """
+    request = get_request()
+    complete = request.form.get("children", "no")
+    if complete.lower() in ["y", "yes", "1", "true"]:
+        return True
+    return False
+
+
 def get_sort_limit():
     """ returns the 'sort_limit' from the request
     """

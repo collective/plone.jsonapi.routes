@@ -213,6 +213,8 @@ def make_items_for(brains_or_objects, endpoint, complete=True):
             obj = get_object(brain_or_object)
             info.update(IInfo(obj)())
             info.update(get_parent_info(obj))
+            if req.get_children():
+                info.update(get_subcontents(obj))
 
         return info
 
@@ -236,6 +238,34 @@ def get_parent_info(obj):
         "parent_id":  parent.getId(),
         "parent_uid": get_uid(parent),
         "parent_url": url_for(endpoint, uid=get_uid(parent))
+    }
+
+
+def get_subcontents(obj):
+    """ returns the contents for this object
+    """
+
+    if not is_folderish(obj):
+        return {
+            "children": None
+        }
+
+    children = []
+    for content in obj.listFolderContents():
+        endpoint = get_endpoint(get_portal_type(content))
+        child = {
+            "uid":     get_uid(content),
+            "url":     get_url(content),
+            "api_url": url_for(endpoint, uid=get_uid(content)),
+        }
+        child.update(IInfo(content)())
+        children.append(child)
+
+    return {
+        "children": {
+            "count": len(children),
+            "items": children,
+        }
     }
 
 #-----------------------------------------------------------------------------
@@ -325,6 +355,12 @@ def is_root(obj):
     """ checks if the object is the site root
     """
     return ISiteRoot.providedBy(obj)
+
+
+def is_folderish(obj):
+    """ checks if the object is folderish
+    """
+    return IFolderish.providedBy(obj)
 
 
 def is_atct(obj):
@@ -487,8 +523,8 @@ def mkdir(path):
             container = obj
             continue
 
-        if not IFolderish.providedBy(container):
-            raise RuntimeError("Object at %s does not provide IFolderish interface" % curpath)
+        if not is_folderish(container):
+            raise RuntimeError("Object at %s is not a folder" % curpath)
 
         # create the folder on the go
         container = ploneapi.content.create(
