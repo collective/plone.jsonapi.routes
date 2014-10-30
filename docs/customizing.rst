@@ -74,8 +74,8 @@ a Python `<list>` instead of a complete mapping as above.
 .. code-block:: python
 
     # CREATE
-    @add_plone_route("/todos/create", "todos_create", methods=["POST"])
-    @add_plone_route("/todos/create/<string:uid>", "todos_create", methods=["POST"])
+    @add_route("/todos/create", "todos_create", methods=["POST"])
+    @add_route("/todos/create/<string:uid>", "todos_create", methods=["POST"])
     def create(context, request, uid=None):
         """ create todos
         """
@@ -87,8 +87,8 @@ a Python `<list>` instead of a complete mapping as above.
         }
 
     # UPDATE
-    @add_plone_route("/todos/update", "todos_update", methods=["POST"])
-    @add_plone_route("/todos/update/<string:uid>", "todos_update", methods=["POST"])
+    @add_route("/todos/update", "todos_update", methods=["POST"])
+    @add_route("/todos/update/<string:uid>", "todos_update", methods=["POST"])
     def update(context, request, uid=None):
         """ update todos
         """
@@ -100,8 +100,8 @@ a Python `<list>` instead of a complete mapping as above.
         }
 
     # DELETE
-    @add_plone_route("/todos/delete", "todos_delete", methods=["POST"])
-    @add_plone_route("/todos/delete/<string:uid>", "todos_delete", methods=["POST"])
+    @add_route("/todos/delete", "todos_delete", methods=["POST"])
+    @add_route("/todos/delete/<string:uid>", "todos_delete", methods=["POST"])
     def delete(context, request, uid=None):
         """ delete todos
         """
