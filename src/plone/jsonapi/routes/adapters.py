@@ -35,8 +35,28 @@ class Base(object):
         self.context = context
         self.keys = []
 
+        # additional attributes to extract besides the Schema keys
+        self.attributes = {
+            "id":          "getId",
+            "uid":         "UID",
+            "title":       "Title",
+            "description": "Description",
+            "created":     "created",
+            "modified":    "modified",
+            "effective":   "effective",
+            "portal_type": "portal_type",
+            "tags":        "Subject",
+        }
+
     def to_dict(self):
-        return to_dict(self.context, keys=self.keys)
+        data = to_dict(self.context, keys=self.keys)
+        for key, attr in self.attributes.iteritems():
+            if data.get(key): continue # don't overwrite
+            value = getattr(self.context, attr, None)
+            if callable(value):
+                value = value()
+            data[key] = get_value(value)
+        return data
 
     def __call__(self):
         return self.to_dict()
@@ -102,18 +122,6 @@ class SiteRootDataProvider(Base):
     def __init__(self, context):
         super(self.__class__, self).__init__(context)
 
-    def to_dict(self):
-        portal = self.context
-        return {
-            "id":          portal.getId(),
-            "title":       portal.Title(),
-            "description": portal.Description(),
-            "portal_type": portal.portal_type,
-            "created":     portal.created().ISO8601(),
-            "modified":    portal.modified().ISO8601(),
-            "effective":   portal.effective().ISO8601(),
-        }
-
 #---------------------------------------------------------------------------
 #   Functional Helpers
 #---------------------------------------------------------------------------
@@ -129,7 +137,9 @@ def to_dict(obj, keys):
         logger.warn("Workflow Info ommitted since the key 'workflow_info' was ",
                 "found in the current schema")
         return out
-    out["workflow_info"] = get_wf_info(obj)
+    wf_info = get_wf_info(obj)
+    out["workflow_info"] = wf_info
+    out["state"] = wf_info.get("status")
     return out
 
 

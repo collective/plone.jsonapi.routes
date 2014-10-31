@@ -208,20 +208,12 @@ def make_items_for(brains_or_objects, endpoint=None, complete=True):
         # extract the data using the default info adapter
         info = IInfo(brain_or_object)()
 
-        # inject additional inforamtions
-        uid = get_uid(brain_or_object)
-
         # might be None for mixed type catalog results, e.g. in the search route
         scoped_endpoint = endpoint
         if scoped_endpoint is None:
             scoped_endpoint = get_endpoint(get_portal_type(brain_or_object))
 
-        # mandatory informations for *all* types
-        info.update({
-            "uid": uid,
-            "url": get_url(brain_or_object),
-            "api_url": url_for(scoped_endpoint, uid=uid),
-        })
+        info.update(get_url_info(brain_or_object, scoped_endpoint))
 
         # switch to wake up the object and complete the informations with the
         # data of the content adapter
@@ -239,6 +231,17 @@ def make_items_for(brains_or_objects, endpoint=None, complete=True):
 
     return map(_block, brains_or_objects)
 
+
+def get_url_info(brain_or_object, endpoint):
+    """ returns the url info for the object
+    """
+
+    uid = get_uid(brain_or_object)
+    return {
+        "uid": uid,
+        "url": get_url(brain_or_object),
+        "api_url": url_for(endpoint, uid=uid),
+    }
 
 def get_parent_info(obj):
     """ returns the infos for the parent object
