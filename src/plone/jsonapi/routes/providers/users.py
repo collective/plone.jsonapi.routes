@@ -98,4 +98,15 @@ def get(context, request, username=None):
         "items": items
     }
 
+
+@add_plone_route("/auth", "auth", methods=["GET"])
+def auth(context, request):
+    """ Authenticate
+    """
+
+    if ploneapi.user.is_anonymous():
+        request.response.setStatus(401)
+        request.response.setHeader('WWW-Authenticate', 'basic realm="JSONAPI AUTH"', 1)
+    return {}
+
 # vim: set ft=python ts=4 sw=4 expandtab :

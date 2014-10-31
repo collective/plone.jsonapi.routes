@@ -17,6 +17,7 @@ from plone import api
 from plone.dexterity.schema import SCHEMA_CACHE
 from plone.dexterity.interfaces import IDexterityContent
 
+from Products.CMFCore.interfaces import ISiteRoot
 from Products.ZCatalog.interfaces import ICatalogBrain
 from Products.ATContentTypes.interfaces import IATContentType
 
@@ -90,6 +91,28 @@ class ATDataProvider(Base):
         super(self.__class__, self).__init__(context)
         schema = context.Schema()
         self.keys = schema.keys()
+
+
+class SiteRootDataProvider(Base):
+    """ Site Root Adapter
+    """
+    interface.implements(IInfo)
+    component.adapts(ISiteRoot)
+
+    def __init__(self, context):
+        super(self.__class__, self).__init__(context)
+
+    def to_dict(self):
+        portal = self.context
+        return {
+            "id":          portal.getId(),
+            "title":       portal.Title(),
+            "description": portal.Description(),
+            "portal_type": portal.portal_type,
+            "created":     portal.created().ISO8601(),
+            "modified":    portal.modified().ISO8601(),
+            "effective":   portal.effective().ISO8601(),
+        }
 
 #---------------------------------------------------------------------------
 #   Functional Helpers

@@ -19,11 +19,17 @@ def get_request():
     return getRequest()
 
 
+def get(key, default=None):
+    """ return the key from the request
+    """
+    request = get_request()
+    return request.form.get(key, default)
+
+
 def get_complete():
     """ returns the 'complete' from the request
     """
-    request = get_request()
-    complete = request.form.get("complete", "no")
+    complete = get("complete", "no")
     if complete.lower() in ["y", "yes", "1", "true"]:
         return True
     return False
@@ -32,8 +38,7 @@ def get_complete():
 def get_children():
     """ returns the 'children' from the request
     """
-    request = get_request()
-    complete = request.form.get("children", "no")
+    complete = get("children", "no")
     if complete.lower() in ["y", "yes", "1", "true"]:
         return True
     return False
@@ -42,8 +47,7 @@ def get_children():
 def get_sort_limit():
     """ returns the 'sort_limit' from the request
     """
-    request = get_request()
-    limit = _.convert(request.form.get("sort_limit"), _.to_int)
+    limit = _.convert(get("sort_limit"), _.to_int)
     if (limit < 1): limit = None # catalog raises IndexError if limit < 1
     return limit
 
@@ -51,22 +55,19 @@ def get_sort_limit():
 def get_batch_size():
     """ returns the 'limit' from the request
     """
-    request = get_request()
-    return _.convert(request.form.get("limit"), _.to_int) or 25
+    return _.convert(get("limit"), _.to_int) or 25
 
 
 def get_batch_start():
     """ returns the 'start' from the request
     """
-    request = get_request()
-    return _.convert(request.form.get("b_start"), _.to_int) or 0
+    return _.convert(get("b_start"), _.to_int) or 0
 
 
 def get_sort_on(allowed_indexes=None):
     """ returns the 'sort_on' from the request
     """
-    request = get_request()
-    sort_on = request.form.get("sort_on")
+    sort_on = get("sort_on")
     if allowed_indexes and sort_on not in allowed_indexes:
         logger.warn("Index '%s' is not in allowed_indexes" % sort_on)
         return "id"
@@ -76,8 +77,7 @@ def get_sort_on(allowed_indexes=None):
 def get_sort_order():
     """ returns the 'sort_order' from the request
     """
-    request = get_request()
-    sort_order = request.form.get("sort_order")
+    sort_order = get("sort_order")
     if sort_order in ["ASC", "ascending", "a", "asc", "up", "high"]:
         return "ascending"
     if sort_order in ["DESC", "descending", "d", "desc", "down", "low"]:
@@ -88,8 +88,7 @@ def get_sort_order():
 def get_query():
     """ returns the 'query' from the request
     """
-    request = get_request()
-    q = request.form.get("q", "")
+    q = get("q", "")
 
     qs = q.lstrip("*.!$%&/()=#-+:'`´^")
     if qs and not qs.endswith("*"):
@@ -100,29 +99,25 @@ def get_query():
 def get_path():
     """ returns the 'path' from the request
     """
-    request = get_request()
-    return request.form.get("path", "")
+    return get("path", "")
 
 
 def get_depth():
     """ returns the 'depth' from the request
     """
-    request = get_request()
-    return  _.convert(request.form.get("depth", 0), _.to_int)
+    return  _.convert(get("depth", 0), _.to_int)
 
 
 def get_recent_created():
     """ returns the 'recent_created' from the request
     """
-    request = get_request()
-    return request.form.get("recent_created", None)
+    return get("recent_created", None)
 
 
 def get_recent_modified():
     """ returns the 'recent_modified' from the request
     """
-    request = get_request()
-    return request.form.get("recent_modified", None)
+    return get("recent_modified", None)
 
 
 def get_request_data():

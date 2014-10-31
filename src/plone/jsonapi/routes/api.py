@@ -32,6 +32,17 @@ logger = logging.getLogger("plone.jsonapi.routes")
 #   Json API (CRUD) Functions
 #-----------------------------------------------------------------------------
 
+
+### GET RECORD
+def get_record(uid=None):
+    """ returns a single record
+    """
+    obj = get_object_by_uid(uid)
+    if obj is None: return {}
+    items = make_items_for(obj)
+    return _.first(items)
+
+
 ### GET
 def get_items(portal_type, request=None, uid=None, endpoint=None):
     """ returns a list of items
@@ -184,10 +195,15 @@ def get_search_results(**kw):
     return search(query)
 
 
-def make_items_for(brains_or_objects, endpoint, complete=True):
+def make_items_for(brains_or_objects, endpoint=None, complete=True):
     """ return a list of info dicts
     """
+
+    # this function extracts the data for one brain or object
     def _block(brain_or_object):
+
+        if req.get("only_children"):
+            return get_children(brain_or_object)
 
         # extract the data using the default info adapter
         info = IInfo(brain_or_object)()
@@ -214,9 +230,12 @@ def make_items_for(brains_or_objects, endpoint, complete=True):
             info.update(IInfo(obj)())
             info.update(get_parent_info(obj))
             if req.get_children():
-                info.update(get_subcontents(obj))
+                info.update(get_children(obj))
 
         return info
+
+    # ensure that we got a list here
+    brains_or_objects = _.to_list(brains_or_objects)
 
     return map(_block, brains_or_objects)
 
@@ -225,13 +244,17 @@ def get_parent_info(obj):
     """ returns the infos for the parent object
     """
 
+    # special case for the portal route
+    if is_root(obj): return {}
+
     parent   = get_parent(obj)
     endpoint = get_endpoint(parent.portal_type)
 
     if is_root(parent):
         return {
             "parent_id":  parent.getId(),
-            "parent_uid": 0
+            "parent_uid": 0,
+            "parent_url": url_for("portal"),
         }
 
     return {
@@ -241,13 +264,16 @@ def get_parent_info(obj):
     }
 
 
-def get_subcontents(obj):
+def get_children(obj):
     """ returns the contents for this object
     """
 
-    if not is_folderish(obj):
+    # ensure we have an object
+    obj = get_object(obj)
+
+    if is_folderish(obj) is False:
         return {
-            "children": None
+            "children": None,
         }
 
     children = []
@@ -262,10 +288,7 @@ def get_subcontents(obj):
         children.append(child)
 
     return {
-        "children": {
-            "count": len(children),
-            "items": children,
-        }
+        "children": children
     }
 
 #-----------------------------------------------------------------------------
@@ -461,7 +484,7 @@ def get_object_by_uid(uid):
     """
 
     # define uid 0 as the portal object
-    if uid == 0:
+    if  _.to_int(uid) == 0:
         return get_portal()
 
     # we try to find the object with both catalogs

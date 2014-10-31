@@ -13,6 +13,12 @@
         factory=".adapters.ZCDataProvider"
         />
 
+    <!-- Adapter for the Plone Site -->
+    <adapter
+        for="Products.CMFCore.interfaces.ISiteRoot"
+        factory=".adapters.SiteRootDataProvider"
+        />
+
     <!-- Adapter for AT Content Types -->
     <adapter
         for="Products.ATContentTypes.interfaces.IATContentType"
