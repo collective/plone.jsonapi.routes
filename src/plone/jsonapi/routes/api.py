@@ -44,7 +44,7 @@ def get_record(uid=None):
 
 
 ### GET
-def get_items(portal_type, request=None, uid=None, endpoint=None):
+def get_items(portal_type=None, request=None, uid=None, endpoint=None):
     """ returns a list of items
 
     1. If the UID is given, fetch the object directly => should return 1 item
@@ -63,7 +63,7 @@ def get_items(portal_type, request=None, uid=None, endpoint=None):
 
 
 ### GET BATCHED
-def get_batched(portal_type, request=None, uid=None, endpoint=None):
+def get_batched(portal_type=None, request=None, uid=None, endpoint=None):
     """ returns a batched result record (dictionary)
     """
 
@@ -84,7 +84,7 @@ def get_batched(portal_type, request=None, uid=None, endpoint=None):
 
 
 ### CREATE
-def create_items(portal_type, request=None, uid=None, endpoint=None):
+def create_items(portal_type=None, request=None, uid=None, endpoint=None):
     """ create items
 
     1. If the uid is given, get the object and create the content in there
@@ -113,7 +113,7 @@ def create_items(portal_type, request=None, uid=None, endpoint=None):
 
 
 ### UPDATE
-def update_items(portal_type, request=None, uid=None, endpoint=None):
+def update_items(portal_type=None, request=None, uid=None, endpoint=None):
     """ update items
 
     1. If the uid is given, the user wants to update the object with the data
@@ -154,7 +154,7 @@ def update_items(portal_type, request=None, uid=None, endpoint=None):
 
 
 ### DELETE
-def delete_items(portal_type, request=None, uid=None, endpoint=None):
+def delete_items(portal_type=None, request=None, uid=None, endpoint=None):
     """ delete items
 
     1. If the uid is given, we can ignore the request body and delete the
