@@ -12,7 +12,7 @@ from plone.jsonapi.routes.api import url_for
 
 
 # GET
-@add_plone_route("/<string:uid>", "root", methods=["GET"])
+@add_plone_route("/<string:uid>", "get", methods=["GET"])
 def get(context, request, uid=0):
     """ get content
     """

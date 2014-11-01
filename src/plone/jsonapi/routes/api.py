@@ -105,7 +105,9 @@ def create_items(portal_type=None, request=None, uid=None, endpoint=None):
     for record in records:
         if dest is None:
             # find the container for content creation
-            dest = find_target_container(record, portal_type)
+            dest = find_target_container(record)
+        if portal_type is None:
+            portal_type = record.get("portal_type", "NOTSET")
         obj = create_object_in_container(dest, portal_type, record)
         results.append(obj)
 
@@ -559,7 +561,7 @@ def mkdir(path):
     return container
 
 
-def find_target_container(record, portal_type):
+def find_target_container(record):
     """ find the target container for this record
     """
 
@@ -598,6 +600,9 @@ def get_current_user():
 def create_object_in_container(container, portal_type, record):
     """ creates an object with the given data in the container
     """
+    if portal_type not in container.getLocallyAllowedTypes():
+        raise RuntimeError("Creation of this portal type is not allowed in this context.")
+
     from AccessControl import Unauthorized
     try:
         title = record.get("title")
