@@ -626,6 +626,7 @@ def delete_object(obj):
     """ delete the object """
     return ploneapi.content.delete(obj) == None and True or False
 
+
 def get_current_user():
     """ return the current logged in user """
     return ploneapi.user.get_current()
@@ -637,11 +638,13 @@ def create_object_in_container(container, portal_type, record):
     if portal_type not in container.getLocallyAllowedTypes():
         raise RuntimeError("Creation of this portal type is not allowed in this context.")
 
+    id    = record.get("id", None)
+    title = record.get("title", None)
+
     from AccessControl import Unauthorized
     try:
-        title = record.get("title")
         obj = ploneapi.content.create(
-                container=container, type=portal_type, title=title, save_id=True)
+                container=container, type=portal_type, id=id, title=title, save_id=True)
         return update_object_with_data(obj, record)
     except Unauthorized:
         raise RuntimeError("You are not allowed to create this content")
