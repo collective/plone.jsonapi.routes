@@ -12,7 +12,8 @@ from plone.jsonapi.routes.api import url_for
 
 
 # GET
-@add_plone_route("/<string:uid>", "get", methods=["GET"])
+@add_plone_route("/get", "get", methods=["POST"])
+@add_plone_route("/get/<string:uid>", "get", methods=["POST"])
 def get(context, request, uid=0):
     """ get content
     """

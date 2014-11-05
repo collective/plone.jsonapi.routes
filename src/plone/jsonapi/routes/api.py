@@ -39,7 +39,7 @@ def get_record(uid=None):
     """
     obj = get_object_by_uid(uid)
     if obj is None: return {}
-    items = make_items_for(obj)
+    items = make_items_for([obj])
     return _.first(items)
 
 
@@ -107,7 +107,7 @@ def create_items(portal_type=None, request=None, uid=None, endpoint=None):
             # find the container for content creation
             dest = find_target_container(record)
         if portal_type is None:
-            portal_type = record.get("portal_type", "NOTSET")
+            portal_type = record.get("portal_type", None)
         obj = create_object_in_container(dest, portal_type, record)
         results.append(obj)
 
@@ -121,37 +121,32 @@ def update_items(portal_type=None, request=None, uid=None, endpoint=None):
     1. If the uid is given, the user wants to update the object with the data
        given in request body
     2. If no uid is given, the user wants to update a bunch of objects.
+       -> each record contains either an UID, path or parent_path + id
     """
 
     # the data to update
     records = req.get_request_data()
 
-    objects = []
-    if uid:
-        objects.append(get_object_by_uid(uid))
-    else:
-        # get the objects for the given uids
-        objects = (map(get_object_by_uid, _.pluck(records, "uid")))
+    # we have an uid -> try to get an object for it
+    obj = get_object_by_uid(uid)
+    if obj:
+        record = records[0] # ignore other records if we got an uid
+        obj = update_object_with_data(obj, record)
+        return make_items_for([obj], endpoint=endpoint)
 
+    # no uid -> go through the record items
     results = []
-    for obj in objects:
-        # get the update dataset for this object
+    for record in records:
+        obj = get_object_by_record(record)
 
-        if uid:
-            record = records and records[0] or {}
-        else:
-            # the uid is inside the payload
-            record = filter(lambda d: get_uid(obj) == d.get("uid"), records)
-            record = record and record[0] or {}
+        # no object found for this record
+        if obj is None:
+            continue
 
-        # do a wf transition
-        if record.get("transition", None):
-            t = record.get("transition")
-            logger.info(">>> Do Transition '%s' for Enquiry %s", t, obj.getId())
-            do_action_for(obj, t)
-
+        # update the object with the given record data
         obj = update_object_with_data(obj, record)
         results.append(obj)
+
     return make_items_for(results, endpoint=endpoint)
 
 
@@ -169,18 +164,28 @@ def delete_items(portal_type=None, request=None, uid=None, endpoint=None):
        wants to delete the right content.
     """
 
-    objects = []
-    if uid:
-        objects.append(get_object_by_uid(uid))
-    else:
-        payload = req.get_request_data()
-        objects = (map(get_object_by_uid, _.pluck(payload, "uid")))
+    # the data to update
+    records = req.get_request_data()
 
+    # we have an uid -> try to get an object for it
+    obj = get_object_by_uid(uid)
+    if obj:
+        info = IInfo(obj)()
+        info["deleted"] = delete_object(obj)
+        return [info]
+
+    # no uid -> go through the record items
     results = []
-    for obj in objects:
-        result = {"id": obj.getId()}
-        result["deleted"] = ploneapi.content.delete(obj) == None and True or False
-        results.append(result)
+    for record in records:
+        obj = get_object_by_record(record)
+
+        # no object found for this record
+        if obj is None:
+            continue
+
+        info = IInfo(obj)()
+        info["deleted"] = delete_object(obj)
+        results.append(info)
 
     return results
 
@@ -199,6 +204,8 @@ def get_search_results(**kw):
 
 def make_items_for(brains_or_objects, endpoint=None, complete=True):
     """ return a list of info dicts
+
+    @param brains_or_objects: List/LazyMap
     """
 
     # this function extracts the data for one brain or object
@@ -227,9 +234,6 @@ def make_items_for(brains_or_objects, endpoint=None, complete=True):
                 info.update(get_children(obj))
 
         return info
-
-    # ensure that we got a list here
-    brains_or_objects = _.to_list(brains_or_objects)
 
     return map(_block, brains_or_objects)
 
@@ -484,9 +488,32 @@ def is_file_field(field):
     return False
 
 
+def get_object_by_record(record):
+    """ locate the object by record
+    """
+
+    # nothing to do here
+    if not record: return None
+
+    if record.get("uid"):
+        return get_object_by_uid(record["uid"])
+    if record.get("path"):
+        return get_object_by_path(record["path"])
+    if record.get("parent_path") and record.get("id"):
+        portal = get_portal()
+        path = "/".join([record["parent_path"], record["id"]])
+        return get_object_by_path(path)
+
+    console.warn("get_object_by_record::No object found! record='%r'" % record)
+    return None
+
+
 def get_object_by_uid(uid):
     """ Fetches an object by uid
     """
+
+    # nothing to do here
+    if not uid: return None
 
     # define uid 0 as the portal object
     if  _.to_int(uid) == 0:
@@ -514,6 +541,9 @@ def get_object_by_uid(uid):
 def get_object_by_path(path):
     """ fetch the object by physical path
     """
+
+    # nothing to do here
+    if not path: return None
 
     pc = get_portal_catalog()
     portal = get_portal()
@@ -592,6 +622,10 @@ def do_action_for(obj, transition):
     return ploneapi.content.transition(obj, transition)
 
 
+def delete_object(obj):
+    """ delete the object """
+    return ploneapi.content.delete(obj) == None and True or False
+
 def get_current_user():
     """ return the current logged in user """
     return ploneapi.user.get_current()
@@ -633,13 +667,20 @@ def update_object_with_data(content, record):
             logger.info("update_object_with_data:: File field detected ('%r'), base64 decoding value", field)
             v = str(v).decode("base64")
 
+        # XXX handle field security?
         if is_atc:
-            # XXX handle security
             mutator = field.getMutator(content)
             mutator(v)
         else:
             setattr(content, k, v)
 
+    # do a wf transition
+    if record.get("transition", None):
+        t = record.get("transition")
+        logger.info(">>> Do Transition '%s' for Object %s", t, obj.getId())
+        do_action_for(content, t)
+
+    # reindex the object
     content.reindexObject()
     return content
 

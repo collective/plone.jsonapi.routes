@@ -7,6 +7,10 @@ from plone.jsonapi.routes.tests.base import APITestCase
 
 class TestSetup(APITestCase):
 
+    def testCRUDEndpoint(self):
+        endpoint = "get"
+        self.assertEqual(router.url_for(endpoint), "/plone/api/1.0/%s" % endpoint)
+
     def testCollectionsEndpoint(self):
         endpoint = "collections"
         self.assertEqual(router.url_for(endpoint), "/plone/api/1.0/%s" % endpoint)
