@@ -500,11 +500,10 @@ def get_object_by_record(record):
     if record.get("path"):
         return get_object_by_path(record["path"])
     if record.get("parent_path") and record.get("id"):
-        portal = get_portal()
         path = "/".join([record["parent_path"], record["id"]])
         return get_object_by_path(path)
 
-    console.warn("get_object_by_record::No object found! record='%r'" % record)
+    logger.warn("get_object_by_record::No object found! record='%r'" % record)
     return None
 
 
@@ -680,7 +679,7 @@ def update_object_with_data(content, record):
     # do a wf transition
     if record.get("transition", None):
         t = record.get("transition")
-        logger.info(">>> Do Transition '%s' for Object %s", t, obj.getId())
+        logger.info(">>> Do Transition '%s' for Object %s", t, content.getId())
         do_action_for(content, t)
 
     # reindex the object
