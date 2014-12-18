@@ -28,5 +28,4 @@ def make_docs():
         local("make html")
         local("open _build/html/index.html")
 
-
 # vim: set ft=python ts=4 sw=4 expandtab :
