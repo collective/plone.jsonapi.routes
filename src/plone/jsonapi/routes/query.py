@@ -30,6 +30,8 @@ __all__ = ['search', 'make_query']
 
 logger = logging.getLogger("plone.jsonapi.routes.query")
 
+USE_ADVANCED_QUERY = True
+
 
 #-----------------------------------------------------------------------------
 #   Public API
@@ -38,7 +40,7 @@ logger = logging.getLogger("plone.jsonapi.routes.query")
 def search(query, **kw):
     """ execute either AdvancedQuery or a StandardQuery
     """
-    if HAS_ADVANCED_QUERY and type(query) is tuple:
+    if USE_ADVANCED_QUERY and HAS_ADVANCED_QUERY and type(query) is tuple:
         return advanced_search(*query, **kw)
     return standard_search(query, **kw)
 
@@ -46,7 +48,7 @@ def search(query, **kw):
 def make_query(**kw):
     """ generates a catalog query
     """
-    if HAS_ADVANCED_QUERY:
+    if USE_ADVANCED_QUERY and HAS_ADVANCED_QUERY:
         return make_advanced_query(**kw)
     return make_standard_query(**kw)
 
@@ -152,7 +154,7 @@ def get_keyword_query(**kw):
 
     for k, v in kw.iteritems():
         # handle uid
-        if k.lower() == "uid":
+        if v and k.lower() == "uid":
             if v: query["UID"] = v
             continue
         # handle portal_type
@@ -177,7 +179,7 @@ def to_advanced_query(query):
     """
 
     # nothing to do
-    if not query: return None
+    if not query: return Eq("Title", "")
 
     a_query = None
     def get_query_expression_for(value):
