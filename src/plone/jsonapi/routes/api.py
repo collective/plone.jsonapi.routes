@@ -21,6 +21,7 @@ from query import make_query
 
 # request helpers
 from plone.jsonapi.routes import request as req
+from plone.jsonapi.routes.exceptions import APIError
 
 from plone.jsonapi.routes.interfaces import IInfo
 from plone.jsonapi.routes import underscore as _
@@ -39,7 +40,7 @@ def get_record(uid=None):
     """ returns a single record
     """
     obj = get_object_by_uid(uid)
-    if obj is None: return {}
+    if obj is None: raise APIError(404, "No object could be found for the UID %s" % uid)
     items = make_items_for([obj])
     return _.first(items)
 

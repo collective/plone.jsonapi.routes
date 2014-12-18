@@ -17,9 +17,7 @@ Table of Contents:
    quickstart
    api
    customizing
-   create
-   update
-   delete
+   crud
    links
    CONTRIBUTORS
    LICENSE
