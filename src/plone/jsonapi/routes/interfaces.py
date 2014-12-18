@@ -6,6 +6,20 @@ __docformat__ = 'plaintext'
 from zope import interface
 
 
+
+class IDataManager(interface.Interface):
+    """ Field Interface
+    """
+
+    def get(name):
+        """ Get the value of the named field with
+        """
+
+    def set(name, value):
+        """ Set the value of the named field
+        """
+
+
 class IInfo(interface.Interface):
     """ JSON Info Interface
     """

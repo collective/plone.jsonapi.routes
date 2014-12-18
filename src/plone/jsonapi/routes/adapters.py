@@ -22,8 +22,36 @@ from Products.ZCatalog.interfaces import ICatalogBrain
 from Products.ATContentTypes.interfaces import IATContentType
 
 from plone.jsonapi.routes.interfaces import IInfo
+from plone.jsonapi.routes.interfaces import IDataManager
+
 
 logger = logging.getLogger("plone.jsonapi.routes")
+
+
+class DataManager(object):
+    """ Adapter to set and get field values in a unified way
+    """
+    interface.implements(IDataManager)
+
+    def __init__(self, context):
+        self.context = context
+        self.schema = self.get_schema()
+
+    def get_schema(self):
+        pt = api.portal.get_tool("portal_types")
+        fti = pt.getTypeInfo(self.context.portal_type)
+        return fti.lookupSchema()
+
+    def get_field(self, name):
+        return self.schema.get(name)
+
+    def set(self, name, value):
+        field = self.get_field(name)
+        field.set(self.context, value)
+
+    def get(self, name):
+        field = self.get_field(name)
+        return field.get(self.context)
 
 
 class Base(object):

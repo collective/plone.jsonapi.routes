@@ -7,6 +7,12 @@
     <!-- Zope2 initialization -->
     <five:registerPackage package="." initialize=".initialize" />
 
+    <!-- Adapter for Field manipulation -->
+    <adapter
+        for="*"
+        factory=".adapters.DataManager"
+        />
+
     <!-- Adapter for Catalog Brains -->
     <adapter
         for="Products.ZCatalog.interfaces.ICatalogBrain"
