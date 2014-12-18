@@ -6,9 +6,13 @@ import unittest2 as unittest
 
 from plone.testing.z2 import Browser
 
-from plone.app.testing import login
 from plone.app.testing import PloneSandboxLayer
 from plone.app.testing import PLONE_FIXTURE
+from plone.app.testing import setRoles
+from plone.app.testing import TEST_USER_ID
+from plone.testing import z2
+
+
 from plone.app.testing.layers import IntegrationTesting
 from zope.configuration import xmlconfig
 
@@ -16,27 +20,36 @@ from zope.configuration import xmlconfig
 class TestLayer(PloneSandboxLayer):
     defaultBases = (PLONE_FIXTURE,)
 
+
     def setUpZope(self, app, configurationContext):
+        # Load ZCML
         import plone.jsonapi.core
         import plone.jsonapi.routes
         xmlconfig.file('configure.zcml', plone.jsonapi.core, context=configurationContext)
         xmlconfig.file('configure.zcml', plone.jsonapi.routes, context=configurationContext)
 
+        # Install product and call its initialize() function
+        z2.installProduct(app, 'plone.jsonapi.core')
+        z2.installProduct(app, 'plone.jsonapi.routes')
+
+    def tearDownZope(self, app):
+        # Uninstall product
+        z2.uninstallProduct(app, 'plone.jsonapi.core')
+        z2.uninstallProduct(app, 'plone.jsonapi.routes')
+
     def setUpPloneSite(self, portal):
-        portal.acl_users.userFolderAddUser('admin',
-                                           'secret',
-                                           ['Manager'],
-                                           [])
-        login(portal, 'admin')
-        # enable workflow for browser tests
-        workflow = portal.portal_workflow
-        workflow.setDefaultChain('simple_publication_workflow')
+        setRoles(portal, TEST_USER_ID, ['Manager'])
 
         # add a folder, so we can test with it
         _ = portal.invokeFactory("Folder", "folder", title="Test Folder")
         folder = portal[_]
         for i in range(50):
             folder.invokeFactory("Document", "document-%d" % i, title="Test Document %d" % i)
+
+        # Test fixture -- p.j.c. needs to have a request
+        from plone.jsonapi.core import router
+        router.DefaultRouter.initialize(portal, portal.REQUEST)
+
 
 TEST_FIXTURE = TestLayer()
 INTEGRATION_TESTING = IntegrationTesting(bases=(TEST_FIXTURE,),
@@ -46,30 +59,22 @@ INTEGRATION_TESTING = IntegrationTesting(bases=(TEST_FIXTURE,),
 class APITestCase(unittest.TestCase):
     layer = INTEGRATION_TESTING
 
-    def setUp(self):
-        from plone.jsonapi.core import router
-        from plone.jsonapi.routes import initialize
-
-        self.app     = self.layer.get("app")
-        self.portal  = self.layer.get("portal")
-        self.request = self.layer.get("request")
-
-        self.test_folder = self.portal.folder
-
-        initialize(self.portal)
-        router.DefaultRouter.initialize(self.portal, self.request)
-
     def getBrowser(self, handleErrors=False):
-        browser = Browser(self.app)
+        browser = Browser(self.getApp())
         if handleErrors:
             browser.handleErrors = True
         return browser
 
+    def getApp(self):
+        return self.layer.get("app")
+
+    def getPortal(self):
+        return self.layer.get("portal")
+
+    def getRequest(self):
+        return self.layer.get("request")
+
     def decode(self, s):
         return json.loads(s)
-
-    def create(self, what, where, id, **kw):
-        login(self.portal, 'admin')
-        where.invokeFactory(what, id, **kw)
 
 # vim: set ft=python ts=4 sw=4 expandtab :

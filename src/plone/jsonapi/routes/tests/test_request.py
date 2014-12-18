@@ -7,6 +7,12 @@ from plone.jsonapi.routes import request as req
 
 
 class TestRequest(APITestCase):
+    """ Test the request API
+    """
+
+    def setUp(self):
+        self.portal  = self.getPortal()
+        self.request = self.getRequest()
 
     def test_complete_parameter(self):
         self.assertFalse(req.get_complete())
@@ -79,6 +85,7 @@ class TestRequest(APITestCase):
         data = {"title": "test"}
         self.request["BODY"] = json.dumps(data)
         self.assertEqual(req.get_request_data(), [data])
+
 
 def test_suite():
     from unittest import TestSuite, makeSuite
