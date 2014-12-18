@@ -3,85 +3,130 @@
 __author__ = 'Ramon Bartl <ramon.bartl@googlemail.com>'
 __docformat__ = 'plaintext'
 
-import logging
 import types
-
-from DateTime import DateTime
+import logging
+import pkg_resources
 
 from plone import api
+
+from DateTime import DateTime
 
 from plone.jsonapi.routes import request as req
 from plone.jsonapi.routes import underscore as _
 
-HAS_ADVANCED_QUERY = True
 try:
-    from Products import AdvancedQuery
-    AQ = AdvancedQuery
-except ImportError:
+    pkg_resources.get_distribution('Products.AdvancedQuery')
+    from Products.AdvancedQuery import Eq
+    from Products.AdvancedQuery import In
+    from Products.AdvancedQuery import Generic
+except pkg_resources.DistributionNotFound:
     HAS_ADVANCED_QUERY = False
+else:
+    HAS_ADVANCED_QUERY = True
+
+
+__all__ = ['search', 'make_query']
+
 
 logger = logging.getLogger("plone.jsonapi.routes.query")
+
+
+#-----------------------------------------------------------------------------
+#   Public API
+#-----------------------------------------------------------------------------
+
+def search(query, **kw):
+    """ execute either AdvancedQuery or a StandardQuery
+    """
+    if HAS_ADVANCED_QUERY and type(query) is tuple:
+        return advanced_search(*query, **kw)
+    return standard_search(query, **kw)
 
 
 def make_query(**kw):
     """ generates a catalog query
     """
-
     if HAS_ADVANCED_QUERY:
-        logger.debug("AdvancedQuery installed: We could do magic here ...")
-        #return make_advanced_query(**kw)
-
-    logger.debug("Building standard query")
+        return make_advanced_query(**kw)
     return make_standard_query(**kw)
 
+#-----------------------------------------------------------------------------
+#   Query Builders
+#-----------------------------------------------------------------------------
 
 def make_standard_query(**kw):
     """ generates a query for the portal catalog
     """
+    logger.info("Building **standard** query")
+
     # build a default query from the request parameters and the keywords
-    query = build_query(**kw)
-    logger.info("Catalog Query --> %r", query)
+    query = build_catalog_query(**kw)
+
     return query
 
 
 def make_advanced_query(**kw):
-    """ generates an advaced query
+    """ generates a query suitable for the portal catalog
     """
-    raise NotImplementedError("Usage of AdvancedQuery is not supported yet")
+    logger.info("Building **advanced** query")
+
+    # build the initial query
+    query = build_catalog_query(**kw)
+
+    # transform to advanced query
+    advanced_query = to_advanced_query(query)
+
+    # get the sort specification
+    sort = get_sort_spec()
+
+    return advanced_query, sort
 
 
-#-----------------------------------------------------------------------------
-#   Standard Query Builders
-#-----------------------------------------------------------------------------
+def build_catalog_query(**kw):
+    """ build an initial query object
 
-def build_query(**kw):
-    """ build a query spec suitable for the portal_catalog tool
+    this query can be used directly for a std. catalog query
     """
+    query = {}
 
-    # XXX we need a better way to extract all possible search variants from
-    #     the request...
+    # note: order is important!
+    query.update(get_request_query())
+    query.update(get_custom_query())
+    query.update(get_keyword_query(**kw))
 
-    query = dict()
+    logger.info("build_catalog_query::query=%s" % query)
+    return query
+
+
+def get_request_query():
+    """ checks the request for known catalog indexes.
+    """
+    query = {}
+
+    # only known indexes get observed
+    indexes = get_catalog_indexes()
 
     # check what we can use from the reqeust
     request = req.get_request()
-    for idx in get_catalog_indexes():
+    for idx in indexes:
         val = request.form.get(idx)
         if val: query[idx] = to_index_value(val, idx)
 
-    # build a default catalog query
-    query.update({
-        "sort_limit":      req.get_sort_limit(),
-        "sort_on":         req.get_sort_on(),
-        "sort_order":      req.get_sort_order(),
-        "SearchableText":  req.get_query(),
-    })
+    return query
 
-    # special handling for the physical path
+
+def get_custom_query():
+    """ checks the request for custom query keys.
+    """
+    query = {}
+
+    # searchable text queries
+    q = req.get_query()
+    if q: query["SearchableText"] = q
+
+    # physical path queries
     path = req.get_path()
-    if path:
-        depth = req.get_depth()
-        query["path"] = {'query': path, 'depth': depth}
+    if path: query["path"] = {'query': path, 'depth': req.get_depth()}
 
     # special handling for recent created/modified
     recent_created = req.get_recent_created()
@@ -94,31 +139,17 @@ def build_query(**kw):
         date = calculate_delta_date(recent_modified)
         query["modified"] = {'query': date, 'range': 'min'}
 
-    # update the query with the given keywords
-    update_query_with_kw(query, **kw)
-
     return query
 
 
-def calculate_delta_date(literal):
-    """ calculate the date in the past from the given literal
+def get_keyword_query(**kw):
+    """ generates a query from the given keywords
     """
-    mapping = {
-        "today":      0,
-        "yesterday":  1,
-        "this-week":  7,
-        "this-month": 30,
-        "this-year":  365,
-    }
-    today = DateTime(DateTime().Date()) # current date without the time
-    return today - mapping.get(literal, 0)
+    query = dict()
 
-
-def update_query_with_kw(query, **kw):
-    """ add the keyword parameters to the query
-    """
+    # only known indexes get observed
     indexes = get_catalog_indexes()
-    # handle keywords
+
     for k, v in kw.iteritems():
         # handle uid
         if k.lower() == "uid":
@@ -137,6 +168,52 @@ def update_query_with_kw(query, **kw):
             continue
         logger.info("Adding '%s=%s' to query" % (k, v))
         query[k] = v
+
+    return query
+
+
+def to_advanced_query(query):
+    """ convert a dictionary to an advanced query
+    """
+
+    # nothing to do
+    if not query: return None
+
+    a_query = None
+    def get_query_expression_for(value):
+        # return the Advanced Query Expression
+        if type(value) in (tuple, list):
+            return In
+        if type(value) is dict:
+            return Generic
+        return Eq
+
+    for k, v in query.iteritems():
+        exp = get_query_expression_for(v)
+        # first loop, build the initial query expression
+        if a_query is None:
+            a_query = exp(k, v)
+        else:
+            a_query = a_query & exp(k, v)
+
+    return a_query
+
+#-----------------------------------------------------------------------------
+#   Functional Helpers
+#-----------------------------------------------------------------------------
+
+def calculate_delta_date(literal):
+    """ calculate the date in the past from the given literal
+    """
+    mapping = {
+        "today":      0,
+        "yesterday":  1,
+        "this-week":  7,
+        "this-month": 30,
+        "this-year":  365,
+    }
+    today = DateTime(DateTime().Date()) # current date without the time
+    return today - mapping.get(literal, 0)
 
 #-----------------------------------------------------------------------------
 #   Catalog Helpers
@@ -176,12 +253,13 @@ def to_index_value(value, index):
     return value
 
 
-def search(query, **kw):
-    """ execute either AdvancedQuery or a StandardQuery
+def get_sort_spec():
+    """ build sort specification
     """
-    #if HAS_ADVANCED_QUERY and type(query) is tuple:
-    #    return advanced_search(*query, **kw)
-    return standard_search(query, **kw)
+    all_indexes = get_portal_catalog().indexes()
+    si = req.get_sort_on(allowed_indexes=all_indexes)
+    so = req.get_sort_order()
+    return ((si, so), )
 
 
 def standard_search(query, **kw):

@@ -16,7 +16,8 @@ from Products.ATContentTypes.interfaces import IATContentType
 from Products.CMFPlone.PloneBatch import Batch
 
 # search helpers
-from query import make_query, search
+from query import search
+from query import make_query
 
 # request helpers
 from plone.jsonapi.routes import request as req
@@ -512,7 +513,7 @@ def get_object_by_uid(uid):
     """
 
     # nothing to do here
-    if not uid: return None
+    if uid is None: return None
 
     # define uid 0 as the portal object
     if  _.to_int(uid) == 0:
