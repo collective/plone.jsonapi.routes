@@ -30,7 +30,7 @@ __all__ = ['search', 'make_query']
 
 logger = logging.getLogger("plone.jsonapi.routes.query")
 
-USE_ADVANCED_QUERY = True
+USE_ADVANCED_QUERY = False
 
 
 #-----------------------------------------------------------------------------
