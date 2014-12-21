@@ -9,10 +9,11 @@ import logging
 from plone import api as ploneapi
 from plone.jsonapi.core import router
 
+from AccessControl import Unauthorized
+
 from Products.CMFCore.interfaces import ISiteRoot
 from Products.CMFCore.interfaces import IFolderish
 from Products.ZCatalog.interfaces import ICatalogBrain
-from Products.ATContentTypes.interfaces import IATContentType
 from Products.CMFPlone.PloneBatch import Batch
 
 # search helpers
@@ -24,6 +25,7 @@ from plone.jsonapi.routes import request as req
 from plone.jsonapi.routes.exceptions import APIError
 
 from plone.jsonapi.routes.interfaces import IInfo
+from plone.jsonapi.routes.interfaces import IDataManager
 from plone.jsonapi.routes import underscore as _
 
 
@@ -115,7 +117,11 @@ def create_items(portal_type=None, request=None, uid=None, endpoint=None):
             dest = find_target_container(record)
         if portal_type is None:
             portal_type = record.get("portal_type", None)
-        obj = create_object_in_container(dest, portal_type, record)
+        id = record.get("id", None)
+        title = record.get("title", None)
+        obj = create_object_in_container(dest, portal_type, id=id, title=title)
+        # update the object
+        update_object_with_data(obj, record)
         results.append(obj)
 
     return make_items_for(results, endpoint=endpoint)
@@ -372,12 +378,6 @@ def get_portal_reference_catalog():
     return get_tool("reference_catalog")
 
 
-def get_portal_types_tool():
-    """ return the portal types tool
-    """
-    return get_tool("portal_types")
-
-
 def get_portal_workflow():
     """ return portal_workflow tool
     """
@@ -402,10 +402,13 @@ def is_folderish(obj):
     return IFolderish.providedBy(obj)
 
 
-def is_atct(obj):
-    """ checks if the object is an ATContent type
+def get_locally_allowed_types(obj):
+    """ get the locally allowed types of this object
     """
-    return IATContentType.providedBy(obj)
+    if not is_folderish(obj): return []
+    method = getattr(obj, "getLocallyAllowedTypes", None)
+    if not callable(method): return []
+    return method()
 
 
 def url_for(endpoint, **values):
@@ -435,17 +438,6 @@ def get_uid(obj):
     if is_root(obj):
         return 0
     return obj.UID()
-
-
-def get_schema(obj):
-    """ return the schema of this type
-    """
-    obj = get_object(obj)
-    if is_atct(obj):
-        return obj.schema
-    pt = get_portal_types_tool()
-    fti = pt.getTypeInfo(obj.portal_type)
-    return fti.lookupSchema()
 
 
 def get_portal_type(obj):
@@ -486,13 +478,6 @@ def get_endpoint(portal_type):
     portal_type = portal_type.lower() + "s"
 
     return portal_type
-
-
-def is_file_field(field):
-    # XXX find a better way to distinguish file/image fields
-    if field.__name__ in ["file", "image"]:
-        return True
-    return False
 
 
 def get_object_by_record(record):
@@ -537,7 +522,7 @@ def get_object_by_uid(uid):
     # try to find the object with the portal catalog
     res = pc(dict(UID=uid))
     if len(res) > 1:
-        raise ValueError("More than one object found for UID %s" % uid)
+        raise APIError(500, "More than one object found for UID %s" % uid)
     if not res:
         return None
 
@@ -556,7 +541,7 @@ def get_object_by_path(path):
     portal_path = get_path(portal)
 
     if not path.startswith(portal_path):
-        raise ValueError("Not a physical path inside the portal")
+        raise APIError(500, "Not a physical path inside the portal")
 
     if path == portal_path:
         return portal
@@ -588,7 +573,7 @@ def mkdir(path):
             continue
 
         if not is_folderish(container):
-            raise RuntimeError("Object at %s is not a folder" % curpath)
+            raise APIError(500, "Object at %s is not a folder" % curpath)
 
         # create the folder on the go
         container = ploneapi.content.create(
@@ -615,10 +600,10 @@ def find_target_container(record):
         if target is None:
             target = mkdir(parent_path)
     else:
-        raise RuntimeError("No target UID/PATH information found")
+        raise APIError(500, "No target UID/PATH information found")
 
     if not target:
-        raise RuntimeError("No target container found")
+        raise APIError(500, "No target container found")
 
     return target
 
@@ -638,50 +623,38 @@ def get_current_user():
     return ploneapi.user.get_current()
 
 
-def create_object_in_container(container, portal_type, record):
+def is_anonymous():
+    """ check anonymous state of the current user """
+    return ploneapi.user.is_anonymous()
+
+
+def create_object_in_container(container, portal_type, id=None, title=None):
     """ creates an object with the given data in the container
     """
-    if portal_type not in container.getLocallyAllowedTypes():
-        raise RuntimeError("Creation of this portal type is not allowed in this context.")
+    if not is_root(container) and portal_type not in get_locally_allowed_types(container):
+        raise APIError(500, "Creation of this portal type is not allowed in this context.")
+    return create_object(container=container, id=id, title=title, type=portal_type)
 
-    id    = record.get("id", None)
-    title = record.get("title", None)
 
-    from AccessControl import Unauthorized
+def create_object(**kw):
+    defaults = {"save_id": True}
+    defaults.update(kw)
     try:
-        obj = ploneapi.content.create(
-                container=container, type=portal_type, id=id, title=title, save_id=True)
-        return update_object_with_data(obj, record)
+        return ploneapi.content.create(**defaults)
     except Unauthorized:
-        raise RuntimeError("You are not allowed to create this content")
+        raise APIError(401, "You are not allowed to create this content")
 
 
 def update_object_with_data(content, record):
     """ update the content with the values from records
     """
-    schema = get_schema(content)
-    is_atc = is_atct(content)
+    dm = IDataManager(content)
 
     for k, v in record.items():
-
-        # fetch the field
-        field = content.getField(k) or schema.get(k)
-
-        logger.info("update_object_with_data::processing key=%r, value=%r, field=%r", k, v, field)
-        if field is None:
+        if not dm.set(k, v):
             logger.info("update_object_with_data::skipping key=%r", k)
             continue
-
-        if is_file_field(field):
-            logger.info("update_object_with_data:: File field detected ('%r'), base64 decoding value", field)
-            v = str(v).decode("base64")
-
-        # XXX handle field security?
-        if is_atc:
-            mutator = field.getMutator(content)
-            mutator(v)
-        else:
-            setattr(content, k, v)
+        logger.info("update_object_with_data::field %r updated with value=%r", k, v)
 
     # do a wf transition
     if record.get("transition", None):
