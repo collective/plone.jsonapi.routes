@@ -22,72 +22,9 @@ from Products.ZCatalog.interfaces import ICatalogBrain
 from Products.ATContentTypes.interfaces import IATContentType
 
 from plone.jsonapi.routes.interfaces import IInfo
-from plone.jsonapi.routes.interfaces import IDataManager
 
 
 logger = logging.getLogger("plone.jsonapi.routes")
-
-
-class DataManager(object):
-    """ Adapter to set and get field values in a unified way
-    """
-    interface.implements(IDataManager)
-
-    def __init__(self, context):
-        self.context = context
-        self.schema = self.get_schema()
-
-    def is_atct(self):
-        """ checks if the object is an ATContent type
-        """
-        return IATContentType.providedBy(self.context)
-
-    def is_file_field(self, field):
-        """ checks if field is a file field
-        """
-        # XXX find a better way to distinguish file/image fields
-        if field.__name__ in ["file", "image"]:
-            return True
-        return False
-
-    def get_portal_types_tool():
-        """ return the portal types tool
-        """
-        return api.portal.get_tool("portal_types")
-
-    def get_schema(self):
-        """ return the schema of this type
-        """
-        obj = self.context
-        if self.is_atct():
-            return obj.schema
-        pt = self.get_portal_types_tool()
-        fti = pt.getTypeInfo(obj.portal_type)
-        return fti.lookupSchema()
-
-    def get_field(self, name):
-        if self.is_atct():
-            return self.context.getField(name)
-        return self.schema.get(name)
-
-    def set(self, name, value):
-        field = self.get_field(name)
-        logger.info("DataManager::set: name=%r, value=%r, field=%r", name, value, field)
-        if not field:
-            return False
-        if self.is_file_field(field):
-            logger.info("DataManager::set:File field detected ('%r'), base64 decoding value", field)
-            value = str(value).decode("base64")
-        if self.is_atct():
-            mutator = field.getMutator(self.context)
-            mutator(value)
-        else:
-            setattr(self.context, name, value)
-        return True
-
-    def get(self, name):
-        field = self.get_field(name)
-        return field.get(self.context)
 
 
 class Base(object):

@@ -422,6 +422,7 @@ def url_for(endpoint, **values):
         logger.warn("Could not build API URL for endpoint '%s'. No route provider registered?" % endpoint)
         return None
 
+
 def get_url(obj):
     """ get the absolute url for this object
     """
@@ -621,11 +622,6 @@ def delete_object(obj):
 def get_current_user():
     """ return the current logged in user """
     return ploneapi.user.get_current()
-
-
-def is_anonymous():
-    """ check anonymous state of the current user """
-    return ploneapi.user.is_anonymous()
 
 
 def create_object_in_container(container, portal_type, id=None, title=None):

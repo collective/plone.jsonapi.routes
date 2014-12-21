@@ -6,7 +6,6 @@ __docformat__ = 'plaintext'
 from zope import interface
 
 
-
 class IDataManager(interface.Interface):
     """ Field Interface
     """
