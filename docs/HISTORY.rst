@@ -16,6 +16,7 @@ Changelog
 
 **OTHER CHANGES**
 
+- added `IDataManager` field data manager
 - added `/auth` route to enforce a basic auth
 - added a custom exception class to set the right response status
 - added `recent_modified` and `recent_created` handling
