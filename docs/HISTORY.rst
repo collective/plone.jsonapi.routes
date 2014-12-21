@@ -16,6 +16,7 @@ Changelog
 
 **OTHER CHANGES**
 
+- added `/auth` route to enforce a basic auth
 - added a custom exception class to set the right response status
 - added `recent_modified` and `recent_created` handling
 - added unittests for the `api` and `request` module
