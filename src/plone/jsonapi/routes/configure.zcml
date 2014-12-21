@@ -7,10 +7,28 @@
     <!-- Zope2 initialization -->
     <five:registerPackage package="." initialize=".initialize" />
 
+    <!-- Adapter for AT Field manipulation -->
+    <adapter
+        for="Products.ATContentTypes.interfaces.IATContentType"
+        factory=".datamanagers.ATDataManager"
+        />
+
+    <!-- Adapter for Dexterity Field manipulation -->
+    <adapter
+        for="plone.dexterity.interfaces.IDexterityContent"
+        factory=".datamanagers.DexterityDataManager"
+        />
+
     <!-- Adapter for Catalog Brains -->
     <adapter
         for="Products.ZCatalog.interfaces.ICatalogBrain"
         factory=".adapters.ZCDataProvider"
+        />
+
+    <!-- Adapter for the Plone Site -->
+    <adapter
+        for="Products.CMFCore.interfaces.ISiteRoot"
+        factory=".adapters.SiteRootDataProvider"
         />
 
     <!-- Adapter for AT Content Types -->

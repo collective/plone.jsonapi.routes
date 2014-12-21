@@ -11,12 +11,13 @@ Some needed imports::
 
 Prepare the browser::
 
+    >>> portal = self.getPortal()
     >>> browser = self.getBrowser()
     >>> browser.addHeader('Authorization', 'Basic admin:secret')
 
 Remember some URLs::
 
-    >>> portal_url = self.portal.absolute_url()
+    >>> portal_url = portal.absolute_url()
     >>> api_url = portal_url + "/@@API/plone/api/1.0"
     >>> version_url = api_url + "/version"
 

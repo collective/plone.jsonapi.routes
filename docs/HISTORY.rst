@@ -1,6 +1,29 @@
 Changelog
 =========
 
+0.4 - unreleased
+----------------
+
+**FIXED ISSUES**
+
+- https://github.com/collective/plone.jsonapi.routes/issues/22: Absoulte url is missing in update/create response
+- https://github.com/collective/plone.jsonapi.routes/issues/21: Image Route throws an error
+
+**ENHANCEMENTS**
+
+- https://github.com/collective/plone.jsonapi.routes/issues/20: Support query for DateTime Indexes
+- https://github.com/collective/plone.jsonapi.routes/issues/23: Support query for created/modified DateTime ranges
+
+**OTHER CHANGES**
+
+- added `IDataManager` field data manager
+- added `/auth` route to enforce a basic auth
+- added a custom exception class to set the right response status
+- added `recent_modified` and `recent_created` handling
+- added unittests for the `api` and `request` module
+- no more request passing anymore - all handled by the request module now
+
+
 0.3 - 2014-10-14
 ----------------
 

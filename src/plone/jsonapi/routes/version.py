@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-__author__ = 'Ramon Bartl <ramon.bartl@nexiles.com>'
+__author__    = 'Ramon Bartl <ramon.bartl@nexiles.com>'
 __docformat__ = 'plaintext'
 
 import pkg_resources
@@ -12,8 +12,8 @@ def version():
     return dist.version
 
 __version__ = version()
-__build__ = 120
-__date__ = '2014-10-14'
+__build__ = 207
+__date__ = '2014-12-21'
 
 
 @add_plone_route("/version", "ploneapiversion", methods=["GET"])

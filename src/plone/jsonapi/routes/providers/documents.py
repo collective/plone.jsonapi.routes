@@ -19,7 +19,7 @@ from plone.jsonapi.routes.api import url_for
 def get(context, request, uid=None):
     """ get documents
     """
-    return get_batched("Document", request, uid=uid, endpoint="documents")
+    return get_batched("Document", uid=uid, endpoint="documents")
 
 
 # CREATE
@@ -28,7 +28,7 @@ def get(context, request, uid=None):
 def create(context, request, uid=None):
     """ create documents
     """
-    items = create_items("Document", request, uid=uid, endpoint="documents")
+    items = create_items("Document", uid=uid, endpoint="documents")
     return {
         "url": url_for("documents_create"),
         "count": len(items),
@@ -42,7 +42,7 @@ def create(context, request, uid=None):
 def update(context, request, uid=None):
     """ update documents
     """
-    items = update_items("Document", request, uid=uid, endpoint="documents")
+    items = update_items("Document", uid=uid, endpoint="documents")
     return {
         "url": url_for("documents_update"),
         "count": len(items),
@@ -56,7 +56,7 @@ def update(context, request, uid=None):
 def delete(context, request, uid=None):
     """ delete documents
     """
-    items = delete_items("Document", request, uid=uid, endpoint="documents")
+    items = delete_items("Document", uid=uid, endpoint="documents")
     return {
         "url": url_for("documents_delete"),
         "count": len(items),

@@ -3,7 +3,6 @@
 __author__ = 'Ramon Bartl <ramon.bartl@nexiles.com>'
 __docformat__ = 'plaintext'
 
-
 import types
 
 

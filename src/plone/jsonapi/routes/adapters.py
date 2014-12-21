@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-__author__ = 'Ramon Bartl <ramon.bartl@googlemail.com>'
+__author__    = 'Ramon Bartl <ramon.bartl@googlemail.com>'
 __docformat__ = 'plaintext'
 
 import logging
@@ -17,10 +17,12 @@ from plone import api
 from plone.dexterity.schema import SCHEMA_CACHE
 from plone.dexterity.interfaces import IDexterityContent
 
+from Products.CMFCore.interfaces import ISiteRoot
 from Products.ZCatalog.interfaces import ICatalogBrain
 from Products.ATContentTypes.interfaces import IATContentType
 
 from plone.jsonapi.routes.interfaces import IInfo
+
 
 logger = logging.getLogger("plone.jsonapi.routes")
 
@@ -34,8 +36,28 @@ class Base(object):
         self.context = context
         self.keys = []
 
+        # additional attributes to extract besides the Schema keys
+        self.attributes = {
+            "id":          "getId",
+            "uid":         "UID",
+            "title":       "Title",
+            "description": "Description",
+            "created":     "created",
+            "modified":    "modified",
+            "effective":   "effective",
+            "portal_type": "portal_type",
+            "tags":        "Subject",
+        }
+
     def to_dict(self):
-        return to_dict(self.context, keys=self.keys)
+        data = to_dict(self.context, keys=self.keys)
+        for key, attr in self.attributes.iteritems():
+            if data.get(key): continue # don't overwrite
+            value = getattr(self.context, attr, None)
+            if callable(value):
+                value = value()
+            data[key] = get_value(value)
+        return data
 
     def __call__(self):
         return self.to_dict()
@@ -91,6 +113,16 @@ class ATDataProvider(Base):
         schema = context.Schema()
         self.keys = schema.keys()
 
+
+class SiteRootDataProvider(Base):
+    """ Site Root Adapter
+    """
+    interface.implements(IInfo)
+    component.adapts(ISiteRoot)
+
+    def __init__(self, context):
+        super(self.__class__, self).__init__(context)
+
 #---------------------------------------------------------------------------
 #   Functional Helpers
 #---------------------------------------------------------------------------
@@ -106,7 +138,9 @@ def to_dict(obj, keys):
         logger.warn("Workflow Info ommitted since the key 'workflow_info' was ",
                 "found in the current schema")
         return out
-    out["workflow_info"] = get_wf_info(obj)
+    wf_info = get_wf_info(obj)
+    out["workflow_info"] = wf_info
+    out["state"] = wf_info.get("status")
     return out
 
 
@@ -138,10 +172,14 @@ def get_value(field):
 def get_file_dict(field):
     """ file representation of the given data
     """
+
+    data = field.data.encode("base64")
+    content_type = getattr(field, "content_type", "application/octet-stream")
+
     return {
-        "data": field.data.encode("base64"),
+        "data": data,
         "size": len(field.data),
-        "content_type": getattr(field, "content_type", "application/octet-stream"),
+        "content_type": content_type
     }
 
 
@@ -214,13 +252,5 @@ def to_transition_info(transition):
         "display": transition["description"],
         "url":     transition["url"],
     }
-
-
-def to_iso_date(date=None):
-    """ get the iso string for python datetime objects
-    """
-    if date is None:
-        return ""
-    return date.isoformat()
 
 # vim: set ft=python ts=4 sw=4 expandtab :
