@@ -4,7 +4,8 @@ Quickstart
 This chapter gives a good introduction about `plone.jsonapi.routes` It assumes
 you already have `Plone` and `plone.jsonapi.routes` installed. Since all the
 coming examples are executed directly in Google Chrome, it assumes that you
-have also installed JSONView and the Advanced Rest Client Application.
+have also installed JSONView and the Advanced Rest Client Application (see
+:doc:`installation` for details)
 
 
 Environment
@@ -19,7 +20,7 @@ exapmles.
 Version
 -------
 
-The `version` route prints out the current version of `plone.jsonapi.routes.`
+The `version` route prints out the current version of `plone.jsonapi.routes`.
 
 http://localhost:8080/Plone/@@API/plone/api/1.0/version
 
@@ -27,10 +28,10 @@ http://localhost:8080/Plone/@@API/plone/api/1.0/version
 
     {
         url: "http://localhost:8080/Plone/@@API/plone/api/1.0/version",
-        date: "2014-10-14",
+        date: "2014-12-21",
         version: "0.4",
-        build: 130,
-        _runtime: 0.0019528865814208984
+        build: 200,
+        _runtime: 0.0001528865814208984
     }
 
 
@@ -246,7 +247,6 @@ http://localhost:8080/Plone/@@API/plone/api/1.0/documents/7455c9b14e3c48c9b0be19
         pages: 1,
         previous: null
     }
-
 
 The requested object was now loaded by the API and all fields were gathered.
 But not all data is coming directly from the object fields. Some of them have

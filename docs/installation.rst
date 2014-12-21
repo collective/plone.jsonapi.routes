@@ -43,10 +43,19 @@ comfortable way. You can find the extensions here:
 - Chrome: https://chrome.google.com/webstore/detail/jsonview/chklaanhfefbnpoihckbnefhakgolnmc?hl=en
 
 
+Advanced Rest Client
+--------------------
+
+Use this Chrome Plugin to send POST request to the Plone JSON API. You can
+find it here:
+
+https://chrome.google.com/webstore/detail/advanced-rest-client/hgmloofddffdnphfgcellkdfbfbjeloo
+
 
 .. Links
 
 .. _plone.jsonapi.core: https://pypi.python.org/pypi/plone.jsonapi.core
+.. _plone.jsonapi.routes: https://pypi.python.org/pypi/plone.jsonapi.routes
 .. _plone.api: https://pypi.python.org/pypi/plone.api
 .. _Plone: http://plone.org
 .. _RESTful: http://en.wikipedia.org/wiki/Representational_state_transfer
