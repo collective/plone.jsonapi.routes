@@ -508,7 +508,7 @@ def get_object_by_uid(uid):
     if uid is None: return None
 
     # define uid 0 as the portal object
-    if  _.to_int(uid) == 0:
+    if  uid == "portal" or _.to_int(uid) == 0:
         return get_portal()
 
     # we try to find the object with both catalogs
