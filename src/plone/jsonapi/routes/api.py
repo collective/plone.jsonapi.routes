@@ -39,8 +39,13 @@ logger = logging.getLogger("plone.jsonapi.routes")
 def get_record(uid=None):
     """ returns a single record
     """
-    obj = get_object_by_uid(uid)
-    if obj is None: raise APIError(404, "No object could be found for the UID %s" % uid)
+    obj = None
+    if uid:
+        obj = get_object_by_uid(uid)
+    else:
+        form = req.get_form()
+        obj = get_object_by_record(form)
+    if obj is None: raise APIError(404, "No object found")
     items = make_items_for([obj])
     return _.first(items)
 

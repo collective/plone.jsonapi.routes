@@ -9,7 +9,7 @@ resource handled.
 Unified API
 -----------
 
-:URL Schema: ``<BASE URL>/<OPERATION>/<uid>``
+:URL Schema: ``<BASE URL>/<OPERATION>/<uid:optional>``
 
 There is a convenient and unified way to fetch the content without knowing the
 resource. This unified resource is directly located at the :ref:`BASE_URL`.
@@ -47,7 +47,21 @@ GET
 
 The `get` route will return the content located at the given UID.
 
-http://localhost:8080/Plone/@@API/plone/api/1.0/get/<uid>
+http://localhost:8080/Plone/@@API/plone/api/1.0/get/<uid:optional>
+
+The given optional UID defines the target object to get. You can omit this UID
+and specify the path to the object with a request parameter.
+
+Example
+.......
+
+Getting an object by its **physical path**:
+
+http://localhost:8080/Plone/@@API/plone/api/1.0/get?path=/Plone/folder
+
+Or you can specify the **parent path** and the **id** of the object
+
+http://localhost:8080/Plone/@@API/plone/api/1.0/get?parent_path=/Plone&id=folder
 
 
 .. versionadded:: 0.4

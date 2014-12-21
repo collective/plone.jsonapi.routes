@@ -23,9 +23,17 @@ if not os.path.exists("fabfile.py"):
 
 
 @task
+def test():
+    local("./bin/test -s plone.jsonapi.routes")
+
+@task
 def make_docs():
     with lcd("docs"):
         local("make html")
+
+@task
+def preview_docs():
+    with lcd("docs"):
         local("open _build/html/index.html")
 
 # vim: set ft=python ts=4 sw=4 expandtab :

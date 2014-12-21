@@ -19,11 +19,16 @@ def get_request():
     return getRequest()
 
 
+def get_form():
+    """ return the request form dictionary
+    """
+    return get_request().form
+
+
 def get(key, default=None):
     """ return the key from the request
     """
-    request = get_request()
-    return request.form.get(key, default)
+    return get_form().get(key, default)
 
 
 def get_complete():
