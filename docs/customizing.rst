@@ -158,4 +158,68 @@ Register the adapter in your `configure.zcml` file for your special interface:
 
     </configure>
 
+
+Adding a custom  data manager
+-----------------------------
+
+The data sent by the API for each content type is set by the `IDataManager`
+Adapter. This Adapter has a simple interface:
+
+.. code-block:: python
+
+    class IDataManager(interface.Interface):
+        """ Field Interface
+        """
+
+        def get(name): """ Get the value of the named field with
+            """
+
+        def set(name, value):
+            """ Set the value of the named field
+            """
+
+To customize how the data is set to each field of the content, you have to
+register an adapter for a more specific interface on the content.
+This adapter has to implement the `IDataManager` interface.
+
+.. code-block:: python
+
+    from zope.annotation import IAnnotations
+    from persistent.dict import PersistentDict
+    from plone.jsonapi.routes.interfaces import IDataManager
+
+    class TodoDataManager(object):
+        """ A custom data manager for Todo content types
+        """
+        interface.implements(IDataManager)
+
+        def __init__(self, context):
+            self.context = context
+
+        @property
+        def storage(self):
+            return IAnnotations(self.context).setdefault('plone.todo', PersistentDict())
+
+        def get(self, name):
+            self.storage.get("name")
+
+        def set(self, name, value):
+            self.storage["name"] = value
+
+
+Register the adapter in your `configure.zcml` file for your special interface:
+
+.. code-block:: xml
+
+    <configure
+        xmlns="http://namespaces.zope.org/zope">
+
+        <!-- Adapter for my custom content type -->
+        <adapter
+            for="plone.todo.interfaces.ITodo"
+            factory=".adapters.TodoDataManager"
+            />
+
+    </configure>
+
 .. vim: set ft=rst ts=4 sw=4 expandtab tw=78 :
