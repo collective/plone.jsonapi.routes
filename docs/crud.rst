@@ -1,7 +1,7 @@
 CRUD
 ====
 
-Each route provider shipped with this package, provides the basic CRUD
+Each content route provider shipped with this package, provides the basic CRUD
 :ref:`Operations` functionality to `get`, `create`, `delete` and `update` the
 resource handled.
 
@@ -18,9 +18,9 @@ resource. This unified resource is directly located at the :ref:`BASE_URL`.
 Response Format
 ---------------
 
-The response format differs from the default :ref:`Response_Format` and omits
-the `items` list. The content information is directly provided in the root of
-the JSON object.
+The response format of the unified API differs from the default
+:ref:`Response_Format` and omits the `items` list. The content information is
+directly provided in the root of the returned JSON object.
 
 
 .. code-block:: javascript
@@ -65,13 +65,14 @@ http://localhost:8080/Plone/@@API/plone/api/1.0/get?parent_path=/Plone&id=folder
 
 
 .. versionadded:: 0.4
-    Adding 0 as UID returns the portal Object.
+    Adding 0 or the string `portal` as UID returns the portal Object.
 
 
 CREATE
 ------
 
-The `create` route will create the content located at the given UID.
+The `create` route will create the content inside the container located at the
+given UID.
 
 http://localhost:8080/Plone/@@API/plone/api/1.0/create/<uid:optional>
 
@@ -81,6 +82,9 @@ and specify all the information in the HTTP POST body.
 Example
 .......
 
+This example shows possible variations of a HTTP POST body sent to the JSON
+API with the header **Content-Type: application/json** set.
+
 .. code-block:: javascript
 
     {
@@ -88,7 +92,7 @@ Example
         id: "test", // mandatory if title is not set
         title: "test", // mandatory if id is not set
         parent_uid: "7455c9b14e3c48c9b0be19ca6a142d50", // you can specify the UID for the parent folder
-        parent_path: "/plone/folder", // or the physical path of the parent container
+        parent_path: "/Plone/folder", // or the physical path of the parent container
         ...
     }
 

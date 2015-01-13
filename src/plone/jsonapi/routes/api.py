@@ -31,6 +31,8 @@ from plone.jsonapi.routes import underscore as _
 
 logger = logging.getLogger("plone.jsonapi.routes")
 
+PORTAL_IDS = ["0", "portal", "site", "plone"]
+
 
 #-----------------------------------------------------------------------------
 #   Json API (CRUD) Functions
@@ -508,7 +510,7 @@ def get_object_by_uid(uid):
     if uid is None: return None
 
     # define uid 0 as the portal object
-    if  _.to_int(uid) == 0:
+    if uid.lower() in PORTAL_IDS:
         return get_portal()
 
     # we try to find the object with both catalogs
@@ -616,6 +618,8 @@ def do_action_for(obj, transition):
 
 def delete_object(obj):
     """ delete the object """
+    # we do not want to delete the site root!
+    if is_root(obj): return False
     return ploneapi.content.delete(obj) == None and True or False
 
 

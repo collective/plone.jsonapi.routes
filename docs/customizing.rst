@@ -7,7 +7,8 @@ by the API or you simply write your own route provider.
 
 This section will show how to build a custom route provider for an example
 content type. It will also show how to write and register a custom data adapter
-for this content type.
+for this content type. It is even possible to customize how the fields of a
+specific content type can be accessed or modified.
 
 
 Adding a custom route provider
