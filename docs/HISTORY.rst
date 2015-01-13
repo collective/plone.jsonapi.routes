@@ -1,7 +1,7 @@
 Changelog
 =========
 
-0.4 - unreleased
+0.4 - 2015-01-13
 ----------------
 
 **FIXED ISSUES**
