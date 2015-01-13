@@ -44,7 +44,7 @@ def get_record(uid=None):
     """ returns a single record
     """
     obj = None
-    if uid:
+    if uid is not None:
         obj = get_object_by_uid(uid)
     else:
         form = req.get_form()
@@ -510,7 +510,7 @@ def get_object_by_uid(uid):
     if uid is None: return None
 
     # define uid 0 as the portal object
-    if uid.lower() in PORTAL_IDS:
+    if str(uid).lower() in PORTAL_IDS:
         return get_portal()
 
     # we try to find the object with both catalogs
