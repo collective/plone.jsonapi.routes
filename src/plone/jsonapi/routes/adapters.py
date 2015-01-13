@@ -70,7 +70,7 @@ class ZCDataProvider(Base):
     component.adapts(ICatalogBrain)
 
     def __init__(self, context):
-        super(self.__class__, self).__init__(context)
+        super(ZCDataProvider, self).__init__(context)
 
     def to_dict(self):
         brain = self.context
@@ -96,7 +96,7 @@ class DexterityDataProvider(Base):
     component.adapts(IDexterityContent)
 
     def __init__(self, context):
-        super(self.__class__, self).__init__(context)
+        super(DexterityDataProvider, self).__init__(context)
 
         schema = SCHEMA_CACHE.get(context.portal_type)
         self.keys = schema.names()
@@ -109,7 +109,7 @@ class ATDataProvider(Base):
     component.adapts(IATContentType)
 
     def __init__(self, context):
-        super(self.__class__, self).__init__(context)
+        super(ATDataProvider, self).__init__(context)
         schema = context.Schema()
         self.keys = schema.keys()
 
@@ -121,7 +121,7 @@ class SiteRootDataProvider(Base):
     component.adapts(ISiteRoot)
 
     def __init__(self, context):
-        super(self.__class__, self).__init__(context)
+        super(SiteRootDataProvider, self).__init__(context)
 
 #---------------------------------------------------------------------------
 #   Functional Helpers
