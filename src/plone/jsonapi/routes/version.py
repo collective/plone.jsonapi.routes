@@ -12,7 +12,7 @@ def version():
     return dist.version
 
 __version__ = version()
-__build__ = 335
+__build__ = 336
 __date__ = '2015-01-13'
 
 
