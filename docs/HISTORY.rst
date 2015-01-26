@@ -4,7 +4,9 @@ Changelog
 0.5 - unreleased
 ----------------
 
-- no changes yet
+**ENHANCEMENTS**
+
+- https://github.com/collective/plone.jsonapi.routes/issues/25: Added Batch Adapter
 
 
 0.4 - 2015-01-13

@@ -3,7 +3,6 @@
 __author__    = 'Ramon Bartl <ramon.bartl@googlemail.com>'
 __docformat__ = 'plaintext'
 
-import urllib
 import logging
 
 from plone import api as ploneapi
@@ -25,6 +24,7 @@ from plone.jsonapi.routes import request as req
 from plone.jsonapi.routes.exceptions import APIError
 
 from plone.jsonapi.routes.interfaces import IInfo
+from plone.jsonapi.routes.interfaces import IBatch
 from plone.jsonapi.routes.interfaces import IDataManager
 from plone.jsonapi.routes import underscore as _
 
@@ -323,34 +323,18 @@ def get_batch(sequence, size, start=0, endpoint=None, complete=False):
     """ create a batched result record out of a sequence (catalog brains)
     """
 
-    batch = Batch(sequence, size, start)
+    # we call an adapter here to allow backwards compatibility hooks
+    batch = IBatch(Batch(sequence, size, start))
+
     return {
-        "pagesize": batch.pagesize,
-        "next":     make_next_url(batch),
-        "previous": make_prev_url(batch),
-        "page":     batch.pagenumber,
-        "pages":    batch.numpages,
-        "count":    batch.sequence_length,
-        "items":    make_items_for([b for b in batch], endpoint, complete=complete),
+        "pagesize": batch.get_pagesize(),
+        "next":     batch.make_next_url(),
+        "previous": batch.make_prev_url(),
+        "page":     batch.get_pagenumber(),
+        "pages":    batch.get_numpages(),
+        "count":    batch.get_sequence_length(),
+        "items":    make_items_for([b for b in batch.get_batch()], endpoint, complete=complete),
     }
-
-
-def make_next_url(batch):
-    if not batch.has_next:
-        return None
-    request = req.get_request()
-    params = request.form
-    params["b_start"] = batch.pagenumber * batch.pagesize
-    return "%s?%s" % (request.URL, urllib.urlencode(params))
-
-
-def make_prev_url(batch):
-    if not batch.has_previous:
-        return None
-    request = req.get_request()
-    params = request.form
-    params["b_start"] = max(batch.pagenumber - 2, 0) * batch.pagesize
-    return "%s?%s" % (request.URL, urllib.urlencode(params))
 
 #-----------------------------------------------------------------------------
 #   Functional Helpers

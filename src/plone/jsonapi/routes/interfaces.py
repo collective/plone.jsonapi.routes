@@ -6,19 +6,6 @@ __docformat__ = 'plaintext'
 from zope import interface
 
 
-class IDataManager(interface.Interface):
-    """ Field Interface
-    """
-
-    def get(name):
-        """ Get the value of the named field with
-        """
-
-    def set(name, value):
-        """ Set the value of the named field
-        """
-
-
 class IInfo(interface.Interface):
     """ JSON Info Interface
     """
@@ -29,6 +16,52 @@ class IInfo(interface.Interface):
 
     def __call__():
         """ return the dictionary representation of the object
+        """
+
+
+class IBatch(interface.Interface):
+    """ Batch Interface
+    """
+
+    def get_batch():
+        """ return the wrapped batch object
+        """
+
+    def get_pagesize():
+        """ return the current page size
+        """
+
+    def get_pagenumber():
+        """ return the current page number
+        """
+
+    def get_numpages():
+        """ return the current number of pages
+        """
+
+    def get_sequence_length():
+        """ return the length
+        """
+
+    def make_next_url():
+        """ build and return the next url
+        """
+
+    def make_prev_url():
+        """ build and return the previous url
+        """
+
+
+class IDataManager(interface.Interface):
+    """ Field Interface
+    """
+
+    def get(name):
+        """ Get the value of the named field with
+        """
+
+    def set(name, value):
+        """ Set the value of the named field
         """
 
 # vim: set ft=python ts=4 sw=4 expandtab :

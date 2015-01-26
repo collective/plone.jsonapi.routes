@@ -7,6 +7,12 @@
     <!-- Zope2 initialization -->
     <five:registerPackage package="." initialize=".initialize" />
 
+    <!-- Adapter for Batching -->
+    <adapter
+        for="*"
+        factory=".batch.Batch"
+        />
+
     <!-- Adapter for AT Field manipulation -->
     <adapter
         for="Products.ATContentTypes.interfaces.IATContentType"

@@ -1,0 +1,57 @@
+# -*- coding: utf-8 -*-
+
+__author__    = 'Ramon Bartl <ramon.bartl@googlemail.com>'
+__docformat__ = 'plaintext'
+
+import urllib
+import logging
+
+from zope import interface
+
+from plone.jsonapi.routes.interfaces import IBatch
+
+from plone.jsonapi.routes import request as req
+
+logger = logging.getLogger("plone.jsonapi.routes.batching")
+
+
+class Batch(object):
+    """ Adapter for batching functionality
+    """
+    interface.implements(IBatch)
+
+    def __init__(self, batch):
+        self.batch = batch
+
+    def get_batch(self):
+        return self.batch
+
+    def get_pagesize(self):
+        return self.batch.pagesize
+
+    def get_pagenumber(self):
+        return self.batch.pagenumber
+
+    def get_numpages(self):
+        return self.batch.numpages
+
+    def get_sequence_length(self):
+        return self.batch.sequence_length
+
+    def make_next_url(self):
+        if not self.batch.has_next:
+            return None
+        request = req.get_request()
+        params = request.form
+        params["b_start"] = self.batch.pagenumber * self.batch.pagesize
+        return "%s?%s" % (request.URL, urllib.urlencode(params))
+
+    def make_prev_url(self):
+        if not self.batch.has_previous:
+            return None
+        request = req.get_request()
+        params = request.form
+        params["b_start"] = max(self.batch.pagenumber - 2, 0) * self.batch.pagesize
+        return "%s?%s" % (request.URL, urllib.urlencode(params))
+
+# vim: set ft=python ts=4 sw=4 expandtab :
