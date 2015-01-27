@@ -16,7 +16,7 @@ logger = logging.getLogger("plone.jsonapi.routes.batching")
 
 
 class Batch(object):
-    """ Adapter for batching functionality
+    """ Adapter for Plone 4.3 batching functionality
     """
     interface.implements(IBatch)
 
@@ -52,6 +52,46 @@ class Batch(object):
         request = req.get_request()
         params = request.form
         params["b_start"] = max(self.batch.pagenumber - 2, 0) * self.batch.pagesize
+        return "%s?%s" % (request.URL, urllib.urlencode(params))
+
+
+class Batch42(object):
+    """ Adapter for Plone 4.2 batching functionality
+    """
+    interface.implements(IBatch)
+
+    def __init__(self, batch):
+        self.batch = batch
+
+    def get_batch(self):
+        return self.batch
+
+    def get_pagesize(self):
+        return self.batch.size
+
+    def get_pagenumber(self):
+        return self.batch.pagenumber
+
+    def get_numpages(self):
+        return self.batch.numpages
+
+    def get_sequence_length(self):
+        return self.batch.sequence_length
+
+    def make_next_url(self):
+        if self.batch.next is not None:
+            return None
+        request = req.get_request()
+        params = request.form
+        params["b_start"] = self.batch.numpages * self.batch.size
+        return "%s?%s" % (request.URL, urllib.urlencode(params))
+
+    def make_prev_url(self):
+        if self.batch.previous is not None:
+            return None
+        request = req.get_request()
+        params = request.form
+        params["b_start"] = max(self.batch.numpages - 2, 0) * self.batch.size
         return "%s?%s" % (request.URL, urllib.urlencode(params))
 
 # vim: set ft=python ts=4 sw=4 expandtab :
