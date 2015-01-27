@@ -7,10 +7,16 @@
     <!-- Zope2 initialization -->
     <five:registerPackage package="." initialize=".initialize" />
 
-    <!-- Adapter for Batching -->
+    <!-- Adapter for Plone 4.3 Batching -->
     <adapter
         for="*"
         factory=".batch.Batch"
+        />
+
+    <!-- Adapter for Plone 4.2 Batching -->
+    <adapter
+        for="ZTUtils.Batch.Batch"
+        factory=".batch.Batch42"
         />
 
     <!-- Adapter for AT Field manipulation -->
