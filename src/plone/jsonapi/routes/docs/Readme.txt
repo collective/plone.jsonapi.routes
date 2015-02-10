@@ -65,10 +65,10 @@ We expect **one** folder in our portal::
 
 
 Query records
-================
+=============
 
 ZPublisher query record format can be used for querying.
-We test this with a simple created since query.
+We test this with a simple created since query::
 
     >>> from urllib import urlencode
     >>> from datetime import datetime
@@ -81,7 +81,7 @@ We test this with a simple created since query.
     >>> browser.open(api_url + "/folders?" + since_now)
     >>> response = self.decode(browser.contents)
 
-No folders were created just now.
+No folders were created just now::
 
    >>> response.get("count")
    0
@@ -93,10 +93,10 @@ No folders were created just now.
    >>> browser.open(api_url + "/folders?" + since_yesterday)
    >>> response = self.decode(browser.contents)
 
-One folder created since yesterday - if not, we need to look at testrunner performance ;-)
+One folder created since yesterday - if not, we need to look at testrunner
+performance ;-) ::
 
    >>> response.get("count")
    1
 
-    
 .. vim: set ft=rst ts=4 sw=4 expandtab :
