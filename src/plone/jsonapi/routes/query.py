@@ -8,6 +8,7 @@ import logging
 import pkg_resources
 
 from plone import api
+from ZPublisher import HTTPRequest
 
 from DateTime import DateTime
 
@@ -242,6 +243,10 @@ def get_index(name):
 def to_index_value(value, index):
     """ convert the value for the given index
     """
+    # ZPublisher records can be passed to the catalog as is.
+    if isinstance(value, HTTPRequest.record):
+        return value
+
     if type(index) in types.StringTypes:
         index = get_index(index)
 
