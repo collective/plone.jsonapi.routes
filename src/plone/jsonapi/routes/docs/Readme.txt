@@ -31,7 +31,7 @@ Check if the version URL returns the right version::
     True
 
 
-Reoute Providers
+Route Providers
 ================
 
 The package provides for each contenttype a separate resource URL.
@@ -63,4 +63,40 @@ We expect **one** folder in our portal::
     >>> folder.get("title") == "Test Folder"
     True
 
+
+Query records
+================
+
+ZPublisher query record format can be used for querying.
+We test this with a simple created since query.
+
+    >>> from urllib import urlencode
+    >>> from datetime import datetime
+    >>> from datetime import timedelta
+
+    >>> now = datetime.now()
+    >>> since_now = urlencode({
+    ...    'created.query:record:list:date': now,
+    ...    'created.range:record': 'min'})
+    >>> browser.open(api_url + "/folders?" + since_now)
+    >>> response = self.decode(browser.contents)
+
+No folders were created just now.
+
+   >>> response.get("count")
+   0
+
+   >>> yesterday = now - timedelta(days=1)
+   >>> since_yesterday = urlencode({
+   ...     'created.query:record:list:date': yesterday,
+   ...     'created.range:record': 'min'})
+   >>> browser.open(api_url + "/folders?" + since_yesterday)
+   >>> response = self.decode(browser.contents)
+
+One folder created since yesterday - if not, we need to look at testrunner performance ;-)
+
+   >>> response.get("count")
+   1
+
+    
 .. vim: set ft=rst ts=4 sw=4 expandtab :
