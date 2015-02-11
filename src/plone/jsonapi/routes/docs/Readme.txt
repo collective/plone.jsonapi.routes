@@ -98,5 +98,25 @@ One folder created since yesterday - if not, we need to look at testrunner perfo
    >>> response.get("count")
    1
 
+
+Sorting queries
+===============
+
+Queries accept standard sort_order and sort_on params.
+Note that unlike the portal_catalog default, we default to descending order.
+
+    >>> browser.open(api_url + "/search?sort_on=sortable_title")
+    >>> response = self.decode(browser.contents)
+    >>> [x['id'] for x in response.get('items')][:3]
+    ['folder', 'document-49', 'document-48']
+
+'ascending' gives us what we expect.
+
+    >>> browser.open(api_url + "/search?sort_on=sortable_title&sort_order=ascending")
+    >>> response = self.decode(browser.contents)
+    >>> [x['id'] for x in response.get('items')][:3]
+    ['document-0', 'document-1', 'document-2']
+
+
     
 .. vim: set ft=rst ts=4 sw=4 expandtab :
