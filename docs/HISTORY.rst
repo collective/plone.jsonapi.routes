@@ -4,9 +4,16 @@ Changelog
 0.5 - unreleased
 ----------------
 
-**ENHANCEMENTS**
+**CLOSED ISSUES**
 
-- https://github.com/collective/plone.jsonapi.routes/issues/25: Added Batch Adapter
+- https://github.com/collective/plone.jsonapi.routes/pull/30: fix standard query ignoring sort_on and sort_order
+- https://github.com/collective/plone.jsonapi.routes/issues/27: querying does not support ZPublisher record format
+- https://github.com/collective/plone.jsonapi.routes/issues/25: Add support for Plone 4.2
+
+**OTHER CHANGES**
+
+- Added batch adapter
+- Added more tests
 
 
 0.4 - 2015-01-13
