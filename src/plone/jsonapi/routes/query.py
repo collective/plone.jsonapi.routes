@@ -66,6 +66,9 @@ def make_standard_query(**kw):
     # build a default query from the request parameters and the keywords
     query = build_catalog_query(**kw)
 
+    sort_on, sort_order = get_sort_spec()
+    query.update(dict(sort_order=sort_order, sort_on=sort_on))
+
     return query
 
 
@@ -83,7 +86,7 @@ def make_advanced_query(**kw):
     # get the sort specification
     sort = get_sort_spec()
 
-    return advanced_query, sort
+    return advanced_query, (sort, )
 
 
 def build_catalog_query(**kw):
@@ -112,6 +115,7 @@ def get_request_query():
 
     # check what we can use from the reqeust
     request = req.get_request()
+
     for idx in indexes:
         val = request.form.get(idx)
         if val: query[idx] = to_index_value(val, idx)
@@ -247,7 +251,7 @@ def to_index_value(value, index):
     # ZPublisher records can be passed to the catalog as is.
     if isinstance(value, HTTPRequest.record):
         return value
-
+    
     if type(index) in types.StringTypes:
         index = get_index(index)
 
@@ -267,7 +271,7 @@ def get_sort_spec():
     all_indexes = get_portal_catalog().indexes()
     si = req.get_sort_on(allowed_indexes=all_indexes)
     so = req.get_sort_order()
-    return ((si, so), )
+    return si, so
 
 
 def standard_search(query, **kw):
