@@ -1,15 +1,14 @@
 # -*- coding: utf-8 -*-
 
-__author__ = 'Ramon Bartl <ramon.bartl@googlemail.com>'
-__docformat__ = 'plaintext'
-
 import types
 import logging
 
 from plone.jsonapi.routes.api import url_for
 
-logger = logging.getLogger("plone.jsonapi.routes")
+__author__ = 'Ramon Bartl <ramon.bartl@googlemail.com>'
+__docformat__ = 'plaintext'
 
+logger = logging.getLogger("plone.jsonapi.routes")
 
 
 def returns_plone_items_for(endpoint):
@@ -28,5 +27,3 @@ def returns_plone_items_for(endpoint):
             return result
         return inner
     return decorator
-
-# vim: set ft=python ts=4 sw=4 expandtab :
