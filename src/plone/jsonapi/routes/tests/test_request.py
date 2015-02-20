@@ -45,10 +45,12 @@ class TestRequest(APITestCase):
         self.assertEqual(req.get_sort_on(), "Title")
 
     def test_sort_order_parameter(self):
-        self.assertEqual(req.get_sort_order(), "descending")
-        request = req.get_request()
-        request.form["sort_order"] = "asc"
         self.assertEqual(req.get_sort_order(), "ascending")
+        request = req.get_request()
+        request.form["sort_order"] = "desc"
+        self.assertEqual(req.get_sort_order(), "descending")
+        request.form["sort_order"] = "DESC"
+        self.assertEqual(req.get_sort_order(), "descending")
 
     def test_query_parameter(self):
         self.assertEqual(req.get_query(), "")

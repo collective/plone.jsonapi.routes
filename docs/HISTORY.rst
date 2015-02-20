@@ -6,7 +6,8 @@ Changelog
 
 **CLOSED ISSUES**
 
-- https://github.com/collective/plone.jsonapi.routes/pull/30: fix standard query ignoring sort_on and sort_order
+- https://github.com/collective/plone.jsonapi.routes/issues/31: Change default sort order to ascending
+- https://github.com/collective/plone.jsonapi.routes/pull/30:   fix standard query ignoring sort_on and sort_order
 - https://github.com/collective/plone.jsonapi.routes/issues/27: querying does not support ZPublisher record format
 - https://github.com/collective/plone.jsonapi.routes/issues/25: Add support for Plone 4.2
 

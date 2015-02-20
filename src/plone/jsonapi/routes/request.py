@@ -88,7 +88,8 @@ def get_sort_order():
         return "ascending"
     if sort_order in ["DESC", "descending", "d", "desc", "down", "low"]:
         return "descending"
-    return "descending"
+    # https://github.com/collective/plone.jsonapi.routes/issues/31
+    return "ascending"
 
 
 def get_query():

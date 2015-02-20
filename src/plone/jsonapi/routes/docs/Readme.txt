@@ -103,17 +103,17 @@ performance ;-) ::
 Sorting queries
 ===============
 
-Queries accept standard sort_order and sort_on params.
-Note that unlike the portal_catalog default, we default to descending order.
+Queries accept standard `sort_order` and `sort_on` params.
+Like the portal_catalog default, the default is ascending order.
 
     >>> browser.open(api_url + "/search?sort_on=sortable_title")
     >>> response = self.decode(browser.contents)
     >>> [x['id'] for x in response.get('items')][:3]
-    ['folder', 'document-49', 'document-48']
+    ['document-0', 'document-1', 'document-2']
 
-'ascending' gives us what we expect.
+We can also use 'descending' sort::
 
-    >>> browser.open(api_url + "/search?sort_on=sortable_title&sort_order=ascending")
+    >>> browser.open(api_url + "/search?sort_on=sortable_title&sort_order=descending")
     >>> response = self.decode(browser.contents)
     >>> [x['id'] for x in response.get('items')][:3]
-    ['document-0', 'document-1', 'document-2']
+    ['folder', 'document-49', 'document-48']
