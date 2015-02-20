@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 
-__author__    = 'Ramon Bartl <ramon.bartl@googlemail.com>'
-__docformat__ = 'plaintext'
-
 import json
 import logging
 
 from zope.globalrequest import getRequest
 
 from plone.jsonapi.routes import underscore as _
+
+__author__ = 'Ramon Bartl <ramon.bartl@googlemail.com>'
+__docformat__ = 'plaintext'
 
 logger = logging.getLogger("plone.jsonapi.routes.request")
 
@@ -53,7 +53,8 @@ def get_sort_limit():
     """ returns the 'sort_limit' from the request
     """
     limit = _.convert(get("sort_limit"), _.to_int)
-    if (limit < 1): limit = None # catalog raises IndexError if limit < 1
+    if (limit < 1):
+        limit = None  # catalog raises IndexError if limit < 1
     return limit
 
 
@@ -110,7 +111,7 @@ def get_path():
 def get_depth():
     """ returns the 'depth' from the request
     """
-    return  _.convert(get("depth", 0), _.to_int)
+    return _.convert(get("depth", 0), _.to_int)
 
 
 def get_recent_created():
