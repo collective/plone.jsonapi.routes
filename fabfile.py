@@ -20,23 +20,27 @@ if not os.path.exists("fabfile.py"):
 
 env.version_file = "src/plone/jsonapi/routes/version.py"
 
-#-----------------------------------------------------------------------------
+
+# -----------------------------------------------------------------------------
 # Public API
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 @task
 def test():
     local("./bin/test -s plone.jsonapi.routes")
+
 
 @task
 def make_docs():
     with lcd("docs"):
         local("make html")
 
+
 @task
 def preview_docs():
     with lcd("docs"):
         local("open _build/html/index.html")
+
 
 @task
 def bump_version():
@@ -48,11 +52,13 @@ def bump_version():
     local("git add " + env.version_file)
     print "updated version: ", version_string()
 
+
 @task
 def version():
     """ Print current version
     """
     print green(version_string())
+
 
 @task
 def reload():
@@ -60,9 +66,9 @@ def reload():
     local("wget --delete-after http://admin:admin@127.0.0.1:8080/@@reload?action=code")
 
 
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Functional Helpers
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 def write_version_info():
     """ updates the build and date of the version module
@@ -80,6 +86,7 @@ def write_version_info():
             line = "__date__ = '%s'" % now
         print line.strip("\n")
 
+
 def get_version():
     f = env.version_file
     out = {}
@@ -92,9 +99,8 @@ def get_version():
             out[name] = value
     return out
 
+
 def version_string(version=None):
     if not version:
         version = get_version()
     return "version %(version)s build %(build)s date %(date)s" % (version)
-
-# vim: set ft=python ts=4 sw=4 expandtab :

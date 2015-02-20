@@ -64,5 +64,3 @@ MIT - do what you want
 .. _curl: http://curl.haxx.se/
 .. _RESTful: http://en.wikipedia.org/wiki/Representational_state_transfer
 .. _pypi: http://pypi.python.org
-
-.. vim: set ft=rst ts=4 sw=4 expandtab :
