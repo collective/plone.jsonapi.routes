@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
+from zope import interface
+
 __author__ = 'Ramon Bartl <ramon.bartl@googlemail.de>'
 __docformat__ = 'plaintext'
-
-from zope import interface
 
 
 class IInfo(interface.Interface):
@@ -63,5 +63,3 @@ class IDataManager(interface.Interface):
     def set(name, value):
         """ Set the value of the named field
         """
-
-# vim: set ft=python ts=4 sw=4 expandtab :
