@@ -147,7 +147,7 @@ All content resources accept to be filtered by request parameters.
 +-----------------+-----------------------+-------------------------------------------------------------------------+
 | sort_on         | catalog index         | Sort the results by the given index                                     |
 +-----------------+-----------------------+-------------------------------------------------------------------------+
-| sort_order      | asc / desc            | Sort ascrending or descending (default: descending)                     |
+| sort_order      | asc / desc            | Sort ascending or descending (default: ascending)                       |
 +-----------------+-----------------------+-------------------------------------------------------------------------+
 | sort_limit      | 1..n                  | Limit the result set to n items.                                        |
 |                 |                       | The portal catalog will only return n items.                            |
@@ -180,6 +180,20 @@ parameters.
 
 .. note:: Custom added indexes can also be used, as long as they accept a
           single string value as query.
+
+
+Query Records
+~~~~~~~~~~~~~
+
+It is also possible to use the ZPublisher query record format.
+
+Example
+
+``http://localhost:8080/Plone/@@API/plone/api/1.0/folders?created.query:record:list:date=2015-01-02&created.range:record=min``
+
+
+.. versionadded:: 0.5
+    Support for ZPublisher query record format added.
 
 
 .. _Response_Format:
