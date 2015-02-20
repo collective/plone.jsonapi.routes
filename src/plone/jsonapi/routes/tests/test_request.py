@@ -11,7 +11,7 @@ class TestRequest(APITestCase):
     """
 
     def setUp(self):
-        self.portal  = self.getPortal()
+        self.portal = self.getPortal()
         self.request = self.getRequest()
 
     def test_complete_parameter(self):
