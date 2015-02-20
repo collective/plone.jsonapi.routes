@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
 
-__author__ = 'Ramon Bartl <ramon.bartl@googlemail.com>'
-__docformat__ = 'plaintext'
-
 import types
 import logging
 import pkg_resources
@@ -25,6 +22,9 @@ except pkg_resources.DistributionNotFound:
 else:
     HAS_ADVANCED_QUERY = True
 
+__author__ = 'Ramon Bartl <ramon.bartl@googlemail.com>'
+__docformat__ = 'plaintext'
+
 
 __all__ = ['search', 'make_query']
 
@@ -35,9 +35,9 @@ logger = logging.getLogger("plone.jsonapi.routes.query")
 USE_ADVANCED_QUERY = False
 
 
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 #   Public API
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 def search(query, **kw):
     """ execute either AdvancedQuery or a StandardQuery
@@ -54,9 +54,10 @@ def make_query(**kw):
         return make_advanced_query(**kw)
     return make_standard_query(**kw)
 
-#-----------------------------------------------------------------------------
+
+# -----------------------------------------------------------------------------
 #   Query Builders
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 def make_standard_query(**kw):
     """ generates a query for the portal catalog
@@ -118,7 +119,8 @@ def get_request_query():
 
     for idx in indexes:
         val = request.form.get(idx)
-        if val: query[idx] = to_index_value(val, idx)
+        if val:
+            query[idx] = to_index_value(val, idx)
 
     return query
 
@@ -130,11 +132,13 @@ def get_custom_query():
 
     # searchable text queries
     q = req.get_query()
-    if q: query["SearchableText"] = q
+    if q:
+        query["SearchableText"] = q
 
     # physical path queries
     path = req.get_path()
-    if path: query["path"] = {'query': path, 'depth': req.get_depth()}
+    if path:
+        query["path"] = {'query': path, 'depth': req.get_depth()}
 
     # special handling for recent created/modified
     recent_created = req.get_recent_created()
@@ -161,18 +165,20 @@ def get_keyword_query(**kw):
     for k, v in kw.iteritems():
         # handle uid
         if v and k.lower() == "uid":
-            if v: query["UID"] = v
+            if v:
+                query["UID"] = v
             continue
         # handle portal_type
         if k.lower() == "portal_type":
-            if v: query["portal_type"] = _.to_list(v)
+            if v:
+                query["portal_type"] = _.to_list(v)
             continue
         # and the rest
         if k not in indexes:
             logger.warn("Skipping unknown keyword parameter '%s=%s'" % (k, v))
             continue
         if v is None:
-            logger.warn("Skipping value 'None' in keyword parameter '%s=%s'" % (k, v))
+            logger.warn("Skip value 'None' in kw parameter '%s=%s'" % (k, v))
             continue
         logger.info("Adding '%s=%s' to query" % (k, v))
         query[k] = v
@@ -185,9 +191,11 @@ def to_advanced_query(query):
     """
 
     # nothing to do
-    if not query: return Eq("Title", "")
+    if not query:
+        return Eq("Title", "")
 
     a_query = None
+
     def get_query_expression_for(value):
         # return the Advanced Query Expression
         if type(value) in (tuple, list):
@@ -206,9 +214,10 @@ def to_advanced_query(query):
 
     return a_query
 
-#-----------------------------------------------------------------------------
+
+# -----------------------------------------------------------------------------
 #   Functional Helpers
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 def calculate_delta_date(literal):
     """ calculate the date in the past from the given literal
@@ -220,12 +229,13 @@ def calculate_delta_date(literal):
         "this-month": 30,
         "this-year":  365,
     }
-    today = DateTime(DateTime().Date()) # current date without the time
+    today = DateTime(DateTime().Date())  # current date without the time
     return today - mapping.get(literal, 0)
 
-#-----------------------------------------------------------------------------
+
+# -----------------------------------------------------------------------------
 #   Catalog Helpers
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 def get_portal_catalog():
     """ fetch portal_catalog tool
@@ -251,7 +261,7 @@ def to_index_value(value, index):
     # ZPublisher records can be passed to the catalog as is.
     if isinstance(value, HTTPRequest.record):
         return value
-    
+
     if type(index) in types.StringTypes:
         index = get_index(index)
 
@@ -288,5 +298,3 @@ def advanced_search(query, sort_specs=()):
     logger.info("Advanced Query -> %s sort_specs=%r" % (query, sort_specs))
     pc = get_portal_catalog()
     return pc.evalAdvancedQuery(query, sort_specs)
-
-# vim: set ft=python ts=4 sw=4 expandtab :
