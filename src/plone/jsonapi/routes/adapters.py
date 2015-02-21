@@ -224,6 +224,10 @@ def get_wf_info(obj):
     # get the status info of the current state (dictionary)
     status = wf_tool.getStatusOf(workflow.getId(), obj)
 
+    # https://github.com/collective/plone.jsonapi.routes/issues/33
+    if not status:
+        return {}
+
     # get the current review_status
     current_state_id = status.get("review_state", None)
 

@@ -7,6 +7,7 @@ Changelog
 
 **CLOSED ISSUES**
 
+- https://github.com/collective/plone.jsonapi.routes/issues/33; Image detail URL throws error
 - https://github.com/collective/plone.jsonapi.routes/issues/34: Failed POST request return HTTP 200
 - https://github.com/collective/plone.jsonapi.routes/issues/35: DataManager does not check field permissions
 
