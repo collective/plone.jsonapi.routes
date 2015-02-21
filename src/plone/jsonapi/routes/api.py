@@ -126,6 +126,9 @@ def create_items(portal_type=None, request=None, uid=None, endpoint=None):
         update_object_with_data(obj, record)
         results.append(obj)
 
+    if not results:
+        raise APIError(400, "No Objects could be created")
+
     return make_items_for(results, endpoint=endpoint)
 
 
@@ -161,6 +164,9 @@ def update_items(portal_type=None, request=None, uid=None, endpoint=None):
         # update the object with the given record data
         obj = update_object_with_data(obj, record)
         results.append(obj)
+
+    if not results:
+        raise APIError(400, "No Objects could be updated")
 
     return make_items_for(results, endpoint=endpoint)
 
@@ -201,6 +207,9 @@ def delete_items(portal_type=None, request=None, uid=None, endpoint=None):
         info = IInfo(obj)()
         info["deleted"] = delete_object(obj)
         results.append(info)
+
+    if not results:
+        raise APIError(400, "No Objects could be deleted")
 
     return results
 
@@ -509,7 +518,7 @@ def get_object_by_uid(uid):
     # try to find the object with the portal catalog
     res = pc(dict(UID=uid))
     if len(res) > 1:
-        raise APIError(500, "More than one object found for UID %s" % uid)
+        raise APIError(400, "More than one object found for UID %s" % uid)
     if not res:
         return None
 
@@ -528,7 +537,7 @@ def get_object_by_path(path):
     portal_path = get_path(portal)
 
     if not path.startswith(portal_path):
-        raise APIError(500, "Not a physical path inside the portal")
+        raise APIError(404, "Not a physical path inside the portal")
 
     if path == portal_path:
         return portal
@@ -560,7 +569,7 @@ def mkdir(path):
             continue
 
         if not is_folderish(container):
-            raise APIError(500, "Object at %s is not a folder" % curpath)
+            raise APIError(400, "Object at %s is not a folder" % curpath)
 
         # create the folder on the go
         container = ploneapi.content.create(
@@ -587,10 +596,10 @@ def find_target_container(record):
         if target is None:
             target = mkdir(parent_path)
     else:
-        raise APIError(500, "No target UID/PATH information found")
+        raise APIError(404, "No target UID/PATH information found")
 
     if not target:
-        raise APIError(500, "No target container found")
+        raise APIError(404, "No target container found")
 
     return target
 
@@ -603,8 +612,12 @@ def do_action_for(obj, transition):
 def delete_object(obj):
     """ delete the object """
     # we do not want to delete the site root!
-    if is_root(obj): return False
-    return ploneapi.content.delete(obj) == None and True or False
+    if is_root(obj):
+        raise APIError(401, "Removing the Portal is not allowed")
+    try:
+        success = ploneapi.content.delete(obj) == None and True or False
+    except Unauthorized:
+        raise APIError(401, "You are not allowed to delete the object '%s'" % obj.getId())
 
 
 def get_current_user():
