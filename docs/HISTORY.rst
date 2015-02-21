@@ -2,10 +2,11 @@ Changelog
 =========
 
 
-0.6 - unreleased
+0.6 - 2015-02-22
 ----------------
 
-- no changes yet
+**CLOSED ISSUES**
+- https://github.com/collective/plone.jsonapi.routes/issues/35: DataManager does not check field permissions
 
 
 0.5 - 2015-02-20

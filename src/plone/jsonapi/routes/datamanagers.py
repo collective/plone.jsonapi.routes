@@ -9,6 +9,8 @@ from zope import interface
 
 from plone import api
 
+from AccessControl import Unauthorized
+
 from plone.jsonapi.routes.interfaces import IDataManager
 
 logger = logging.getLogger("plone.jsonapi.routes.datamanagers")
@@ -38,6 +40,8 @@ class ATDataManager(object):
         logger.info("ATDataManager::set: name=%r, value=%r, field=%r", name, value, field)
         if not field:
             return False
+        if not field.checkPermission("write", self.context):
+            raise Unauthorized("You are not allowed to write the field %s" % name)
         if self.is_file_field(field):
             logger.info("ATDataManager::set:File field detected ('%r'), base64 decoding value", field)
             value = str(value).decode("base64")
@@ -47,6 +51,8 @@ class ATDataManager(object):
 
     def get(self, name):
         field = self.get_field(name)
+        if not field.checkPermission("read", self.context):
+            raise Unauthorized("You are not allowed to read the field %s" % name)
         return field.get(self.context)
 
 

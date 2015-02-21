@@ -25,11 +25,12 @@
         factory=".datamanagers.ATDataManager"
         />
 
+    <!-- deactivated due to issue #35 -->
     <!-- Adapter for Dexterity Field manipulation -->
-    <adapter
-        for="plone.dexterity.interfaces.IDexterityContent"
-        factory=".datamanagers.DexterityDataManager"
-        />
+    <!-- <adapter -->
+    <!--     for="plone.dexterity.interfaces.IDexterityContent" -->
+    <!--     factory=".datamanagers.DexterityDataManager" -->
+    <!--     /> -->
 
     <!-- Adapter for Catalog Brains -->
     <adapter
