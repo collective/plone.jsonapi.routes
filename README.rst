@@ -9,6 +9,14 @@ plone.jsonapi.routes
    :depth: 2
 
 
+Latest Build Status
+-------------------
+
+.. image:: https://api.travis-ci.org/collective/plone.jsonapi.routes.png?branch=master
+    :target: https://travis-ci.org/collective/plone.jsonapi.routes
+    :alt: Build Status
+
+
 Introduction
 ------------
 
