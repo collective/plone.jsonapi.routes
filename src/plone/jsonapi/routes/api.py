@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
 
-__author__    = 'Ramon Bartl <ramon.bartl@googlemail.com>'
-__docformat__ = 'plaintext'
-
 import logging
 
 from plone import api as ploneapi
@@ -28,18 +25,20 @@ from plone.jsonapi.routes.interfaces import IBatch
 from plone.jsonapi.routes.interfaces import IDataManager
 from plone.jsonapi.routes import underscore as _
 
+__author__ = 'Ramon Bartl <ramon.bartl@googlemail.com>'
+__docformat__ = 'plaintext'
 
 logger = logging.getLogger("plone.jsonapi.routes")
 
 PORTAL_IDS = ["0", "portal", "site", "plone"]
 
 
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 #   Json API (CRUD) Functions
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 
-### GET RECORD
+# GET RECORD
 def get_record(uid=None):
     """ returns a single record
     """
@@ -49,12 +48,13 @@ def get_record(uid=None):
     else:
         form = req.get_form()
         obj = get_object_by_record(form)
-    if obj is None: raise APIError(404, "No object found")
+    if obj is None:
+        raise APIError(404, "No object found")
     items = make_items_for([obj])
     return _.first(items)
 
 
-### GET
+# GET
 def get_items(portal_type=None, request=None, uid=None, endpoint=None):
     """ returns a list of items
 
@@ -73,7 +73,7 @@ def get_items(portal_type=None, request=None, uid=None, endpoint=None):
     return make_items_for(results, endpoint, complete=complete)
 
 
-### GET BATCHED
+# GET BATCHED
 def get_batched(portal_type=None, request=None, uid=None, endpoint=None):
     """ returns a batched result record (dictionary)
     """
@@ -82,7 +82,7 @@ def get_batched(portal_type=None, request=None, uid=None, endpoint=None):
     results = get_search_results(portal_type=portal_type, uid=uid)
 
     # fetch the batch params from the request
-    size  = req.get_batch_size()
+    size = req.get_batch_size()
     start = req.get_batch_start()
 
     complete = req.get_complete()
@@ -94,7 +94,7 @@ def get_batched(portal_type=None, request=None, uid=None, endpoint=None):
     return get_batch(results, size, start, endpoint=endpoint, complete=complete)
 
 
-### CREATE
+# CREATE
 def create_items(portal_type=None, request=None, uid=None, endpoint=None):
     """ create items
 
@@ -213,9 +213,10 @@ def delete_items(portal_type=None, request=None, uid=None, endpoint=None):
 
     return results
 
-#-----------------------------------------------------------------------------
+
+# -----------------------------------------------------------------------------
 #   Data Functions
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 def get_search_results(**kw):
     """ search the catalog and return the results
@@ -273,14 +274,16 @@ def get_url_info(brain_or_object, endpoint):
         "api_url": url_for(endpoint, uid=uid),
     }
 
+
 def get_parent_info(obj):
     """ returns the infos for the parent object
     """
 
     # special case for the portal route
-    if is_root(obj): return {}
+    if is_root(obj):
+        return {}
 
-    parent   = get_parent(obj)
+    parent = get_parent(obj)
     endpoint = get_endpoint(parent.portal_type)
 
     if is_root(parent):
@@ -324,9 +327,10 @@ def get_children(obj):
         "children": children
     }
 
-#-----------------------------------------------------------------------------
+
+# -----------------------------------------------------------------------------
 #   Batching Helpers
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 def get_batch(sequence, size, start=0, endpoint=None, complete=False):
     """ create a batched result record out of a sequence (catalog brains)
@@ -345,9 +349,10 @@ def get_batch(sequence, size, start=0, endpoint=None, complete=False):
         "items":    make_items_for([b for b in batch.get_batch()], endpoint, complete=complete),
     }
 
-#-----------------------------------------------------------------------------
+
+# -----------------------------------------------------------------------------
 #   Functional Helpers
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 def get_portal():
     """ get the Plone site
@@ -400,9 +405,11 @@ def is_folderish(obj):
 def get_locally_allowed_types(obj):
     """ get the locally allowed types of this object
     """
-    if not is_folderish(obj): return []
+    if not is_folderish(obj):
+        return []
     method = getattr(obj, "getLocallyAllowedTypes", None)
-    if not callable(method): return []
+    if not callable(method):
+        return []
     return method()
 
 
@@ -481,7 +488,8 @@ def get_object_by_record(record):
     """
 
     # nothing to do here
-    if not record: return None
+    if not record:
+        return None
 
     if record.get("uid"):
         return get_object_by_uid(record["uid"])
@@ -500,7 +508,8 @@ def get_object_by_uid(uid):
     """
 
     # nothing to do here
-    if uid is None: return None
+    if uid is None:
+        return None
 
     # define uid 0 as the portal object
     if str(uid).lower() in PORTAL_IDS:
@@ -530,7 +539,8 @@ def get_object_by_path(path):
     """
 
     # nothing to do here
-    if not path: return None
+    if not path:
+        return None
 
     pc = get_portal_catalog()
     portal = get_portal()
