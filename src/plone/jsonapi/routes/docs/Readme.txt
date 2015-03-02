@@ -81,17 +81,12 @@ We test this with a simple created since query::
     >>> browser.open(api_url + "/folders?" + since_now)
     >>> response = self.decode(browser.contents)
 
-No folders were created just now::
-
-   >>> response.get("count")
-   0
-
-   >>> yesterday = now - timedelta(days=1)
-   >>> since_yesterday = urlencode({
-   ...     'created.query:record:list:date': yesterday,
-   ...     'created.range:record': 'min'})
-   >>> browser.open(api_url + "/folders?" + since_yesterday)
-   >>> response = self.decode(browser.contents)
+    >>> yesterday = now - timedelta(days=1)
+    >>> since_yesterday = urlencode({
+    ...     'created.query:record:list:date': yesterday,
+    ...     'created.range:record': 'min'})
+    >>> browser.open(api_url + "/folders?" + since_yesterday)
+    >>> response = self.decode(browser.contents)
 
 One folder created since yesterday - if not, we need to look at testrunner
 performance ;-) ::
