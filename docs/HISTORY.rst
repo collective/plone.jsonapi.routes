@@ -2,6 +2,14 @@ Changelog
 =========
 
 
+0.7 - unreleased
+----------------
+
+**OTHER CHANGES**
+
+- Travis CI integration
+
+
 0.6 - 2015-02-22
 ----------------
 
