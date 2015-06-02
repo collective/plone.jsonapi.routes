@@ -655,17 +655,18 @@ def create_object(**kw):
 def update_object_with_data(content, record):
     """ update the content with the values from records
     """
-    dm = IDataManager(content, None)
+    dm = IDataManager(content)
     if dm is None:
         raise APIError(400, "Update on this object is not allowed")
     for k, v in record.items():
+
         try:
-            success = dm.set(k, v)
+            success = dm.set(k, v, **record)
         except Unauthorized:
             raise APIError(401, "You are not allowed to set the field '%s'" % k)
 
         if not success:
-            logger.info("update_object_with_data::skipping key=%r", k)
+            logger.warn("update_object_with_data::skipping key=%r", k)
             continue
 
         logger.info("update_object_with_data::field %r updated with value=%r", k, v)

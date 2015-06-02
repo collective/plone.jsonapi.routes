@@ -10,6 +10,7 @@ from zope import interface
 from plone import api
 
 from AccessControl import Unauthorized
+from Products.Archetypes.utils import mapply
 
 from plone.jsonapi.routes.interfaces import IDataManager
 
@@ -28,25 +29,31 @@ class ATDataManager(object):
         """ checks if field is a file field
         """
         # XXX find a better way to distinguish file/image fields
-        if field.__name__ in ["file", "image"]:
+        if getattr(field, "type", None) in ["file", "image", "blob"]:
             return True
         return False
 
     def get_field(self, name):
         return self.context.getField(name)
 
-    def set(self, name, value):
+    def set(self, name, value, **kw):
         field = self.get_field(name)
         logger.info("ATDataManager::set: name=%r, value=%r, field=%r", name, value, field)
+
         if not field:
             return False
+
         if not field.checkPermission("write", self.context):
             raise Unauthorized("You are not allowed to write the field %s" % name)
+
         if self.is_file_field(field):
             logger.info("ATDataManager::set:File field detected ('%r'), base64 decoding value", field)
             value = str(value).decode("base64")
+
+        # get the field mutator
         mutator = field.getMutator(self.context)
-        mutator(value)
+        # Inspect function and apply positional and keyword arguments as possible.
+        mapply(mutator, value, **kw)
         return True
 
     def get(self, name):
