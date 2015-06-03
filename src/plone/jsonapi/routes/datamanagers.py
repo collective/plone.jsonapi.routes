@@ -34,29 +34,48 @@ class ATDataManager(object):
         return False
 
     def get_field(self, name):
+        """ return the field by name
+        """
         return self.context.getField(name)
 
     def set(self, name, value, **kw):
-        field = self.get_field(name)
-        logger.info("ATDataManager::set: name=%r, value=%r, field=%r", name, value, field)
+        """ Set the field to the given value.
 
+        The keyword arguments represent the other field values
+        to integrate constraints to other values.
+        """
+        field = self.get_field(name)
+
+        # bail out if we have no field
         if not field:
             return False
-
+        # check the field permission
         if not field.checkPermission("write", self.context):
             raise Unauthorized("You are not allowed to write the field %s" % name)
-
         if self.is_file_field(field):
             logger.info("ATDataManager::set:File field detected ('%r'), base64 decoding value", field)
             value = str(value).decode("base64")
+            # handle the filename
+            if "filename" not in kw:
+                logger.debug("ATDataManager::set:No Filename detected -- using title or id")
+                kw["filename"] = kw.get("id") or kw.get("title")
 
+        # set the value to the field
+        self._set(field, value, **kw)
+        return True
+
+    def _set(self, field, value, **kw):
+        """ set the raw value of the field
+        """
+        logger.info("ATDataManager::set: field=%r, value=%r", field, value)
         # get the field mutator
         mutator = field.getMutator(self.context)
         # Inspect function and apply positional and keyword arguments as possible.
-        mapply(mutator, value, **kw)
-        return True
+        return mapply(mutator, value, **kw)
 
     def get(self, name):
+        """ get the value of the field by name
+        """
         field = self.get_field(name)
         if not field.checkPermission("read", self.context):
             raise Unauthorized("You are not allowed to read the field %s" % name)
