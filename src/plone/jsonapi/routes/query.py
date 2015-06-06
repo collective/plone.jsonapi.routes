@@ -32,6 +32,7 @@ __all__ = ['search', 'make_query']
 logger = logging.getLogger("plone.jsonapi.routes.query")
 
 # TODO: make this an configurable option -- maybe zcml?
+#       or Environment Variable?
 USE_ADVANCED_QUERY = False
 
 
