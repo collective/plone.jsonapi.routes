@@ -7,6 +7,7 @@ Changelog
 
 **CLOSED ISSUES**
 
+- https://github.com/collective/plone.jsonapi.routes/issues/9:  Handle Dexterity Behavior fields
 - https://github.com/collective/plone.jsonapi.routes/issues/38: Filename handling
 - https://github.com/collective/plone.jsonapi.routes/issues/36: Mime Type handling
 

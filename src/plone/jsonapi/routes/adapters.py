@@ -174,13 +174,20 @@ def get_file_dict(field):
     """
 
     data = field.data.encode("base64")
-    content_type = getattr(field, "content_type", "application/octet-stream")
+    content_type = get_content_type(field)
 
     return {
         "data": data,
         "size": len(field.data),
         "content_type": content_type
     }
+
+def get_content_type(field):
+    """ get the content type of the field
+    """
+    if hasattr(field, "contentType"):
+        return field.contentType
+    return getattr(field, "content_type", "application/octet-stream")
 
 
 def get_iso_date(date=None):
@@ -256,5 +263,3 @@ def to_transition_info(transition):
         "display": transition["description"],
         "url":     transition["url"],
     }
-
-# vim: set ft=python ts=4 sw=4 expandtab :
