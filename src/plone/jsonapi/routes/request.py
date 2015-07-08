@@ -135,4 +135,25 @@ def get_request_data():
     request = get_request()
     return _.convert(json.loads(request.get("BODY", "{}")), _.to_list)
 
-# vim: set ft=python ts=4 sw=4 expandtab :
+
+def get_json():
+    """ get the request json payload
+    """
+    data = get_request_data().pop()
+    return data or dict()
+
+
+def get_json_key(key, default=None):
+    """ return the key from the json payload
+    """
+    return get_json().get(key, default)
+
+
+def set_json_item(key, value):
+    """ manipulate json data on the fly
+    """
+    data = get_json()
+    data[key] = value
+
+    request = get_request()
+    request["BODY"] = json.dumps(data)

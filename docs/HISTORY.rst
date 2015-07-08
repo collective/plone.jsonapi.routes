@@ -14,6 +14,7 @@ Changelog
 
 **OTHER CHANGES**
 
+- Request module: Added helper functions
 - Travis CI integration
 
 
