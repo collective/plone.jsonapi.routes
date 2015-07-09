@@ -15,7 +15,7 @@ from fabric.colors import red
 from fabric.colors import green
 from fabric.colors import yellow
 
-if not os.path.exists("fabfile.py"):
+if not os.path.exists("buildout.cfg"):
     raise RuntimeError("Must be run in the buildout directory")
 
 env.version_file = "src/plone/jsonapi/routes/version.py"
