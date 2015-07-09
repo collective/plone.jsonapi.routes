@@ -625,7 +625,7 @@ def delete_object(obj):
     if is_root(obj):
         raise APIError(401, "Removing the Portal is not allowed")
     try:
-        success = ploneapi.content.delete(obj) == None and True or False
+        return ploneapi.content.delete(obj) == None and True or False
     except Unauthorized:
         raise APIError(401, "You are not allowed to delete the object '%s'" % obj.getId())
 
@@ -658,8 +658,9 @@ def update_object_with_data(content, record):
     dm = IDataManager(content)
     if dm is None:
         raise APIError(400, "Update on this object is not allowed")
-    for k, v in record.items():
 
+    # Iterate through record items
+    for k, v in record.items():
         try:
             success = dm.set(k, v, **record)
         except Unauthorized:
@@ -669,7 +670,8 @@ def update_object_with_data(content, record):
             logger.warn("update_object_with_data::skipping key=%r", k)
             continue
 
-        logger.info("update_object_with_data::field %r updated with value=%r", k, v)
+        #logger.info("update_object_with_data::field %r updated with value=%r", k, v)
+        logger.info("update_object_with_data::field %r updated", k)
 
     # do a wf transition
     if record.get("transition", None):
@@ -680,5 +682,3 @@ def update_object_with_data(content, record):
     # reindex the object
     content.reindexObject()
     return content
-
-# vim: set ft=python ts=4 sw=4 expandtab :
