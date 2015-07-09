@@ -10,6 +10,7 @@ content type. It will also show how to write and register a custom data adapter
 for this content type. It is even possible to customize how the fields of a
 specific content type can be accessed or modified.
 
+.. _ROUTE_PROVIDER:
 
 Adding a custom route provider
 ------------------------------
@@ -160,6 +161,8 @@ Register the adapter in your `configure.zcml` file for your special interface:
     </configure>
 
 
+.. _DATA_MANAGER:
+
 Adding a custom  data manager
 -----------------------------
 
@@ -182,6 +185,10 @@ Adapter. This Adapter has a simple interface:
 To customize how the data is set to each field of the content, you have to
 register an adapter for a more specific interface on the content.
 This adapter has to implement the `IDataManager` interface.
+
+
+.. important:: Please be aware that you have to implement security for field
+               level access by your own.
 
 .. code-block:: python
 
@@ -222,5 +229,3 @@ Register the adapter in your `configure.zcml` file for your special interface:
             />
 
     </configure>
-
-.. vim: set ft=rst ts=4 sw=4 expandtab tw=78 :

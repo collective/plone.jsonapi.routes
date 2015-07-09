@@ -143,5 +143,3 @@ Example
         parent_path: "/Plone/folder",
         ...
     }
-
-.. vim: set ft=rst ts=4 sw=4 expandtab tw=78 :

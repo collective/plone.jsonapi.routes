@@ -2,7 +2,7 @@ Changelog
 =========
 
 
-0.7 - unreleased
+0.7 - 2015-07-09
 ----------------
 
 **CLOSED ISSUES**
@@ -14,6 +14,7 @@ Changelog
 
 **OTHER CHANGES**
 
+- Updated Documentation
 - Request module: Added helper functions
 - Travis CI integration
 

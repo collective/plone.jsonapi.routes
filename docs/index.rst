@@ -18,6 +18,7 @@ Table of Contents:
    api
    customizing
    crud
+   dexterity
    links
    CONTRIBUTORS
    LICENSE

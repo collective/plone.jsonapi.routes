@@ -283,6 +283,29 @@ http://localhost:8080/Plone/@@API/plone/api/1.0/files
     The object data contains now the base64 encoded file with the size and
     mimetype information.
 
+.. versionadded:: 0.7
+    You can pass in a `filename` in the JSON body to set the name of the file
+    created. If omitted, the id or title will be used.
+
+Example
+.......
+
+To create a new file in the portal, you have to append `create` to the route.
+
+http://localhost:8080/Plone/@@API/plone/api/1.0/files/create
+
+The POST payload can look like this:
+
+.. code-block:: javascript
+
+    {
+        "title": "Test.docx",
+        "description": "A Word File",
+        "filename": "test.docx",
+        "parent_path": "/Plone/folder",
+        "file":"UEsDBBQABgAIAAA..."
+    }
+
 
 Images
 ------
