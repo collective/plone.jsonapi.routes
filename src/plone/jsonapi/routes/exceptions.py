@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 
-__author__    = 'Ramon Bartl <ramon.bartl@googlemail.com>'
-__docformat__ = 'plaintext'
-
-
 from plone.jsonapi.routes import request as req
+
+__author__ = 'Ramon Bartl <ramon.bartl@googlemail.com>'
+__docformat__ = 'plaintext'
 
 
 class APIError(Exception):
@@ -22,5 +21,3 @@ class APIError(Exception):
 
     def __str__(self):
         return self.message
-
-# vim: set ft=python ts=4 sw=4 expandtab :

@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
+import types
+
 __author__ = 'Ramon Bartl <ramon.bartl@nexiles.com>'
 __docformat__ = 'plaintext'
-
-import types
 
 
 def fail(error):

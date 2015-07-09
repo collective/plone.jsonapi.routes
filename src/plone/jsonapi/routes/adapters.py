@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
 
-__author__    = 'Ramon Bartl <ramon.bartl@googlemail.com>'
-__docformat__ = 'plaintext'
-
 import logging
 import datetime
 import DateTime
@@ -22,6 +19,9 @@ from Products.ZCatalog.interfaces import ICatalogBrain
 from Products.ATContentTypes.interfaces import IATContentType
 
 from plone.jsonapi.routes.interfaces import IInfo
+
+__author__ = 'Ramon Bartl <ramon.bartl@googlemail.com>'
+__docformat__ = 'plaintext'
 
 
 logger = logging.getLogger("plone.jsonapi.routes")
