@@ -7,12 +7,13 @@ from zope.schema import getFields
 from zope.schema.interfaces import IObject
 
 from plone import api
+from plone.behavior.interfaces import IBehaviorAssignable
 
 from AccessControl import Unauthorized
-from Products.Archetypes.utils import mapply
+from AccessControl import getSecurityManager
 
-# Dexterity
-from plone.behavior.interfaces import IBehaviorAssignable
+from Products.CMFCore import permissions
+from Products.Archetypes.utils import mapply
 
 from plone.jsonapi.routes.interfaces import IDataManager
 
@@ -141,7 +142,10 @@ class DexterityDataManager(object):
         if field.readonly:
             raise Unauthorized("Field '%s' is read-only" % name)
 
-        # XXX 2015-07-07: how to check the field security?
+        # XXX: How to check security on the field level?
+        sm = getSecurityManager()
+        if not sm.checkPermission(permissions.ModifyPortalContent, self.context):
+            raise Unauthorized("You are not allowed to modify this content")
 
         if self.is_file_field(field):
             logger.debug("DexterityDataManager::set:File field detected ('%r'), base64 decoding value", field)
@@ -159,4 +163,8 @@ class DexterityDataManager(object):
         """ get the value of the field by name
         """
         field = self.get_field(name)
+        # XXX: How to check security on the field level?
+        sm = getSecurityManager()
+        if not sm.checkPermission(permissions.View, self.context):
+            raise Unauthorized("You are not allowed to view this content")
         return field.get(self.context)
