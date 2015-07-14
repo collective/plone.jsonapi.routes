@@ -35,6 +35,7 @@ def truthy(thing):
         return False
     return True
 
+
 def falsy(thing):
     """ checks if a value is False or None
 
@@ -50,6 +51,7 @@ def falsy(thing):
         True
     """
     return not truthy(thing)
+
 
 def is_string(thing):
     """ checks if an object is a string/unicode type
@@ -67,6 +69,7 @@ def is_string(thing):
     """
     return type(thing) in types.StringTypes
 
+
 def is_list(thing):
     """ checks if an object is a list type
 
@@ -79,7 +82,8 @@ def is_list(thing):
         >>> is_list({})
         False
     """
-    return type(thing) is types.ListType
+    return isinstance(thing, types.ListType)
+
 
 def is_tuple(thing):
     """ checks if an object is a tuple type
@@ -93,7 +97,8 @@ def is_tuple(thing):
         >>> is_tuple([])
         False
     """
-    return type(thing) is types.TupleType
+    return isinstance(thing, types.TupleType)
+
 
 def is_dict(thing):
     """ checks if an object is a dictionary type
@@ -107,7 +112,8 @@ def is_dict(thing):
         >>> is_dict([])
         False
     """
-    return type(thing) is types.DictType
+    return isinstance(thing, types.DictType)
+
 
 def is_digit(thing):
     """ checks if an object is a digit
@@ -123,6 +129,7 @@ def is_digit(thing):
     """
     return str(thing).isdigit()
 
+
 def to_int(thing):
     """ coverts an object to int
 
@@ -135,8 +142,10 @@ def to_int(thing):
         >>> to_int("a")
 
     """
-    if is_digit(thing): return int(thing)
+    if is_digit(thing):
+        return int(thing)
     return None
+
 
 def to_string(thing):
     """ coverts an object to string
@@ -149,6 +158,7 @@ def to_string(thing):
         'a'
     """
     return str(thing) or None
+
 
 def to_list(thing):
     """ converts an object to a list
@@ -169,6 +179,7 @@ def to_list(thing):
         return [thing]
     return list(thing)
 
+
 def convert(value, converter):
     """ Converts a value with a given converter function.
 
@@ -179,8 +190,10 @@ def convert(value, converter):
         >>> convert("a", to_int)
 
     """
-    if not callable(converter): fail("Converter must be a function")
+    if not callable(converter):
+        fail("Converter must be a function")
     return converter(value)
+
 
 def pluck(col, key, default=None):
     """ Extracts a list of values from a collection of dictionaries
@@ -201,10 +214,14 @@ def pluck(col, key, default=None):
     """
     if not (is_list(col) or is_tuple(col)):
         fail("First argument must be a list or tuple")
+
     def _block(dct):
-        if not is_dict(dct): return []
+        if not is_dict(dct):
+            return []
         return dct.get(key, default)
+
     return map(_block, col)
+
 
 def pick(dct, *keys):
     """ Returns a copy of the dictionary filtered to only have values for the
@@ -216,8 +233,10 @@ def pick(dct, *keys):
     """
     copy = dict()
     for key in keys:
-        if key in dct.keys(): copy[key] = dct[key]
+        if key in dct.keys():
+            copy[key] = dct[key]
     return copy
+
 
 def omit(dct, *keys):
     """ Returns a copy of the dictionary filtered to omit the blacklisted keys
@@ -228,8 +247,10 @@ def omit(dct, *keys):
     """
     copy = dict()
     for key in dct:
-        if key not in keys: copy[key] = dct[key]
+        if key not in keys:
+            copy[key] = dct[key]
     return copy
+
 
 def rename(dct, mapping):
     """ Rename the keys of a dictionary with the given mapping
@@ -246,6 +267,7 @@ def rename(dct, mapping):
             return memo
     return reduce(_block, mapping, omit(dct, *mapping.keys()))
 
+
 def alias(col, mapping):
     """ Returns a collection of dictionaries with the keys renamed according to
         the mapping
@@ -257,10 +279,14 @@ def alias(col, mapping):
         >>> alias({"a": 1}, {"a": "b"})
         [{'b': 1}]
     """
-    if not is_list(col): col = [col]
+    if not is_list(col):
+        col = [col]
+
     def _block(dct):
         return rename(dct, mapping)
+
     return map(_block, col)
+
 
 def first(lst, n=None):
     """ get the first element of a list
@@ -271,12 +297,13 @@ def first(lst, n=None):
         >>> first(lst, 3)
         [1, 2, 3]
     """
-    if not is_list(lst): return None
+    if not is_list(lst):
+        return None
     return n is None and lst[0] or lst[0:n]
 
 
 if __name__ == '__main__':
     import doctest
-    doctest.testmod(raise_on_error=False, optionflags=doctest.ELLIPSIS | doctest.NORMALIZE_WHITESPACE)
-
-# vim: set ft=python ts=4 sw=4 expandtab :
+    doctest.testmod(raise_on_error=False,
+                    optionflags=doctest.ELLIPSIS |
+                    doctest.NORMALIZE_WHITESPACE)

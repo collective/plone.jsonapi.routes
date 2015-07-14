@@ -19,11 +19,14 @@ def add_plone_route(rule, endpoint=None, **kw):
     """ add a Plone JSON API route
     """
     def apiurl(rule):
-         return '/'.join(s.strip('/') for s in ["", BASE_URL, rule])
+        return '/'.join(s.strip('/') for s in ["", BASE_URL, rule])
 
     def wrapper(f):
         try:
-            DefaultRouter.add_url_rule(apiurl(rule), endpoint=endpoint, view_func=f, options=kw)
+            DefaultRouter.add_url_rule(apiurl(rule),
+                                       endpoint=endpoint,
+                                       view_func=f,
+                                       options=kw)
         except AssertionError:
             pass
         return f
@@ -43,7 +46,7 @@ def get_api_routes_for(segment):
         if rx.match(rule.rule):
             endpoint = rule.endpoint
             info = DefaultRouter.view_functions.get(endpoint).__doc__
-            url  = DefaultRouter.url_for(endpoint, force_external=True)
+            url = DefaultRouter.url_for(endpoint, force_external=True)
             out.append({
                 "url":  url,
                 "info": info and info.strip() or "No description available",
@@ -76,11 +79,10 @@ def initialize(context):
     import providers
 
     prefix = providers.__name__ + "."
-    for importer, modname, ispkg in pkgutil.iter_modules(providers.__path__, prefix):
+    for importer, modname, ispkg in pkgutil.iter_modules(
+            providers.__path__, prefix):
         module = __import__(modname, fromlist="dummy")
         logger.info("INITIALIZED ROUTE PROVIDER ---> %s" % module.__name__)
 
     import version
     logger.info("INITIALIZED ROUTE PROVIDER ---> %s" % version.__name__)
-
-# vim: set ft=python ts=4 sw=4 expandtab :

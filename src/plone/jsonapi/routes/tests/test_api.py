@@ -9,13 +9,12 @@ from plone.jsonapi.routes.tests.base import APITestCase
 from plone.jsonapi.routes import api
 
 
-
 class TestAPI(APITestCase):
     """ Test the API functionality
     """
 
     def setUp(self):
-        self.portal  = self.getPortal()
+        self.portal = self.getPortal()
         self.request = self.getRequest()
 
         # the test folder we created
@@ -30,7 +29,7 @@ class TestAPI(APITestCase):
 
     def get_document_brain(self):
         pc = api.get_portal_catalog()
-        results = pc({"portal_type": "Document", "limit":1})
+        results = pc({"portal_type": "Document", "limit": 1})
         return results[0]
 
     def test_get_portal(self):
@@ -69,7 +68,7 @@ class TestCRUDAPI(APITestCase):
     """
 
     def setUp(self):
-        self.portal  = self.getPortal()
+        self.portal = self.getPortal()
         self.request = self.getRequest()
 
         # the test folder we created

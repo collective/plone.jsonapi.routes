@@ -8,6 +8,7 @@ from Testing import ZopeTestCase as ztc
 
 from plone.jsonapi.routes.tests.base import APITestCase
 
+
 def test_suite():
     suite = unittest.TestSuite()
     suite.addTests([
@@ -18,5 +19,3 @@ def test_suite():
         ),
     ])
     return suite
-
-# vim: set ft=python ts=4 sw=4 expandtab :

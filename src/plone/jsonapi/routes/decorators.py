@@ -18,7 +18,7 @@ def returns_plone_items_for(endpoint):
     def decorator(func):
         def inner(*args, **kwargs):
             result = func(*args, **kwargs)
-            if type(result) is types.ListType:
+            if isinstance(result, types.ListType):
                 return {
                     "url": url_for(endpoint),
                     "count": len(result),

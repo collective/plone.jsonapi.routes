@@ -9,9 +9,8 @@ from plone.jsonapi.routes.interfaces import IBatch
 
 from plone.jsonapi.routes import request as req
 
-__author__    = 'Ramon Bartl <ramon.bartl@googlemail.com>'
+__author__ = 'Ramon Bartl <ramon.bartl@googlemail.com>'
 __docformat__ = 'plaintext'
-
 
 logger = logging.getLogger("plone.jsonapi.routes.batching")
 
@@ -52,7 +51,9 @@ class Batch(object):
             return None
         request = req.get_request()
         params = request.form
-        params["b_start"] = max(self.batch.pagenumber - 2, 0) * self.batch.pagesize
+        pagesize = self.batch.pagesize
+        pagenumber = self.batch.pagenumber
+        params["b_start"] = max(pagenumber - 2, 0) * pagesize
         return "%s?%s" % (request.URL, urllib.urlencode(params))
 
 

@@ -20,13 +20,14 @@ from zope.configuration import xmlconfig
 class TestLayer(PloneSandboxLayer):
     defaultBases = (PLONE_FIXTURE,)
 
-
     def setUpZope(self, app, configurationContext):
         # Load ZCML
         import plone.jsonapi.core
         import plone.jsonapi.routes
-        xmlconfig.file('configure.zcml', plone.jsonapi.core, context=configurationContext)
-        xmlconfig.file('configure.zcml', plone.jsonapi.routes, context=configurationContext)
+        xmlconfig.file('configure.zcml', plone.jsonapi.core,
+                       context=configurationContext)
+        xmlconfig.file('configure.zcml', plone.jsonapi.routes,
+                       context=configurationContext)
 
         # Install product and call its initialize() function
         z2.installProduct(app, 'plone.jsonapi.core')
@@ -44,7 +45,8 @@ class TestLayer(PloneSandboxLayer):
         _ = portal.invokeFactory("Folder", "folder", title="Test Folder")
         folder = portal[_]
         for i in range(50):
-            folder.invokeFactory("Document", "document-%d" % i, title="Test Document %d" % i)
+            folder.invokeFactory("Document", "document-%d" % i,
+                                 title="Test Document %d" % i)
 
         # Test fixture -- p.j.c. needs to have a request
         from plone.jsonapi.core import router
@@ -52,8 +54,9 @@ class TestLayer(PloneSandboxLayer):
 
 
 TEST_FIXTURE = TestLayer()
-INTEGRATION_TESTING = IntegrationTesting(bases=(TEST_FIXTURE,),
-                          name="plone.jsonapi.routes:Integration")
+INTEGRATION_TESTING = IntegrationTesting(
+    bases=(TEST_FIXTURE,),
+    name="plone.jsonapi.routes:Integration")
 
 
 class APITestCase(unittest.TestCase):
@@ -76,5 +79,3 @@ class APITestCase(unittest.TestCase):
 
     def decode(self, s):
         return json.loads(s)
-
-# vim: set ft=python ts=4 sw=4 expandtab :

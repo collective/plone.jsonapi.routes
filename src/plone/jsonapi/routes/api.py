@@ -91,7 +91,8 @@ def get_batched(portal_type=None, request=None, uid=None, endpoint=None):
         complete = uid and True or False
 
     # return a batched record
-    return get_batch(results, size, start, endpoint=endpoint, complete=complete)
+    return get_batch(results, size, start, endpoint=endpoint,
+                     complete=complete)
 
 
 # CREATE
@@ -132,7 +133,7 @@ def create_items(portal_type=None, request=None, uid=None, endpoint=None):
     return make_items_for(results, endpoint=endpoint)
 
 
-### UPDATE
+# UPDATE
 def update_items(portal_type=None, request=None, uid=None, endpoint=None):
     """ update items
 
@@ -148,7 +149,7 @@ def update_items(portal_type=None, request=None, uid=None, endpoint=None):
     # we have an uid -> try to get an object for it
     obj = get_object_by_uid(uid)
     if obj:
-        record = records[0] # ignore other records if we got an uid
+        record = records[0]  # ignore other records if we got an uid
         obj = update_object_with_data(obj, record)
         return make_items_for([obj], endpoint=endpoint)
 
@@ -171,7 +172,7 @@ def update_items(portal_type=None, request=None, uid=None, endpoint=None):
     return make_items_for(results, endpoint=endpoint)
 
 
-### DELETE
+# DELETE
 def delete_items(portal_type=None, request=None, uid=None, endpoint=None):
     """ delete items
 
@@ -242,7 +243,8 @@ def make_items_for(brains_or_objects, endpoint=None, complete=True):
         # extract the data using the default info adapter
         info = IInfo(brain_or_object)()
 
-        # might be None for mixed type catalog results, e.g. in the search route
+        # might be None for mixed type catalog results,
+        # e.g. in the search route
         scoped_endpoint = endpoint
         if scoped_endpoint is None:
             scoped_endpoint = get_endpoint(get_portal_type(brain_or_object))
@@ -346,7 +348,8 @@ def get_batch(sequence, size, start=0, endpoint=None, complete=False):
         "page":     batch.get_pagenumber(),
         "pages":    batch.get_numpages(),
         "count":    batch.get_sequence_length(),
-        "items":    make_items_for([b for b in batch.get_batch()], endpoint, complete=complete),
+        "items":    make_items_for([b for b in batch.get_batch()],
+                                   endpoint, complete=complete),
     }
 
 
@@ -421,7 +424,8 @@ def url_for(endpoint, **values):
     except:
         # XXX plone.jsonapi.core should catch the BuildError of Werkzeug and
         #     throw another error which can be handled here.
-        logger.warn("Could not build API URL for endpoint '%s'. No route provider registered?" % endpoint)
+        logger.warn("Could not build API URL for endpoint '%s'. "
+                    "No route provider registered?" % endpoint)
         return None
 
 
@@ -563,8 +567,8 @@ def mkdir(path):
     """
 
     container = get_portal()
-    segments  = path.split("/")
-    curpath   = None
+    segments = path.split("/")
+    curpath = None
 
     for n, segment in enumerate(segments):
         # skip the first element
@@ -583,7 +587,7 @@ def mkdir(path):
 
         # create the folder on the go
         container = ploneapi.content.create(
-                container, type="Folder", title=segment, save_id=True)
+            container, type="Folder", title=segment, save_id=True)
 
     return container
 
@@ -592,7 +596,7 @@ def find_target_container(record):
     """ find the target container for this record
     """
 
-    parent_uid  = record.get("parent_uid")
+    parent_uid = record.get("parent_uid")
     parent_path = record.get("parent_path")
 
     target = None
@@ -625,9 +629,9 @@ def delete_object(obj):
     if is_root(obj):
         raise APIError(401, "Removing the Portal is not allowed")
     try:
-        return ploneapi.content.delete(obj) == None and True or False
+        return ploneapi.content.delete(obj) is None and True or False
     except Unauthorized:
-        raise APIError(401, "You are not allowed to delete the object '%s'" % obj.getId())
+        raise APIError(401, "Not allowed to delete object '%s'" % obj.getId())
 
 
 def get_current_user():
@@ -638,9 +642,13 @@ def get_current_user():
 def create_object_in_container(container, portal_type, id=None, title=None):
     """ creates an object with the given data in the container
     """
-    if not is_root(container) and portal_type not in get_locally_allowed_types(container):
-        raise APIError(500, "Creation of this portal type is not allowed in this context.")
-    return create_object(container=container, id=id, title=title, type=portal_type)
+    allowed_types = get_locally_allowed_types(container)
+    if not is_root(container) and portal_type not in allowed_types:
+        raise APIError(500, "Creation of this portal type"
+                            "is not allowed in this context.")
+
+    return create_object(container=container, id=id, title=title,
+                         type=portal_type)
 
 
 def create_object(**kw):
@@ -664,14 +672,13 @@ def update_object_with_data(content, record):
         try:
             success = dm.set(k, v, **record)
         except Unauthorized:
-            raise APIError(401, "You are not allowed to set the field '%s'" % k)
+            raise APIError(401, "Not allowed to set the field '%s'" % k)
 
         if not success:
             logger.warn("update_object_with_data::skipping key=%r", k)
             continue
 
-        #logger.info("update_object_with_data::field %r updated with value=%r", k, v)
-        logger.info("update_object_with_data::field %r updated", k)
+        logger.debug("update_object_with_data::field %r updated", k)
 
     # do a wf transition
     if record.get("transition", None):

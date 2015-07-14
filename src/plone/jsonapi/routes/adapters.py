@@ -52,7 +52,8 @@ class Base(object):
     def to_dict(self):
         data = to_dict(self.context, keys=self.keys)
         for key, attr in self.attributes.iteritems():
-            if data.get(key): continue # don't overwrite
+            if data.get(key):
+                continue  # don't overwrite
             value = getattr(self.context, attr, None)
             if callable(value):
                 value = value()
@@ -123,9 +124,10 @@ class SiteRootDataProvider(Base):
     def __init__(self, context):
         super(SiteRootDataProvider, self).__init__(context)
 
-#---------------------------------------------------------------------------
+
+# ---------------------------------------------------------------------------
 #   Functional Helpers
-#---------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 
 def to_dict(obj, keys):
     """ returns a dictionary of the given keys
@@ -135,8 +137,8 @@ def to_dict(obj, keys):
         field = get_field(obj, key)
         out[key] = get_value(field)
     if out.get("workflow_info"):
-        logger.warn("Workflow Info ommitted since the key 'workflow_info' was ",
-                "found in the current schema")
+        logger.warn("Workflow Info ommitted since the key 'workflow_info' "
+                    "was found in the current schema")
         return out
     wf_info = get_wf_info(obj)
     out["workflow_info"] = wf_info
@@ -156,8 +158,9 @@ def get_field(obj, key):
 def get_value(field):
     """ extract the value from the given field
     """
+    dt = (datetime.datetime, datetime.date, DateTime.DateTime)
 
-    if isinstance(field, (datetime.datetime, datetime.date, DateTime.DateTime)):
+    if isinstance(field, dt):
         return get_iso_date(field)
 
     if hasattr(field, "filename"):
@@ -181,6 +184,7 @@ def get_file_dict(field):
         "size": len(field.data),
         "content_type": content_type
     }
+
 
 def get_content_type(field):
     """ get the content type of the field
@@ -223,7 +227,8 @@ def get_wf_info(obj):
     wfs = wf_tool.getWorkflowsFor(obj)
 
     # no worfkflows assigned -> return
-    if not wfs: return {}
+    if not wfs:
+        return {}
 
     # get the first one
     workflow = wfs[0]

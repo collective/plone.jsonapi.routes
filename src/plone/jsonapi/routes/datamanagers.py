@@ -57,13 +57,15 @@ class ATDataManager(object):
             return False
         # check the field permission
         if not field.checkPermission("write", self.context):
-            raise Unauthorized("You are not allowed to write the field %s" % name)
+            raise Unauthorized("Not allowed to write the field %s" % name)
         if self.is_file_field(field):
-            logger.debug("ATDataManager::set:File field detected ('%r'), base64 decoding value", field)
+            logger.debug("ATDataManager::set:File field detected ('%r'), "
+                         "base64 decoding value", field)
             value = str(value).decode("base64")
             # handle the filename
             if "filename" not in kw:
-                logger.debug("ATDataManager::set:No Filename detected -- using title or id")
+                logger.debug("ATDataManager::set: No Filename detected "
+                             "-> using title or id")
                 kw["filename"] = kw.get("id") or kw.get("title")
 
         # set the value to the field
@@ -76,7 +78,8 @@ class ATDataManager(object):
         logger.debug("ATDataManager::set: field=%r, value=%r", field, value)
         # get the field mutator
         mutator = field.getMutator(self.context)
-        # Inspect function and apply positional and keyword arguments as possible.
+        # Inspect function and apply positional and keyword arguments if
+        # possible.
         return mapply(mutator, value, **kw)
 
     def get(self, name):
@@ -84,7 +87,7 @@ class ATDataManager(object):
         """
         field = self.get_field(name)
         if not field.checkPermission("read", self.context):
-            raise Unauthorized("You are not allowed to read the field %s" % name)
+            raise Unauthorized("Not allowed to read the field %s" % name)
         return field.get(self.context)
 
 
@@ -105,7 +108,8 @@ class DexterityDataManager(object):
         """
         out = {}
         assignable = IBehaviorAssignable(self.context, None)
-        if not assignable: return out
+        if not assignable:
+            return out
         for behavior in assignable.enumerateBehaviors():
             for name, field in getFields(behavior.interface).items():
                 out[name] = field
@@ -144,18 +148,22 @@ class DexterityDataManager(object):
 
         # XXX: How to check security on the field level?
         sm = getSecurityManager()
-        if not sm.checkPermission(permissions.ModifyPortalContent, self.context):
-            raise Unauthorized("You are not allowed to modify this content")
+        permission = permissions.ModifyPortalContent
+        if not sm.checkPermission(permission, self.context):
+            raise Unauthorized("Not allowed to modify this content")
 
         if self.is_file_field(field):
-            logger.debug("DexterityDataManager::set:File field detected ('%r'), base64 decoding value", field)
+            logger.debug("DexterityDataManager::set:File field"
+                         "detected ('%r'), base64 decoding value", field)
             data = str(value).decode("base64")
             if "filename" not in kw:
-                logger.debug("ATDataManager::set:No Filename detected -- using title or id")
+                logger.debug("ATDataManager::set:No Filename detected"
+                             "-- using title or id")
                 kw["filename"] = kw.get("id") or kw.get("title")
             value = field._type(data=data, filename=kw.get("filename"))
 
-        logger.debug("DexterityDataManager::set: field=%r, value=%r", field, value)
+        logger.debug("DexterityDataManager::set:"
+                     "field=%r, value=%r", field, value)
         field.set(self.context, value)
         return True
 
@@ -166,5 +174,5 @@ class DexterityDataManager(object):
         # XXX: How to check security on the field level?
         sm = getSecurityManager()
         if not sm.checkPermission(permissions.View, self.context):
-            raise Unauthorized("You are not allowed to view this content")
+            raise Unauthorized("Not allowed to view this content")
         return field.get(self.context)
