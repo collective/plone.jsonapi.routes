@@ -39,19 +39,21 @@ def get_api_routes_for(segment):
     """
     adapter = DefaultRouter.get_adapter()
 
-    out = []
-    rx = re.compile(r".*%s/[\w]+$" % segment)
+    endpoints = set()
+    rx = re.compile(r".*%s/[\w]" % segment)
 
     for rule in adapter.map.iter_rules():
         if rx.match(rule.rule):
-            endpoint = rule.endpoint
-            info = DefaultRouter.view_functions.get(endpoint).__doc__
-            url = DefaultRouter.url_for(endpoint, force_external=True)
-            out.append({
-                "url":  url,
-                "info": info and info.strip() or "No description available",
-                "methods": ",".join(rule.methods),
-            })
+            endpoints.add(rule.endpoint)
+
+    out = []
+    for endpoint in endpoints:
+        info = DefaultRouter.view_functions.get(endpoint).__doc__
+        url = DefaultRouter.url_for(endpoint, force_external=True)
+        out.append({
+            "url":  url,
+            "info": info and info.strip() or "No description available",
+        })
     return out
 
 
