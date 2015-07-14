@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from plone.jsonapi.routes import add_plone_route
+from plone.jsonapi.routes import add_plone_route as route
 
 # CRUD
 from plone.jsonapi.routes.api import get_batched
@@ -12,8 +12,8 @@ from plone.jsonapi.routes.api import url_for
 
 
 # GET
-@add_plone_route("/events", "events", methods=["GET"])
-@add_plone_route("/events/<string:uid>", "events", methods=["GET"])
+@route("/events", "events", methods=["GET"])
+@route("/events/<string:uid>", "events", methods=["GET"])
 def get(context, request, uid=None):
     """ get events
     """
@@ -21,8 +21,8 @@ def get(context, request, uid=None):
 
 
 # CREATE
-@add_plone_route("/events/create", "events_create", methods=["POST"])
-@add_plone_route("/events/create/<string:uid>", "events_create", methods=["POST"])
+@route("/events/create", "events_create", methods=["POST"])
+@route("/events/create/<string:uid>", "events_create", methods=["POST"])
 def create(context, request, uid=None):
     """ create events
     """
@@ -35,8 +35,8 @@ def create(context, request, uid=None):
 
 
 # UPDATE
-@add_plone_route("/events/update", "events_update", methods=["POST"])
-@add_plone_route("/events/update/<string:uid>", "events_update", methods=["POST"])
+@route("/events/update", "events_update", methods=["POST"])
+@route("/events/update/<string:uid>", "events_update", methods=["POST"])
 def update(context, request, uid=None):
     """ update events
     """
@@ -49,8 +49,8 @@ def update(context, request, uid=None):
 
 
 # DELETE
-@add_plone_route("/events/delete", "events_delete", methods=["POST"])
-@add_plone_route("/events/delete/<string:uid>", "events_delete", methods=["POST"])
+@route("/events/delete", "events_delete", methods=["POST"])
+@route("/events/delete/<string:uid>", "events_delete", methods=["POST"])
 def delete(context, request, uid=None):
     """ delete events
     """
@@ -60,5 +60,3 @@ def delete(context, request, uid=None):
         "count": len(items),
         "items": items,
     }
-
-# vim: set ft=python ts=4 sw=4 expandtab :

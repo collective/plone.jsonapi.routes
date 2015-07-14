@@ -2,7 +2,7 @@
 
 from plone import api as ploneapi
 
-from plone.jsonapi.routes import add_plone_route
+from plone.jsonapi.routes import add_plone_route as route
 from plone.jsonapi.routes.api import url_for
 
 
@@ -61,12 +61,12 @@ def get_user_info(username=None, short=True):
     return info
 
 
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # API ROUTES
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
-@add_plone_route("/users", "users", methods=["GET"])
-@add_plone_route("/users/<string:username>", "users", methods=["GET"])
+@route("/users", "users", methods=["GET"])
+@route("/users/<string:username>", "users", methods=["GET"])
 def get(context, request, username=None):
     """ Plone users route
     """
@@ -99,14 +99,13 @@ def get(context, request, username=None):
     }
 
 
-@add_plone_route("/auth", "auth", methods=["GET"])
+@route("/auth", "auth", methods=["GET"])
 def auth(context, request):
-    """ Authenticate
+    """ Basic Authentication
     """
 
     if ploneapi.user.is_anonymous():
         request.response.setStatus(401)
-        request.response.setHeader('WWW-Authenticate', 'basic realm="JSONAPI AUTH"', 1)
+        request.response.setHeader('WWW-Authenticate',
+                                   'basic realm="JSONAPI AUTH"', 1)
     return {}
-
-# vim: set ft=python ts=4 sw=4 expandtab :

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from plone.jsonapi.routes import add_plone_route
+from plone.jsonapi.routes import add_plone_route as route
 
 # CRUD
 from plone.jsonapi.routes.api import get_batched
@@ -12,8 +12,8 @@ from plone.jsonapi.routes.api import url_for
 
 
 # GET
-@add_plone_route("/images", "images", methods=["GET"])
-@add_plone_route("/images/<string:uid>", "images", methods=["GET"])
+@route("/images", "images", methods=["GET"])
+@route("/images/<string:uid>", "images", methods=["GET"])
 def get(context, request, uid=None):
     """ get images
     """
@@ -21,8 +21,8 @@ def get(context, request, uid=None):
 
 
 # CREATE
-@add_plone_route("/images/create", "images_create", methods=["POST"])
-@add_plone_route("/images/create/<string:uid>", "images_create", methods=["POST"])
+@route("/images/create", "images_create", methods=["POST"])
+@route("/images/create/<string:uid>", "images_create", methods=["POST"])
 def create(context, request, uid=None):
     """ create images
     """
@@ -35,8 +35,8 @@ def create(context, request, uid=None):
 
 
 # UPDATE
-@add_plone_route("/images/update", "images_update", methods=["POST"])
-@add_plone_route("/images/update/<string:uid>", "images_update", methods=["POST"])
+@route("/images/update", "images_update", methods=["POST"])
+@route("/images/update/<string:uid>", "images_update", methods=["POST"])
 def update(context, request, uid=None):
     """ update images
     """
@@ -49,8 +49,8 @@ def update(context, request, uid=None):
 
 
 # DELETE
-@add_plone_route("/images/delete", "images_delete", methods=["POST"])
-@add_plone_route("/images/delete/<string:uid>", "images_delete", methods=["POST"])
+@route("/images/delete", "images_delete", methods=["POST"])
+@route("/images/delete/<string:uid>", "images_delete", methods=["POST"])
 def delete(context, request, uid=None):
     """ delete images
     """
@@ -60,5 +60,3 @@ def delete(context, request, uid=None):
         "count": len(items),
         "items": items,
     }
-
-# vim: set ft=python ts=4 sw=4 expandtab :

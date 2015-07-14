@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from plone.jsonapi.routes import add_plone_route
+from plone.jsonapi.routes import add_plone_route as route
 
 # CRUD
 from plone.jsonapi.routes.api import get_batched
@@ -12,8 +12,8 @@ from plone.jsonapi.routes.api import url_for
 
 
 # GET
-@add_plone_route("/links", "links", methods=["GET"])
-@add_plone_route("/links/<string:uid>", "links", methods=["GET"])
+@route("/links", "links", methods=["GET"])
+@route("/links/<string:uid>", "links", methods=["GET"])
 def get(context, request, uid=None):
     """ get links
     """
@@ -21,8 +21,8 @@ def get(context, request, uid=None):
 
 
 # CREATE
-@add_plone_route("/links/create", "links_create", methods=["POST"])
-@add_plone_route("/links/create/<string:uid>", "links_create", methods=["POST"])
+@route("/links/create", "links_create", methods=["POST"])
+@route("/links/create/<string:uid>", "links_create", methods=["POST"])
 def create(context, request, uid=None):
     """ create links
     """
@@ -35,8 +35,8 @@ def create(context, request, uid=None):
 
 
 # UPDATE
-@add_plone_route("/links/update", "links_update", methods=["POST"])
-@add_plone_route("/links/update/<string:uid>", "links_update", methods=["POST"])
+@route("/links/update", "links_update", methods=["POST"])
+@route("/links/update/<string:uid>", "links_update", methods=["POST"])
 def update(context, request, uid=None):
     """ update links
     """
@@ -49,8 +49,8 @@ def update(context, request, uid=None):
 
 
 # DELETE
-@add_plone_route("/links/delete", "links_delete", methods=["POST"])
-@add_plone_route("/links/delete/<string:uid>", "links_delete", methods=["POST"])
+@route("/links/delete", "links_delete", methods=["POST"])
+@route("/links/delete/<string:uid>", "links_delete", methods=["POST"])
 def delete(context, request, uid=None):
     """ delete links
     """
@@ -60,5 +60,3 @@ def delete(context, request, uid=None):
         "count": len(items),
         "items": items,
     }
-
-# vim: set ft=python ts=4 sw=4 expandtab :

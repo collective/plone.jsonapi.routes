@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from plone.jsonapi.routes import add_plone_route
+from plone.jsonapi.routes import add_plone_route as route
 
 # CRUD
 from plone.jsonapi.routes.api import get_record
@@ -12,8 +12,8 @@ from plone.jsonapi.routes.api import url_for
 
 
 # GET
-@add_plone_route("/get", "get", methods=["GET"])
-@add_plone_route("/get/<string:uid>", "get", methods=["GET"])
+@route("/get", "get", methods=["GET"])
+@route("/get/<string:uid>", "get", methods=["GET"])
 def get(context, request, uid=None):
     """ get content
     """
@@ -21,8 +21,8 @@ def get(context, request, uid=None):
 
 
 # CREATE
-@add_plone_route("/create", "create", methods=["POST"])
-@add_plone_route("/create/<string:uid>", "create", methods=["POST"])
+@route("/create", "create", methods=["POST"])
+@route("/create/<string:uid>", "create", methods=["POST"])
 def create(context, request, uid=None):
     """ create content
     """
@@ -35,8 +35,8 @@ def create(context, request, uid=None):
 
 
 # UPDATE
-@add_plone_route("/update", "update", methods=["POST"])
-@add_plone_route("/update/<string:uid>", "update", methods=["POST"])
+@route("/update", "update", methods=["POST"])
+@route("/update/<string:uid>", "update", methods=["POST"])
 def update(context, request, uid=None):
     """ update content
     """
@@ -49,8 +49,8 @@ def update(context, request, uid=None):
 
 
 # DELETE
-@add_plone_route("/delete", "delete", methods=["POST"])
-@add_plone_route("/delete/<string:uid>", "delete", methods=["POST"])
+@route("/delete", "delete", methods=["POST"])
+@route("/delete/<string:uid>", "delete", methods=["POST"])
 def delete(context, request, uid=None):
     """ delete content
     """
@@ -60,5 +60,3 @@ def delete(context, request, uid=None):
         "count": len(items),
         "items": items,
     }
-
-# vim: set ft=python ts=4 sw=4 expandtab :
