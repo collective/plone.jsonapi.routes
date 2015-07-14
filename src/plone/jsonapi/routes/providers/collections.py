@@ -13,7 +13,8 @@ from plone.jsonapi.routes.api import url_for
 
 # GET
 @route("/collections", "collections", methods=["GET"])
-@route("/collections/<string:uid>", "collections", methods=["GET"])
+@route("/collections/<string:uid>",
+       "collections", methods=["GET"])
 def get(context, request, uid=None):
     """ get collections
     """
@@ -22,7 +23,8 @@ def get(context, request, uid=None):
 
 # CREATE
 @route("/collections/create", "collections_create", methods=["POST"])
-@route("/collections/create/<string:uid>", "collections_create", methods=["POST"])
+@route("/collections/create/<string:uid>",
+       "collections_create", methods=["POST"])
 def create(context, request, uid=None):
     """ create collections
     """
@@ -36,7 +38,8 @@ def create(context, request, uid=None):
 
 # UPDATE
 @route("/collections/update", "collections_update", methods=["POST"])
-@route("/collections/update/<string:uid>", "collections_update", methods=["POST"])
+@route("/collections/update/<string:uid>",
+       "collections_update", methods=["POST"])
 def update(context, request, uid=None):
     """ update collections
     """
@@ -50,7 +53,8 @@ def update(context, request, uid=None):
 
 # DELETE
 @route("/collections/delete", "collections_delete", methods=["POST"])
-@route("/collections/delete/<string:uid>", "collections_delete", methods=["POST"])
+@route("/collections/delete/<string:uid>",
+       "collections_delete", methods=["POST"])
 def delete(context, request, uid=None):
     """ delete collections
     """
@@ -60,5 +64,3 @@ def delete(context, request, uid=None):
         "count": len(items),
         "items": items,
     }
-
-# vim: set ft=python ts=4 sw=4 expandtab :
