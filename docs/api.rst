@@ -120,6 +120,10 @@ Beside the *content resources*, there are some special resources available.
 +----------+--------------------+----------------------------------------+
 | version  |                    | Get the current Version                |
 +----------+--------------------+----------------------------------------+
+| auth     |                    | Basic Authentication                   |
++----------+--------------------+----------------------------------------+
+| login    |                    | Login with __ac_name and __ac_password |
++----------+--------------------+----------------------------------------+
 
 
 .. _Parameters:

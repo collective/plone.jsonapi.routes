@@ -1,6 +1,13 @@
 Changelog
 =========
 
+0.8 - unreleased
+----------------
+
+**OTHER CHANGES**
+
+- Added `login` route
+
 
 0.7 - 2015-07-09
 ----------------

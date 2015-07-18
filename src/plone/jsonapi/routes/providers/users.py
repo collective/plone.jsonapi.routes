@@ -136,7 +136,7 @@ def login(context, request):
     acl_users = ploneapi.portal.get_tool("acl_users")
     acl_users.credentials_cookie_auth.login()
 
-    #if ploneapi.user.is_anonymous():
-    #    raise APIError(401, "Invalid Credentials")
+    if ploneapi.user.is_anonymous():
+        raise APIError(401, "Invalid Credentials")
 
-    return get_user_info(__ac_name)
+    return get_user_info(__ac_name, False)
