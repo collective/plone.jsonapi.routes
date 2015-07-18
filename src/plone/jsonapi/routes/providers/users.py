@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
 
+import logging
 from plone import api as ploneapi
 
-from plone.jsonapi.routes import add_plone_route as route
 from plone.jsonapi.routes.api import url_for
+from plone.jsonapi.routes.exceptions import APIError
+from plone.jsonapi.routes import add_plone_route as route
 
+logger = logging.getLogger("plone.jsonapi.routes.users")
 
 def get_user_info(username=None, short=True):
     """ return the user informations
@@ -108,4 +111,32 @@ def auth(context, request):
         request.response.setStatus(401)
         request.response.setHeader('WWW-Authenticate',
                                    'basic realm="JSONAPI AUTH"', 1)
+
+    logger.info("*** BASIC AUTHENTICATE ***")
     return {}
+
+
+@route("/login", "login", methods=["GET"])
+def login(context, request):
+    """ Login Route
+
+    Login route to authenticate a user against Plone.
+    """
+    logger.info("*** LOGIN ***")
+
+    # extract the data
+    __ac_name = request.form.get("__ac_name", None)
+    __ac_password = request.form.get("__ac_password", None)
+
+    if __ac_name is None:
+        raise APIError(400, "Username is missing")
+    if __ac_password is None:
+        raise APIError(400, "Password is missing")
+
+    acl_users = ploneapi.portal.get_tool("acl_users")
+    acl_users.credentials_cookie_auth.login()
+
+    #if ploneapi.user.is_anonymous():
+    #    raise APIError(401, "Invalid Credentials")
+
+    return get_user_info(__ac_name)
