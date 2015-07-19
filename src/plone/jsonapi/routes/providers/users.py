@@ -76,8 +76,9 @@ def get(context, request, username=None):
 
     items = []
 
+    # don't allow anonymous to see other accounts
     if ploneapi.user.is_anonymous():
-        raise RuntimeError("Not allowed for anonymous users")
+        username = "current"
 
     # list all users if no username was given
     if username is None:
@@ -122,11 +123,11 @@ def login(context, request):
 
     Login route to authenticate a user against Plone.
     """
-    logger.info("*** LOGIN ***")
-
     # extract the data
     __ac_name = request.form.get("__ac_name", None)
     __ac_password = request.form.get("__ac_password", None)
+
+    logger.info("*** LOGIN %s ***" % __ac_name)
 
     if __ac_name is None:
         raise APIError(400, "Username is missing")
@@ -134,9 +135,32 @@ def login(context, request):
         raise APIError(400, "Password is missing")
 
     acl_users = ploneapi.portal.get_tool("acl_users")
+
+    # XXX hard coded
     acl_users.credentials_cookie_auth.login()
+
+    # XXX amin user won't be logged in if I use this approach
+    #acl_users.login()
+    #response = request.response
+    #acl_users.updateCredentials(request, response, __ac_name, __ac_password)
 
     if ploneapi.user.is_anonymous():
         raise APIError(401, "Invalid Credentials")
 
-    return get_user_info(__ac_name, False)
+    # return the JSON in the same format like the user route
+    return get(context, request, username=__ac_name)
+
+
+@route("/logout", "logout", methods=["GET"])
+def logout(context, request):
+    """ Logout Route
+    """
+    logger.info("*** LOGOUT ***")
+
+    acl_users = ploneapi.portal.get_tool("acl_users")
+    acl_users.logout(request)
+
+    return {
+        "url":     url_for("users"),
+        "success": True
+    }
