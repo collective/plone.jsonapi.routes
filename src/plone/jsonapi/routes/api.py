@@ -587,7 +587,7 @@ def mkdir(path):
 
         # create the folder on the go
         container = ploneapi.content.create(
-            container, type="Folder", title=segment, save_id=True)
+            container, type="Folder", id=segment)
 
     return container
 

@@ -6,6 +6,7 @@ Changelog
 
 **CLOSED ISSUES**
 
+- https://github.com/collective/plone.jsonapi.routes/issues/43: API: Intermediate Folder creation
 - https://github.com/collective/plone.jsonapi.routes/issues/41: Field Type Validation
 - https://github.com/collective/plone.jsonapi.routes/issues/42: ContentType for Dexterity Files CT
 
