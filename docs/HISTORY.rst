@@ -1,3 +1,5 @@
+.. _Changelog:
+
 Changelog
 =========
 
@@ -6,6 +8,7 @@ Changelog
 
 **CLOSED ISSUES**
 
+- https://github.com/collective/plone.jsonapi.routes/issues/45: Add authentication routes
 - https://github.com/collective/plone.jsonapi.routes/issues/44: Add the filename to the JSON data
 - https://github.com/collective/plone.jsonapi.routes/issues/43: API: Intermediate Folder creation
 - https://github.com/collective/plone.jsonapi.routes/issues/41: Field Type Validation

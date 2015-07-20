@@ -16,6 +16,7 @@ Table of Contents:
    installation
    quickstart
    api
+   auth
    customizing
    crud
    dexterity

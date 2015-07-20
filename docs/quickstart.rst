@@ -287,6 +287,14 @@ http://localhost:8080/Plone/@@API/plone/api/1.0/files
     You can pass in a `filename` in the JSON body to set the name of the file
     created. If omitted, the id or title will be used.
 
+.. versionadded:: 0.8
+    You can pass in a `mimetype` key to manually set the content type of the
+    file. If omitted, the content type will be guessed by the filename.
+    Default: `application/octet-stream`
+
+.. versionadded:: 0.8
+    The response data contains now the `filename` and the `download` url.
+
 Example
 .......
 
@@ -318,6 +326,8 @@ http://localhost:8080/Plone/@@API/plone/api/1.0/images
     The object data contains now the base64 encoded image with the size and
     mimetype information.
 
+.. versionadded:: 0.8
+    The response data contains now the `filename` and the `download` url.
 
 Links
 -----
@@ -349,6 +359,3 @@ Collections
 The `collections` route will rule all contents of the portal type `Collection`.
 
 http://localhost:8080/Plone/@@API/plone/api/1.0/collections
-
-
-.. vim: set ft=rst ts=4 sw=4 expandtab tw=78 :
