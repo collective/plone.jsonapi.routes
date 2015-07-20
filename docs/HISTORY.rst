@@ -4,6 +4,11 @@ Changelog
 0.8 - unreleased
 ----------------
 
+**CLOSED ISSUES**
+
+- https://github.com/collective/plone.jsonapi.routes/issues/41: Field Type Validation
+- https://github.com/collective/plone.jsonapi.routes/issues/42: ContentType for Dexterity Files CT
+
 **OTHER CHANGES**
 
 - Added `login` route
