@@ -19,6 +19,7 @@ from Products.ZCatalog.interfaces import ICatalogBrain
 from Products.ATContentTypes.interfaces import IATContentType
 
 from plone.jsonapi.routes.interfaces import IInfo
+from plone.jsonapi.routes.interfaces import IDataManager
 
 __author__ = 'Ramon Bartl <ramon.bartl@googlemail.com>'
 __docformat__ = 'plaintext'
@@ -57,7 +58,7 @@ class Base(object):
             value = getattr(self.context, attr, None)
             if callable(value):
                 value = value()
-            data[key] = get_value(value)
+            data[key] = get_json_value(self.context, key, value=value)
         return data
 
     def __call__(self):
@@ -133,9 +134,11 @@ def to_dict(obj, keys):
     """ returns a dictionary of the given keys
     """
     out = dict()
+    # see interfaces.IDataManager
+    dm = IDataManager(obj)
     for key in keys:
-        field = get_field(obj, key)
-        out[key] = get_value(field)
+        value = dm.get(key)
+        out[key] = get_json_value(obj, key, value=value)
     if out.get("workflow_info"):
         logger.warn("Workflow Info ommitted since the key 'workflow_info' "
                     "was found in the current schema")
@@ -146,52 +149,71 @@ def to_dict(obj, keys):
     return out
 
 
-def get_field(obj, key):
-    """ get the value for the given key
-        => handles Dexterity/AT Content types
+def get_json_value(obj, key, value=None):
+    """ json save value encoding
     """
-    if IATContentType.providedBy(obj):
-        return obj.getField(key).getAccessor(obj)()
-    return getattr(obj, key)
 
+    # extract the value from the object if omitted
+    if value is None:
+        value = IDataManager(obj).get(key)
 
-def get_value(field):
-    """ extract the value from the given field
-    """
-    dt = (datetime.datetime, datetime.date, DateTime.DateTime)
+    # known date types
+    date_types = (datetime.datetime,
+                  datetime.date,
+                  DateTime.DateTime)
 
-    if isinstance(field, dt):
-        return get_iso_date(field)
+    # check if we have a date
+    if isinstance(value, date_types):
+        return get_iso_date(value)
 
-    if hasattr(field, "filename"):
-        return get_file_dict(field)
+    # check if the value is a file object
+    if hasattr(value, "filename"):
+        # => value is e.g. a named blob file
+        return get_file_dict(obj, key, value=value)
 
-    if not is_json_serializable(field):
+    if not is_json_serializable(value):
         return None
 
-    return field
+    return value
 
 
-def get_file_dict(field):
+def get_file_dict(obj, key, value=None):
     """ file representation of the given data
     """
 
-    data = field.data.encode("base64")
-    content_type = get_content_type(field)
+    # extract the value from the object if omitted
+    if value is None:
+        value = IDataManager(obj).get(key)
+
+    # extract file attributes
+    data = value.data.encode("base64")
+    content_type = get_content_type(value)
+    filename = getattr(value, "filename", "")
+    download = None
+
+    if IDexterityContent.providedBy(obj):
+        # calculate the download url
+        download = "{}/@@download/{}/{}".format(
+            obj.absolute_url(), key, filename)
+    else:
+        # calculate the download url
+        download = "{}/download".format(obj.absolute_url())
 
     return {
         "data": data,
-        "size": len(field.data),
-        "content_type": content_type
+        "size": len(value.data),
+        "content_type": content_type,
+        "filename": filename,
+        "download": download,
     }
 
 
-def get_content_type(field):
-    """ get the content type of the field
+def get_content_type(fileobj):
+    """ get the content type of the file object
     """
-    if hasattr(field, "contentType"):
-        return field.contentType
-    return getattr(field, "content_type", "application/octet-stream")
+    if hasattr(fileobj, "contentType"):
+        return fileobj.contentType
+    return getattr(fileobj, "content_type", "application/octet-stream")
 
 
 def get_iso_date(date=None):
