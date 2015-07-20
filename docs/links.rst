@@ -40,5 +40,3 @@ plone.jsonapi.core
 .. _plone.jsonapi.core @ pypi: https://pypi.python.org/pypi/plone.jsonapi.core
 .. _plone.jsonapi.core @ GitHub: https://github.com/collective/plone.jsonapi.core
 .. _plone.jsonapi.core Issues: https://github.com/collective/plone.jsonapi.cores/issues
-
-.. vim: set ft=rst ts=4 sw=4 expandtab tw=78 :

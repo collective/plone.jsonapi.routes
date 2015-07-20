@@ -16,9 +16,6 @@ Latest Build Status
     :target: https://travis-ci.org/collective/plone.jsonapi.routes
     :alt: Build Status
 
-.. image:: https://coveralls.io/repos/plone/plone.jsonapi.routes/badge.png?branch=master
-  :target: https://coveralls.io/r/plone/plone.jsonapi.routes
-
 .. image:: https://readthedocs.org/projects/pip/badge/
   :target: https://plonejsonapiroutes.readthedocs.org
 
@@ -48,6 +45,10 @@ Documentation
 -------------
 
 http://plonejsonapiroutes.readthedocs.org
+
+Source:
+
+https://github.com/collective/plone.jsonapi.routes/tree/master/docs
 
 
 See it in action
