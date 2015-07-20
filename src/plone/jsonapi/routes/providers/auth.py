@@ -48,9 +48,9 @@ def login(context, request):
     acl_users.credentials_cookie_auth.login()
 
     # XXX amin user won't be logged in if I use this approach
-    #acl_users.login()
-    #response = request.response
-    #acl_users.updateCredentials(request, response, __ac_name, __ac_password)
+    # acl_users.login()
+    # response = request.response
+    # acl_users.updateCredentials(request, response, __ac_name, __ac_password)
 
     if ploneapi.user.is_anonymous():
         raise APIError(401, "Invalid Credentials")
