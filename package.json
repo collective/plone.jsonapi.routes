@@ -1,0 +1,10 @@
+{
+    "main": {
+        "customer": "Plone",
+        "packages": ["plone.jsonapi.routes"],
+        "src_dir": "src",
+        "dist_dir": "dist",
+        "docs_dir": "docs"
+    }
+}
+
