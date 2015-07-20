@@ -11,6 +11,7 @@ from os.path import join as j
 
 # Fabric imports
 from fabric.api import env
+from fabric.api import lcd
 from fabric.api import task
 from fabric.api import local
 from fabric.colors import yellow
@@ -182,6 +183,17 @@ def reload():
     local("wget --delete-after http://admin:admin@localhost:8080/@@reload?action=code")
     print green("RELOADED CODE")
 
+
+@task
+def make_docs():
+    with lcd("docs"):
+        local("make html")
+
+
+@task
+def preview_docs():
+    with lcd("docs"):
+        local("open _build/html/index.html")
 
 @task
 def bump_version():
