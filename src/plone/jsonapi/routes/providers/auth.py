@@ -6,7 +6,7 @@ from plone import api as ploneapi
 from plone.jsonapi.routes.api import url_for
 from plone.jsonapi.routes.exceptions import APIError
 from plone.jsonapi.routes import add_plone_route as route
-from plone.jsonapi.routes.users import get as get_user
+from plone.jsonapi.routes.providers.users import get as get_user
 
 logger = logging.getLogger("plone.jsonapi.routes.users")
 
