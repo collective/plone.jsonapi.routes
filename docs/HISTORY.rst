@@ -6,7 +6,7 @@ Changelog
 0.9 - unreleased
 ----------------
 
-- no changes yet
+- https://github.com/collective/plone.jsonapi.routes/issues/47: ZCML directive to enable AdvancedQuery if installed
 
 
 0.8 - 2015-07-20

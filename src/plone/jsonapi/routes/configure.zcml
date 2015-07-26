@@ -7,6 +7,9 @@
     <!-- Zope2 initialization -->
     <five:registerPackage package="." initialize=".initialize" />
 
+    <!-- Include meta directives -->
+    <include file="meta.zcml"/>
+
     <!-- Adapter for Plone 4.3 Batching -->
     <adapter
         for="*"
