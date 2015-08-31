@@ -23,6 +23,50 @@ __docformat__ = 'plaintext'
 logger = logging.getLogger("plone.jsonapi.routes.datamanagers")
 
 
+class PortalDataManager(object):
+    """ Adapter to set and get attributes of the Plone portal
+    """
+    interface.implements(IDataManager)
+
+    def __init__(self, context):
+        self.context = context
+
+    def get(self, name):
+        """ get the value by name
+        """
+
+        # check read permission
+        sm = getSecurityManager()
+        permission = permissions.View
+        if not sm.checkPermission(permission, self.context):
+            raise Unauthorized("Not allowed to view the Plone portal")
+
+        # read the attribute
+        attr = getattr(self.context, name, None)
+        if callable(attr):
+            return attr()
+        return attr
+
+    def set(self, name, value, **kw):
+        """ Set the attribute to the given value.
+
+        The keyword arguments represent the other attribute values
+        to integrate constraints to other values.
+        """
+
+        # check write permission
+        sm = getSecurityManager()
+        permission = permissions.ManagePortal
+        if not sm.checkPermission(permission, self.context):
+            raise Unauthorized("Not allowed to modify the Plone portal")
+
+        # set the attribute
+        if not hasattr(self.context, name):
+            return False
+        self.context[name] = value
+        return True
+
+
 class ATDataManager(object):
     """ Adapter to set and get field values of AT Content Types
     """

@@ -3,9 +3,10 @@
 Changelog
 =========
 
-0.9 - unreleased
-----------------
+0.8.1 - unreleased
+------------------
 
+- https://github.com/collective/plone.jsonapi.routes/issues/46: Route Provider `portal` throws TypeError
 - https://github.com/collective/plone.jsonapi.routes/issues/47: ZCML directive to enable AdvancedQuery if installed
 
 

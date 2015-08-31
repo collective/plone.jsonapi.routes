@@ -22,13 +22,19 @@
         factory=".batch.Batch42"
         />
 
-    <!-- Adapter for AT Field manipulation -->
+    <!-- Data adapter for Portal manipulation -->
+    <adapter
+        for="Products.CMFPlone.interfaces.siteroot.IPloneSiteRoot"
+        factory=".datamanagers.PortalDataManager"
+        />
+
+    <!-- Data adapter for AT Field manipulation -->
     <adapter
         for="Products.ATContentTypes.interfaces.IATContentType"
         factory=".datamanagers.ATDataManager"
         />
 
-    <!-- Adapter for Dexterity Field manipulation -->
+    <!-- Data adapter for Dexterity Field manipulation -->
     <adapter
         for="plone.dexterity.interfaces.IDexterityContent"
         factory=".datamanagers.DexterityDataManager"
