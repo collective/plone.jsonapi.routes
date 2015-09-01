@@ -88,6 +88,7 @@ class ZCDataProvider(Base):
             "effective":   brain.effective.ISO8601(),
             "type":        brain.portal_type,
             "tags":        brain.Subject,
+            "path":        brain.getPath(),
         }
 
 
