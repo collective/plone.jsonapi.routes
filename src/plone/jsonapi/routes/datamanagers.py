@@ -112,6 +112,9 @@ class ATDataManager(object):
                              "-> using title or id")
                 kw["filename"] = kw.get("id") or kw.get("title")
 
+        if name == "id":
+            value = str(value)
+
         # set the value to the field
         self._set(field, value, **kw)
         return True
