@@ -45,7 +45,7 @@ def copy(context, request, uid=None):
         raise APIError(400, "Not allowed to copy the whole Portal")
 
     # copy the object
-    obj.aq_parent.manage_copyObjects( obj.getId(), REQUEST=request)
+    obj.aq_parent.manage_copyObjects(obj.getId(), REQUEST=request)
 
     return {
         "success": True
