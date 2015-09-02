@@ -125,6 +125,7 @@ class SiteRootDataProvider(Base):
 
     def __init__(self, context):
         super(SiteRootDataProvider, self).__init__(context)
+        self.keys = ["uid"]
 
 
 # ---------------------------------------------------------------------------

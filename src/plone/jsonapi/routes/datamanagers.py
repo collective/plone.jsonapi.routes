@@ -45,6 +45,9 @@ class PortalDataManager(object):
         attr = getattr(self.context, name, None)
         if callable(attr):
             return attr()
+        # set the (missing) uid of the portal to 0
+        if name == "uid":
+            return 0
         return attr
 
     def set(self, name, value, **kw):

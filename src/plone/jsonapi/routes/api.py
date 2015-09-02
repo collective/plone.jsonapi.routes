@@ -30,7 +30,7 @@ __docformat__ = 'plaintext'
 
 logger = logging.getLogger("plone.jsonapi.routes")
 
-PORTAL_IDS = ["0", "portal", "site", "plone"]
+PORTAL_IDS = ["0", "portal", "site", "plone", "root"]
 
 
 # -----------------------------------------------------------------------------
@@ -224,6 +224,8 @@ def get_search_results(**kw):
 
     The request may contain additional query parameters
     """
+    if kw.get("portal_type") == "Plone Site":
+        return [get_portal()]
     query = make_query(**kw)
     return search(query)
 
