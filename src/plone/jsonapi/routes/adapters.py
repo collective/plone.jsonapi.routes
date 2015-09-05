@@ -90,8 +90,15 @@ class ZCDataProvider(Base):
     def __init__(self, context):
         super(ZCDataProvider, self).__init__(context)
         catalog = api.portal.get_tool("portal_catalog")
+        # extract the metadata
         self.keys = catalog.schema()
-        # ignore some metadata values which we already mapped
+
+        # add specific catalog brain mappings
+        self.attributes.update({
+            "path": "getPath",
+            })
+
+        # ignore some metadata values, which we already mapped
         self.ignore = [
             'CreationDate',
             'Creator',

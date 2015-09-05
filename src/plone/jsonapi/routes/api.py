@@ -242,26 +242,22 @@ def make_items_for(brains_or_objects, endpoint=None, complete=True):
         # extract the data using the default info adapter
         info = IInfo(brain_or_object)()
 
-        # update with url info
-        info.update(get_url_info(brain_or_object, endpoint))
-
-        # switch to wake up the object and complete the informations with the
-        # data of the content adapter
+        # wake up the object and extract the complete data
         if complete:
-            # 1. wake up the object
             obj = get_object(brain_or_object)
-
-            # 2. inspect and extract schema field values
             info.update(IInfo(obj)())
-
-            # 3. include the parent
+            # also include the parent url info
             parent = get_parent_info(obj)
             info.update(parent)
 
-            # 4. include an array of child contents
-            if req.get_children():
-                children = get_children(obj, complete)
-                info.update(children)
+        # update with url info
+        url_info = get_url_info(brain_or_object, endpoint)
+        info.update(url_info)
+
+        # include an array of child contents
+        if req.get_children():
+            children = get_children(brain_or_object, complete)
+            info.update(children)
 
         return info
 
@@ -299,7 +295,7 @@ def get_parent_info(obj):
         return {
             "parent_id":  parent.getId(),
             "parent_uid": 0,
-            "parent_url": url_for("portal"),
+            "parent_url": url_for("plonesites", uid=0),
         }
 
     return {
