@@ -112,3 +112,53 @@ We can also use 'descending' sort::
     >>> response = self.decode(browser.contents)
     >>> [x['id'] for x in response.get('items')][:3]
     ['folder', 'document-49', 'document-48']
+
+
+Results data
+============
+
+What's in the result?
+
+All catalog indexes are included in results, including any custom indexes::
+
+    >>> browser.open(api_url + "/folders")
+    >>> response = self.decode(browser.contents)
+    >>> folder = response.get("items")[0]
+    >>> keys = folder.keys()
+
+The following default metadata columns are not included, since they duplicate
+other indexes or are not really interesting outside plone::
+
+    >>> ignored_metadata = [
+    ...     'CreationDate',
+    ...     'Creator',
+    ...     'Date',
+    ...     'Description',
+    ...     'EffectiveDate',
+    ...     'ExpirationDate',
+    ...     'ModificationDate',
+    ...     'Subject',
+    ...     'Title',
+    ...     'Type',
+    ...     'UID',
+    ...     'cmf_uid',
+    ...     'getIcon',
+    ...     'getId',
+    ...     'getObjSize',
+    ...     'getRemoteUrl',
+    ...     'listCreators',
+    ...     'meta_type',
+    ... ]
+    >>> filter(lambda k: k in ignored_metadata, keys)
+    []
+
+Some builtin metadata columns are mapped to simplified, lowercase keys::
+
+    >>> mapped_metadata = ['id', 'uid', 'title', 'description', 'url', 'tags']
+    >>> filter(lambda k: k in keys, mapped_metadata)
+    ['id', 'uid', 'title', 'description', 'url', 'tags']
+
+Custom indexes are included
+
+    >>> folder['title_or_id']
+    'Test Folder'

@@ -3,6 +3,7 @@
 import logging
 import datetime
 import DateTime
+import Missing
 
 import simplejson as json
 
@@ -36,8 +37,10 @@ class Base(object):
     def __init__(self, context):
         self.context = context
         self.keys = []
+        self.ignore = []
 
-        # additional attributes to extract besides the Schema keys
+        # Mapped attributes to extract from the object besides the schema keys.
+        # These keys are always included
         self.attributes = {
             "id":          "getId",
             "uid":         "UID",
@@ -48,16 +51,29 @@ class Base(object):
             "effective":   "effective",
             "portal_type": "portal_type",
             "tags":        "Subject",
+            "state":       "review_state",
         }
 
     def to_dict(self):
-        data = to_dict(self.context, keys=self.keys)
+        """ extract the data of the content and return it as a dictionary
+        """
+
+        # 1. extract the schema keys
+        data = extract_keys(self.context, keys=self.keys, ignore=self.ignore)
+
+        # 2. include custom key-value pairs listed in the mapping dictionary
         for key, attr in self.attributes.iteritems():
+            # key already extracted in the first step
             if data.get(key):
                 continue  # don't overwrite
+            if key in self.ignore:
+                continue # skip ignores
+            # fetch the mapped attribute
             value = getattr(self.context, attr, None)
+            # handle function calls
             if callable(value):
                 value = value()
+            # map the value to the given key from the mapping
             data[key] = get_json_value(self.context, key, value=value)
         return data
 
@@ -73,23 +89,29 @@ class ZCDataProvider(Base):
 
     def __init__(self, context):
         super(ZCDataProvider, self).__init__(context)
-
-    def to_dict(self):
-        brain = self.context
-        return {
-            "id":          brain.getId,
-            "uid":         brain.UID,
-            "title":       brain.Title,
-            "description": brain.Description,
-            "url":         brain.getURL(),
-            "portal_type": brain.portal_type,
-            "created":     brain.created.ISO8601(),
-            "modified":    brain.modified.ISO8601(),
-            "effective":   brain.effective.ISO8601(),
-            "type":        brain.portal_type,
-            "tags":        brain.Subject,
-            "path":        brain.getPath(),
-        }
+        catalog = api.portal.get_tool("portal_catalog")
+        self.keys = catalog.schema()
+        # ignore some metadata values which we already mapped
+        self.ignore = [
+            'CreationDate',
+            'Creator',
+            'Date',
+            'Description',
+            'EffectiveDate',
+            'ExpirationDate',
+            'ModificationDate',
+            'Subject',
+            'Title',
+            'Type',
+            'UID',
+            'cmf_uid',
+            'getIcon',
+            'getId',
+            'getObjSize',
+            'getRemoteUrl',
+            'listCreators',
+            'meta_type',
+            ]
 
 
 class DexterityDataProvider(Base):
@@ -125,19 +147,24 @@ class SiteRootDataProvider(Base):
 
     def __init__(self, context):
         super(SiteRootDataProvider, self).__init__(context)
-        self.keys = ["uid"]
+        # virtual keys, which are handled by the data manager
+        self.keys = ["uid", "path"]
 
 
 # ---------------------------------------------------------------------------
 #   Functional Helpers
 # ---------------------------------------------------------------------------
 
-def to_dict(obj, keys):
-    """ returns a dictionary of the given keys
+def extract_keys(obj, keys, ignore=[]):
+    """ fetch the given keys from the object using the proper data manager
     """
-    out = dict()
     # see interfaces.IDataManager
     dm = IDataManager(obj)
+
+    # filter out ignores
+    keys = filter(lambda key: key not in ignore, keys)
+    out = dict()
+
     for key in keys:
         value = dm.get(key)
         out[key] = get_json_value(obj, key, value=value)
@@ -154,6 +181,10 @@ def to_dict(obj, keys):
 def get_json_value(obj, key, value=None):
     """ json save value encoding
     """
+
+    # returned from catalog brain metadata
+    if value is Missing.Value:
+        return None
 
     # extract the value from the object if omitted
     if value is None:

@@ -28,6 +28,12 @@
         factory=".datamanagers.PortalDataManager"
         />
 
+    <!-- Data adapter for Catalog brains -->
+    <adapter
+        for="Products.ZCatalog.interfaces.ICatalogBrain"
+        factory=".datamanagers.BrainDataManager"
+        />
+
     <!-- Data adapter for AT Field manipulation -->
     <adapter
         for="Products.ATContentTypes.interfaces.IATContentType"
