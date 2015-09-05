@@ -69,9 +69,13 @@ class PortalDataManager(object):
         attr = getattr(self.context, name, None)
         if callable(attr):
             return attr()
-        # set the (missing) uid of the portal to 0
+
+        # XXX no really nice, but we want the portal to behave like an ordinary
+        # content type. Therefore we need to inject the neccessary data.
         if name == "uid":
             return 0
+        if name == "path":
+            return "/%s" % self.context.getId()
         return attr
 
     def set(self, name, value, **kw):
