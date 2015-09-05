@@ -118,6 +118,7 @@ class ZCDataProvider(Base):
             'getRemoteUrl',
             'listCreators',
             'meta_type',
+            'review_state',
             ]
 
 
