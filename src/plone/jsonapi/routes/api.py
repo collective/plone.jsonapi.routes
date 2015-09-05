@@ -485,7 +485,7 @@ def get_contents(brain_or_object, depth=1):
     """ return the folder contents
     """
     pc = get_portal_catalog()
-    contents = pc(path = {
+    contents = pc(path={
         "query": get_path(brain_or_object),
         "depth": depth})
     return contents

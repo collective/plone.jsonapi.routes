@@ -23,7 +23,6 @@ __docformat__ = 'plaintext'
 logger = logging.getLogger("plone.jsonapi.routes.datamanagers")
 
 
-
 class BrainDataManager(object):
     """ Adapter to get catalog brain attributes
     """

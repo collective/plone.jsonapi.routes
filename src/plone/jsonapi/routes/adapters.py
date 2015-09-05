@@ -67,7 +67,7 @@ class Base(object):
             if data.get(key):
                 continue  # don't overwrite
             if key in self.ignore:
-                continue # skip ignores
+                continue  # skip ignores
             # fetch the mapped attribute
             value = getattr(self.context, attr, None)
             # handle function calls
