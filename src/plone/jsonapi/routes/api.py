@@ -186,34 +186,118 @@ def delete_items(portal_type=None, request=None, uid=None, endpoint=None):
        wants to delete the right content.
     """
 
-    # the data to update
-    records = req.get_request_data()
+    # try to find the requested objects
+    objects = find_objects(uid=uid)
 
-    # we have an uid -> try to get an object for it
-    obj = get_object_by_uid(uid)
-    if obj:
-        info = IInfo(obj)()
-        info["deleted"] = delete_object(obj)
-        return [info]
+    # We don't want to delete the portal object
+    if filter(lambda o: is_root(o), objects):
+        raise APIError(400, "Can not delete the portal object")
 
-    # no uid -> go through the record items
     results = []
-    for record in records:
-        obj = get_object_by_record(record)
-
-        # no object found for this record
-        if obj is None:
-            continue
-
+    for obj in objects:
         info = IInfo(obj)()
         info["deleted"] = delete_object(obj)
         results.append(info)
 
     if not results:
-        raise APIError(400, "No Objects could be deleted")
+        raise APIError(404, "No Objects could be found")
 
     return results
 
+
+# CUT
+def cut_items(portal_type=None, request=None, uid=None, endpoint=None):
+    """ cut items
+    """
+
+    # try to find the requested objects
+    objects = find_objects(uid=uid)
+
+    # No objects could be found, bail out
+    if not objects:
+        raise APIError(404, "No Objects could be found")
+
+    # We support only to cut a single object
+    if len(objects) > 1:
+        raise APIError(400, "Can only cut one object at a time")
+
+    # We don't want to cut the portal object
+    if filter(lambda o: is_root(o), objects):
+        raise APIError(400, "Can not cut the portal object")
+
+    # cut the object
+    obj = objects[0]
+    obj.aq_parent.manage_cutObjects(obj.getId(), REQUEST=request)
+    request.response.setHeader("Content-Type", "application/json")
+    info = IInfo(obj)()
+
+    return [info]
+
+
+# COPY
+def copy_items(portal_type=None, request=None, uid=None, endpoint=None):
+    """ copy items
+    """
+
+    # try to find the requested objects
+    objects = find_objects(uid=uid)
+
+    # No objects could be found, bail out
+    if not objects:
+        raise APIError(404, "No Objects could be found")
+
+    # We support only to copy a single object
+    if len(objects) > 1:
+        raise APIError(400, "Can only copy one object at a time")
+
+    # We don't want to copy the portal object
+    if filter(lambda o: is_root(o), objects):
+        raise APIError(400, "Can not copy the portal object")
+
+    # cut the object
+    obj = objects[0]
+    obj.aq_parent.manage_copyObjects(obj.getId(), REQUEST=request)
+    request.response.setHeader("Content-Type", "application/json")
+    info = IInfo(obj)()
+
+    return [info]
+
+
+# PASTE
+def paste_items(portal_type=None, request=None, uid=None, endpoint=None):
+    """ paste items
+    """
+
+    # try to find the requested objects
+    objects = find_objects(uid=uid)
+
+    # No objects could be found, bail out
+    if not objects:
+        raise APIError(404, "No Objects could be found")
+
+    # check if the cookie is there
+    cookie = req.get_cookie("__cp")
+    if cookie is None:
+        raise APIError(400, "No data found to paste")
+
+    # We support only to copy a single object
+    if len(objects) > 1:
+        raise APIError(400, "Can only paste to one location")
+
+    # cut the object
+    obj = objects[0]
+
+    # paste the object
+    results = obj.manage_pasteObjects(cookie)
+
+    out = []
+    for result in results:
+        new_id = result.get("new_id")
+        pasted = obj.get(new_id)
+        if pasted:
+            out.append(IInfo(pasted)())
+
+    return out
 
 # -----------------------------------------------------------------------------
 #   Data Functions
@@ -504,8 +588,47 @@ def get_endpoint(brain_or_object):
     return portal_type
 
 
+def find_objects(uid=None):
+    """ locate objects
+
+    1. get the object from the given uid
+    2. fetch objects specified in the request parameters
+    3. fetch objects located in the request body
+    """
+    # The objects to cut
+    objects = []
+
+    # get the object by the given uid or try to find it by the request
+    # parameters
+    obj = get_object_by_uid(uid) or get_object_by_request()
+
+    if obj:
+        objects.append(obj)
+    else:
+        # no uid -> go through the record items
+        records = req.get_request_data()
+        for record in records:
+            # try to get the object by the given record
+            obj = get_object_by_record(record)
+
+            # no object found for this record
+            if obj is None:
+                continue
+            objects.append(obj)
+
+    return objects
+
+
+def get_object_by_request():
+    """ locate the object by the request parameters
+    """
+    form = req.get_form()
+    return get_object_by_record(form)
+
+
 def get_object_by_record(record):
-    """ locate the object by record
+    """ locate the object by the given record (dictionary).
+    The record is usually contained in the request.body or in the request.form
     """
 
     # nothing to do here
