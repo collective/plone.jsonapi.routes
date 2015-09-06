@@ -6,6 +6,7 @@ from plone.jsonapi.routes import request as req
 from plone.jsonapi.routes import add_plone_route as route
 from plone.jsonapi.routes.exceptions import APIError
 
+
 # CUT
 @route("/cut", "cut", methods=["GET"])
 @route("/cut/<string:uid>", "cut", methods=["GET"])
