@@ -23,6 +23,80 @@ __docformat__ = 'plaintext'
 logger = logging.getLogger("plone.jsonapi.routes.datamanagers")
 
 
+class BrainDataManager(object):
+    """ Adapter to get catalog brain attributes
+    """
+    interface.implements(IDataManager)
+
+    def __init__(self, context):
+        self.context = context
+
+    def get(self, name):
+        """ get the value by name
+        """
+        # read the attribute
+        attr = getattr(self.context, name, None)
+        if callable(attr):
+            return attr()
+        return attr
+
+    def set(self, name, value, **kw):
+        """ Not used for catalog brains
+        """
+        logger.warn("set attributes not allowed on catalog brains")
+
+
+class PortalDataManager(object):
+    """ Adapter to set and get attributes of the Plone portal
+    """
+    interface.implements(IDataManager)
+
+    def __init__(self, context):
+        self.context = context
+
+    def get(self, name):
+        """ get the value by name
+        """
+
+        # check read permission
+        sm = getSecurityManager()
+        permission = permissions.View
+        if not sm.checkPermission(permission, self.context):
+            raise Unauthorized("Not allowed to view the Plone portal")
+
+        # read the attribute
+        attr = getattr(self.context, name, None)
+        if callable(attr):
+            return attr()
+
+        # XXX no really nice, but we want the portal to behave like an ordinary
+        # content type. Therefore we need to inject the neccessary data.
+        if name == "uid":
+            return 0
+        if name == "path":
+            return "/%s" % self.context.getId()
+        return attr
+
+    def set(self, name, value, **kw):
+        """ Set the attribute to the given value.
+
+        The keyword arguments represent the other attribute values
+        to integrate constraints to other values.
+        """
+
+        # check write permission
+        sm = getSecurityManager()
+        permission = permissions.ManagePortal
+        if not sm.checkPermission(permission, self.context):
+            raise Unauthorized("Not allowed to modify the Plone portal")
+
+        # set the attribute
+        if not hasattr(self.context, name):
+            return False
+        self.context[name] = value
+        return True
+
+
 class ATDataManager(object):
     """ Adapter to set and get field values of AT Content Types
     """
@@ -50,14 +124,19 @@ class ATDataManager(object):
         The keyword arguments represent the other field values
         to integrate constraints to other values.
         """
+
+        # fetch the field by name
         field = self.get_field(name)
 
         # bail out if we have no field
         if not field:
             return False
+
         # check the field permission
         if not field.checkPermission("write", self.context):
             raise Unauthorized("Not allowed to write the field %s" % name)
+
+        # set the field value
         if self.is_file_field(field):
             logger.debug("ATDataManager::set:File field detected ('%r'), "
                          "base64 decoding value", field)
@@ -67,6 +146,10 @@ class ATDataManager(object):
                 logger.debug("ATDataManager::set: No Filename detected "
                              "-> using title or id")
                 kw["filename"] = kw.get("id") or kw.get("title")
+
+        # id fields take only strings
+        if name == "id":
+            value = str(value)
 
         # set the value to the field
         self._set(field, value, **kw)
@@ -85,9 +168,19 @@ class ATDataManager(object):
     def get(self, name):
         """ get the value of the field by name
         """
+
+        # fetch the field by name
         field = self.get_field(name)
+
+        # bail out if we have no field
+        if not field:
+            return None
+
+        # check the field permission
         if not field.checkPermission("read", self.context):
             raise Unauthorized("Not allowed to read the field %s" % name)
+
+        # return the field value
         return field.get(self.context)
 
 

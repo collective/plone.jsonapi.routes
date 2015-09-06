@@ -1,7 +1,7 @@
 Quickstart
 ==========
 
-This chapter gives a good introduction about `plone.jsonapi.routes` It assumes
+This section gives a good introduction about `plone.jsonapi.routes` It assumes
 you already have `Plone` and `plone.jsonapi.routes` installed. Since all the
 coming examples are executed directly in Google Chrome, it assumes that you
 have also installed JSONView and the Advanced Rest Client Application (see

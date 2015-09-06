@@ -30,7 +30,7 @@ __docformat__ = 'plaintext'
 
 logger = logging.getLogger("plone.jsonapi.routes")
 
-PORTAL_IDS = ["0", "portal", "site", "plone"]
+PORTAL_IDS = ["0", "portal", "site", "plone", "root"]
 
 
 # -----------------------------------------------------------------------------
@@ -186,33 +186,118 @@ def delete_items(portal_type=None, request=None, uid=None, endpoint=None):
        wants to delete the right content.
     """
 
-    # the data to update
-    records = req.get_request_data()
+    # try to find the requested objects
+    objects = find_objects(uid=uid)
 
-    # we have an uid -> try to get an object for it
-    obj = get_object_by_uid(uid)
-    if obj:
-        info = IInfo(obj)()
-        info["deleted"] = delete_object(obj)
-        return [info]
+    # We don't want to delete the portal object
+    if filter(lambda o: is_root(o), objects):
+        raise APIError(400, "Can not delete the portal object")
 
-    # no uid -> go through the record items
     results = []
-    for record in records:
-        obj = get_object_by_record(record)
-
-        # no object found for this record
-        if obj is None:
-            continue
-
+    for obj in objects:
         info = IInfo(obj)()
         info["deleted"] = delete_object(obj)
         results.append(info)
 
     if not results:
-        raise APIError(400, "No Objects could be deleted")
+        raise APIError(404, "No Objects could be found")
 
     return results
+
+
+# CUT
+def cut_items(portal_type=None, request=None, uid=None, endpoint=None):
+    """ cut items
+    """
+
+    # try to find the requested objects
+    objects = find_objects(uid=uid)
+
+    # No objects could be found, bail out
+    if not objects:
+        raise APIError(404, "No Objects could be found")
+
+    # We support only to cut a single object
+    if len(objects) > 1:
+        raise APIError(400, "Can only cut one object at a time")
+
+    # We don't want to cut the portal object
+    if filter(lambda o: is_root(o), objects):
+        raise APIError(400, "Can not cut the portal object")
+
+    # cut the object
+    obj = objects[0]
+    obj.aq_parent.manage_cutObjects(obj.getId(), REQUEST=request)
+    request.response.setHeader("Content-Type", "application/json")
+    info = IInfo(obj)()
+
+    return [info]
+
+
+# COPY
+def copy_items(portal_type=None, request=None, uid=None, endpoint=None):
+    """ copy items
+    """
+
+    # try to find the requested objects
+    objects = find_objects(uid=uid)
+
+    # No objects could be found, bail out
+    if not objects:
+        raise APIError(404, "No Objects could be found")
+
+    # We support only to copy a single object
+    if len(objects) > 1:
+        raise APIError(400, "Can only copy one object at a time")
+
+    # We don't want to copy the portal object
+    if filter(lambda o: is_root(o), objects):
+        raise APIError(400, "Can not copy the portal object")
+
+    # cut the object
+    obj = objects[0]
+    obj.aq_parent.manage_copyObjects(obj.getId(), REQUEST=request)
+    request.response.setHeader("Content-Type", "application/json")
+    info = IInfo(obj)()
+
+    return [info]
+
+
+# PASTE
+def paste_items(portal_type=None, request=None, uid=None, endpoint=None):
+    """ paste items
+    """
+
+    # try to find the requested objects
+    objects = find_objects(uid=uid)
+
+    # No objects could be found, bail out
+    if not objects:
+        raise APIError(404, "No Objects could be found")
+
+    # check if the cookie is there
+    cookie = req.get_cookie("__cp")
+    if cookie is None:
+        raise APIError(400, "No data found to paste")
+
+    # We support only to copy a single object
+    if len(objects) > 1:
+        raise APIError(400, "Can only paste to one location")
+
+    # cut the object
+    obj = objects[0]
+
+    # paste the object
+    results = obj.manage_pasteObjects(cookie)
+
+    out = []
+    for result in results:
+        new_id = result.get("new_id")
+        pasted = obj.get(new_id)
+        if pasted:
+            out.append(IInfo(pasted)())
+
+    return out
 
 
 # -----------------------------------------------------------------------------
@@ -224,6 +309,8 @@ def get_search_results(**kw):
 
     The request may contain additional query parameters
     """
+    if kw.get("portal_type") == "Plone Site":
+        return [get_portal()]
     query = make_query(**kw)
     return search(query)
 
@@ -237,37 +324,38 @@ def make_items_for(brains_or_objects, endpoint=None, complete=True):
     # this function extracts the data for one brain or object
     def _block(brain_or_object):
 
-        if req.get("only_children"):
-            return get_children(brain_or_object)
-
         # extract the data using the default info adapter
         info = IInfo(brain_or_object)()
 
-        # might be None for mixed type catalog results,
-        # e.g. in the search route
-        scoped_endpoint = endpoint
-        if scoped_endpoint is None:
-            scoped_endpoint = get_endpoint(get_portal_type(brain_or_object))
-
-        info.update(get_url_info(brain_or_object, scoped_endpoint))
-
-        # switch to wake up the object and complete the informations with the
-        # data of the content adapter
+        # wake up the object and extract the complete data
         if complete:
             obj = get_object(brain_or_object)
             info.update(IInfo(obj)())
-            info.update(get_parent_info(obj))
-            if req.get_children():
-                info.update(get_children(obj))
+            # also include the parent url info
+            parent = get_parent_info(obj)
+            info.update(parent)
+
+        # update with url info
+        url_info = get_url_info(brain_or_object, endpoint)
+        info.update(url_info)
+
+        # include an array of child contents
+        if req.get_children():
+            children = get_children(brain_or_object, complete)
+            info.update(children)
 
         return info
 
     return map(_block, brains_or_objects)
 
 
-def get_url_info(brain_or_object, endpoint):
+def get_url_info(brain_or_object, endpoint=None):
     """ returns the url info for the object
     """
+
+    # If no endpoint was given, guess the endpoint by portal type
+    if endpoint is None:
+        endpoint = get_endpoint(brain_or_object)
 
     uid = get_uid(brain_or_object)
     return {
@@ -286,13 +374,13 @@ def get_parent_info(obj):
         return {}
 
     parent = get_parent(obj)
-    endpoint = get_endpoint(parent.portal_type)
+    endpoint = get_endpoint(parent)
 
     if is_root(parent):
         return {
             "parent_id":  parent.getId(),
             "parent_uid": 0,
-            "parent_url": url_for("portal"),
+            "parent_url": url_for("plonesites", uid=0),
         }
 
     return {
@@ -302,30 +390,27 @@ def get_parent_info(obj):
     }
 
 
-def get_children(obj):
+def get_children(brain_or_object, complete=False):
     """ returns the contents for this object
     """
 
-    # ensure we have an object
-    obj = get_object(obj)
-
-    if is_folderish(obj) is False:
-        return {
-            "children": None,
-        }
-
     children = []
-    for content in obj.listFolderContents():
-        endpoint = get_endpoint(get_portal_type(content))
-        child = {
-            "uid":     get_uid(content),
-            "url":     get_url(content),
-            "api_url": url_for(endpoint, uid=get_uid(content)),
-        }
-        child.update(IInfo(content)())
+
+    for brain in get_contents(brain_or_object):
+        child = IInfo(brain)()
+        child.update(get_url_info(brain))
+
+        # if the complete flag is set, we include the full object info for the
+        # child contents.
+        if complete:
+            # wake up the object
+            obj = get_object(brain)
+            # extract and include schema field values
+            child.update(IInfo(obj)())
         children.append(child)
 
     return {
+        "child_count": len(children),
         "children": children
     }
 
@@ -387,22 +472,24 @@ def get_portal_workflow():
     return get_tool("portal_workflow")
 
 
-def is_brain(obj):
+def is_brain(brain_or_object):
     """ checks if the object is a catalog brain
     """
-    return ICatalogBrain.providedBy(obj)
+    return ICatalogBrain.providedBy(brain_or_object)
 
 
-def is_root(obj):
+def is_root(brain_or_object):
     """ checks if the object is the site root
     """
-    return ISiteRoot.providedBy(obj)
+    return ISiteRoot.providedBy(brain_or_object)
 
 
-def is_folderish(obj):
+def is_folderish(brain_or_object):
     """ checks if the object is folderish
     """
-    return IFolderish.providedBy(obj)
+    if is_brain(brain_or_object):
+        return brain_or_object.is_folderish
+    return IFolderish.providedBy(brain_or_object)
 
 
 def get_locally_allowed_types(obj):
@@ -447,18 +534,18 @@ def get_uid(obj):
     return obj.UID()
 
 
-def get_portal_type(obj):
+def get_portal_type(brain_or_object):
     """ return the portal type of this object
     """
-    return obj.portal_type
+    return brain_or_object.portal_type
 
 
 def get_object(brain_or_object):
     """ return the referenced object
     """
-    if not is_brain(brain_or_object):
-        return brain_or_object
-    return brain_or_object.getObject()
+    if is_brain(brain_or_object):
+        return brain_or_object.getObject()
+    return brain_or_object
 
 
 def get_parent(brain_or_object):
@@ -475,8 +562,23 @@ def get_path(brain_or_object):
     return "/".join(brain_or_object.getPhysicalPath())
 
 
-def get_endpoint(portal_type):
-    """ get the endpoint for this type """
+def get_contents(brain_or_object, depth=1):
+    """ return the folder contents
+    """
+    pc = get_portal_catalog()
+    contents = pc(path={
+        "query": get_path(brain_or_object),
+        "depth": depth})
+    return contents
+
+
+def get_endpoint(brain_or_object):
+    """ get the endpoint for this object
+
+        The endpoint is used to generate the api url for this content.
+    """
+
+    portal_type = get_portal_type(brain_or_object)
     # handle portal types with dots
     portal_type = portal_type.split(".").pop()
     # remove whitespaces
@@ -487,8 +589,47 @@ def get_endpoint(portal_type):
     return portal_type
 
 
+def find_objects(uid=None):
+    """ locate objects
+
+    1. get the object from the given uid
+    2. fetch objects specified in the request parameters
+    3. fetch objects located in the request body
+    """
+    # The objects to cut
+    objects = []
+
+    # get the object by the given uid or try to find it by the request
+    # parameters
+    obj = get_object_by_uid(uid) or get_object_by_request()
+
+    if obj:
+        objects.append(obj)
+    else:
+        # no uid -> go through the record items
+        records = req.get_request_data()
+        for record in records:
+            # try to get the object by the given record
+            obj = get_object_by_record(record)
+
+            # no object found for this record
+            if obj is None:
+                continue
+            objects.append(obj)
+
+    return objects
+
+
+def get_object_by_request():
+    """ locate the object by the request parameters
+    """
+    form = req.get_form()
+    return get_object_by_record(form)
+
+
 def get_object_by_record(record):
-    """ locate the object by record
+    """ locate the object by the given record (dictionary).
+    The record is usually contained in the request.body or in the request.form
     """
 
     # nothing to do here
@@ -618,13 +759,16 @@ def find_target_container(record):
     return target
 
 
-def do_action_for(obj, transition):
+def do_action_for(brain_or_object, transition):
     """ perform wf transition """
+    obj = get_object(brain_or_object)
     return ploneapi.content.transition(obj, transition)
 
 
-def delete_object(obj):
+def delete_object(brain_or_object):
     """ delete the object """
+
+    obj = get_object(brain_or_object)
     # we do not want to delete the site root!
     if is_root(obj):
         raise APIError(401, "Removing the Portal is not allowed")

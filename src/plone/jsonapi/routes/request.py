@@ -32,6 +32,12 @@ def get(key, default=None):
     return get_form().get(key, default)
 
 
+def get_cookie(key, default=None):
+    """ return the key from the request
+    """
+    return get_request().cookies.get(key, default)
+
+
 def get_complete():
     """ returns the 'complete' from the request
     """
