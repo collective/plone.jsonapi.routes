@@ -8,6 +8,8 @@ Changelog
 
 **CLOSED ISSUES**
 
+- https://github.com/collective/plone.jsonapi.routes/issues/50: API route throws error
+- https://github.com/collective/plone.jsonapi.routes/pull/37:   Include custom metadata columns
 - https://github.com/collective/plone.jsonapi.routes/pull/37:   Include custom metadata columns
 _ https://github.com/collective/plone.jsonapi.routes/issues/49: Setting the ID throws a traceback
 - https://github.com/collective/plone.jsonapi.routes/issues/48: Implement cut/copy/paste routes
