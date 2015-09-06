@@ -38,16 +38,19 @@ physical path `/Plone/folder`.
 You can either cut or copy by the `parent_path` & `id` pair:
 
 http://localhost:8080/Plone/@@API/plone/api/1.0/copy?parent_path=/Plone&id=folder
+
 http://localhost:8080/Plone/@@API/plone/api/1.0/cut?parent_path=/Plone&id=folder
 
 Or you can simply take the physical path by specifying the `path`:
 
 http://localhost:8080/Plone/@@API/plone/api/1.0/copy?path=/Plone/folder
+
 http://localhost:8080/Plone/@@API/plone/api/1.0/cut?path=/Plone/folder
 
 Or if you know the UID, you can use the `uid` parameter:
 
 http://localhost:8080/Plone/@@API/plone/api/1.0/copy/3762908a5d2c4917b9d2dbaf2a9be1cc
+
 http://localhost:8080/Plone/@@API/plone/api/1.0/cut/3762908a5d2c4917b9d2dbaf2a9be1cc
 
 After you cutted or copied the content, you can paste it by providing the
@@ -57,6 +60,7 @@ If you would like to paste it in the portal root, just use the UID 0 or the path
 your Plone site:
 
 http://localhost:8080/Plone/@@API/plone/api/1.0/paste/0
+
 http://localhost:8080/Plone/@@API/plone/api/1.0/paste?path=/Plone
 
 
@@ -70,8 +74,11 @@ http://localhost:8080/Plone/@@API/plone/api/1.0/search
 The search results can be refined by using request parameters, e.g.:
 
 http://localhost:8080/Plone/@@API/plone/api/1.0/search?q=test
+
 http://localhost:8080/Plone/@@API/plone/api/1.0/search?q=test&limit=10
+
 http://localhost:8080/Plone/@@API/plone/api/1.0/search?q=test&limit=10&portal_type=Folder
+
 http://localhost:8080/Plone/@@API/plone/api/1.0/search?q=test&limit=10&portal_type=Folder&Creator=admin
 
 Basically, you can use any defined index of your Plone site.
