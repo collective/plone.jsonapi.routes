@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 
 from plone.jsonapi.routes import api
+from plone.jsonapi.routes.api import url_for
 from plone.jsonapi.routes import request as req
 from plone.jsonapi.routes import add_plone_route as route
 from plone.jsonapi.routes.exceptions import APIError
 
-
 # CUT
+@route("/cut", "cut", methods=["GET"])
 @route("/cut/<string:uid>", "cut", methods=["GET"])
 def cut(context, request, uid=None):
     """ cut content
@@ -24,12 +25,18 @@ def cut(context, request, uid=None):
     # cut the object
     obj.aq_parent.manage_cutObjects(obj.getId(), REQUEST=request)
 
+    # extract the response cookie
+    result = request.response.cookies.get("__cp")
+
     return {
-        "success": True
+        "url": url_for("cut", uid=uid),
+        "uid": uid,
+        "success": result is not None
     }
 
 
 # COPY
+@route("/copy", "copy", methods=["GET"])
 @route("/copy/<string:uid>", "copy", methods=["GET"])
 def copy(context, request, uid=None):
     """ copy content
@@ -47,12 +54,18 @@ def copy(context, request, uid=None):
     # copy the object
     obj.aq_parent.manage_copyObjects(obj.getId(), REQUEST=request)
 
+    # extract the response cookie
+    result = request.response.cookies.get("__cp")
+
     return {
-        "success": True
+        "url": url_for("copy", uid=uid),
+        "uid": uid,
+        "success": result is not None
     }
 
 
 # PASTE
+@route("/paste", "paste", methods=["GET"])
 @route("/paste/<string:uid>", "paste", methods=["GET"])
 def paste(context, request, uid=None):
     """ paste content
@@ -73,5 +86,7 @@ def paste(context, request, uid=None):
     obj.manage_pasteObjects(cookie, REQUEST=request)
 
     return {
+        "url": url_for("copy", uid=uid),
+        "uid": uid,
         "success": True
     }

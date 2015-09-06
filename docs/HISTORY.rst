@@ -3,14 +3,22 @@
 Changelog
 =========
 
-0.8.1 - unreleased
+0.8.1 - 2015-09-06
 ------------------
 
+**CLOSED ISSUES**
+
+- https://github.com/collective/plone.jsonapi.routes/pull/37:   Include custom metadata columns
 _ https://github.com/collective/plone.jsonapi.routes/issues/49: Setting the ID throws a traceback
 - https://github.com/collective/plone.jsonapi.routes/issues/48: Implement cut/copy/paste routes
 - https://github.com/collective/plone.jsonapi.routes/issues/46: Route Provider `portal` throws TypeError
 - https://github.com/collective/plone.jsonapi.routes/issues/47: ZCML directive to enable AdvancedQuery if installed
 
+
+**ENHANCEMENTS**
+
+- API actions to cut/copy/paste contents
+- New route provider `plonesites`
 
 0.8 - 2015-07-20
 ----------------
