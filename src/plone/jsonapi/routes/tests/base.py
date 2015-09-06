@@ -52,6 +52,11 @@ class TestLayer(PloneSandboxLayer):
         from plone.jsonapi.core import router
         router.DefaultRouter.initialize(portal, portal.REQUEST)
 
+        # add a custom metadata column to portal_catalog so
+        # we can test it gets included in json output
+        portal.portal_catalog.addColumn('title_or_id')
+        portal.portal_catalog.refreshCatalog(clear=0)
+
 
 TEST_FIXTURE = TestLayer()
 INTEGRATION_TESTING = IntegrationTesting(

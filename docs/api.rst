@@ -6,6 +6,8 @@ plone.jsonapi.routes. It also covers all the request parameters that can be
 applied to these resources to refine the results.
 
 
+.. _Concept:
+
 Concept
 -------
 
