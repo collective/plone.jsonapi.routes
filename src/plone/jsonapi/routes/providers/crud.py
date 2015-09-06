@@ -78,6 +78,7 @@ def cut(context, request, uid=None):
         "items": items,
         }
 
+
 # COPY
 @route("/copy", "copy", methods=["GET", "POST"])
 @route("/copy/<string:uid>", "copy", methods=["GET", "POST"])
@@ -90,6 +91,7 @@ def copy(context, request, uid=None):
         "count": len(items),
         "items": items,
         }
+
 
 # PASTE
 @route("/paste", "paste", methods=["GET", "POST"])
