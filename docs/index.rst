@@ -20,6 +20,7 @@ Table of Contents:
    customizing
    crud
    dexterity
+   examples
    links
    CONTRIBUTORS
    LICENSE

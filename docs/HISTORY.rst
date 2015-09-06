@@ -21,6 +21,7 @@ _ https://github.com/collective/plone.jsonapi.routes/issues/49: Setting the ID t
 
 - API actions to cut/copy/paste contents
 - New route provider `plonesites`
+- Support for catalog brain schema
 
 0.8 - 2015-07-20
 ----------------
