@@ -3,12 +3,13 @@
 Changelog
 =========
 
-0.8.2 - unreleased
+0.8.2 - 2015-09-09
 ------------------
 
 **CLOSED ISSUES**
 
-- no changes yet
+- https://github.com/collective/plone.jsonapi.routes/issues/52: Handle field unauthorized errors in the GET API
+- https://github.com/collective/plone.jsonapi.routes/issues/51: Default Data Adapters missing
 
 
 0.8.1 - 2015-09-06

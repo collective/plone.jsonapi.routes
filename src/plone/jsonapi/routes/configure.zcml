@@ -10,6 +10,12 @@
     <!-- Include meta directives -->
     <include file="meta.zcml"/>
 
+
+    <!-- BATCHING
+
+    split results into multiple batches
+    -->
+
     <!-- Adapter for Plone 4.3 Batching -->
     <adapter
         for="*"
@@ -20,6 +26,18 @@
     <adapter
         for="ZTUtils.Batch.Batch"
         factory=".batch.Batch42"
+        />
+
+
+    <!-- DATA MANAGERS
+
+    get/set values from fields
+    -->
+
+    <!-- Default Data adapter (AT based content types) -->
+    <adapter
+        for="*"
+        factory=".datamanagers.ATDataManager"
         />
 
     <!-- Data adapter for Portal manipulation -->
@@ -34,16 +52,22 @@
         factory=".datamanagers.BrainDataManager"
         />
 
-    <!-- Data adapter for AT Field manipulation -->
-    <adapter
-        for="Products.ATContentTypes.interfaces.IATContentType"
-        factory=".datamanagers.ATDataManager"
-        />
-
     <!-- Data adapter for Dexterity Field manipulation -->
     <adapter
         for="plone.dexterity.interfaces.IDexterityContent"
         factory=".datamanagers.DexterityDataManager"
+        />
+
+
+    <!-- DATA PROVIDERS
+
+    extract fields from schema and return a dictionary
+    -->
+
+    <!-- Default data provider (AT based content types) -->
+    <adapter
+        for="*"
+        factory=".adapters.ATDataProvider"
         />
 
     <!-- Adapter for Catalog Brains -->
@@ -58,12 +82,6 @@
         factory=".adapters.SiteRootDataProvider"
         />
 
-    <!-- Adapter for AT Content Types -->
-    <adapter
-        for="Products.ATContentTypes.interfaces.IATContentType"
-        factory=".adapters.ATDataProvider"
-        />
-
     <!-- Adapter for Dexterity Content Types -->
     <adapter
         for="plone.dexterity.interfaces.IDexterityContent"
@@ -71,5 +89,3 @@
         />
 
 </configure>
-
-<!-- vim: set ft=xml ts=2 sw=2 expandtab : -->
