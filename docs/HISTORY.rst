@@ -3,6 +3,13 @@
 Changelog
 =========
 
+0.8.3 - unreleased
+------------------
+
+**CLOSED ISSUES**
+
+- no changes yet
+
 
 0.8.2 - 2015-09-09
 ------------------
