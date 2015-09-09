@@ -15,6 +15,8 @@ from plone import api
 from plone.dexterity.schema import SCHEMA_CACHE
 from plone.dexterity.interfaces import IDexterityContent
 
+from AccessControl import Unauthorized
+
 from Products.CMFCore.interfaces import ISiteRoot
 from Products.ZCatalog.interfaces import ICatalogBrain
 from Products.ATContentTypes.interfaces import IATContentType
@@ -174,15 +176,25 @@ def extract_keys(obj, keys, ignore=[]):
     out = dict()
 
     for key in keys:
-        value = dm.get(key)
+        try:
+            # get the field value with the data manager
+            value = dm.get(key)
+        # https://github.com/collective/plone.jsonapi.routes/issues/52
+        # -> skip restricted fields
+        except Unauthorized:
+            logger.debug("Skipping restricted field '%s'" % key)
+            continue
         out[key] = get_json_value(obj, key, value=value)
     if out.get("workflow_info"):
         logger.warn("Workflow Info ommitted since the key 'workflow_info' "
                     "was found in the current schema")
         return out
+
+    # additional workflow information
     wf_info = get_wf_info(obj)
     out["workflow_info"] = wf_info
     out["state"] = wf_info.get("status")
+
     return out
 
 
