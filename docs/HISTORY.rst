@@ -8,6 +8,7 @@ Changelog
 
 **CLOSED ISSUES**
 
+- https://github.com/collective/plone.jsonapi.routes/issues/54: Let complete flag overrule "uid rule"
 - https://github.com/collective/plone.jsonapi.routes/issues/53: Unit tests: add tests for api module
 
 

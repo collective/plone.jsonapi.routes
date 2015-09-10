@@ -30,6 +30,8 @@ __docformat__ = 'plaintext'
 
 logger = logging.getLogger("plone.jsonapi.routes")
 
+_marker = object()
+
 PORTAL_IDS = ["0", "portal", "site", "plone", "root"]
 
 
@@ -50,7 +52,10 @@ def get_record(uid=None):
         obj = get_object_by_record(form)
     if obj is None:
         raise APIError(404, "No object found")
-    items = make_items_for([obj])
+    complete = req.get_complete(default=_marker)
+    if complete is _marker:
+        complete = True
+    items = make_items_for([obj], complete=complete)
     return _.first(items)
 
 
@@ -65,8 +70,8 @@ def get_items(portal_type=None, request=None, uid=None, endpoint=None):
     # fetch the catalog results
     results = get_search_results(portal_type=portal_type, uid=uid)
 
-    complete = req.get_complete()
-    if not complete:
+    complete = req.get_complete(default=_marker)
+    if complete is _marker:
         # if the uid is given, get the complete information set
         complete = uid and True or False
 
@@ -85,8 +90,8 @@ def get_batched(portal_type=None, request=None, uid=None, endpoint=None):
     size = req.get_batch_size()
     start = req.get_batch_start()
 
-    complete = req.get_complete()
-    if not complete:
+    complete = req.get_complete(default=_marker)
+    if complete is _marker:
         # if the uid is given, get the complete information set
         complete = uid and True or False
 

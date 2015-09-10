@@ -38,20 +38,24 @@ def get_cookie(key, default=None):
     return get_request().cookies.get(key, default)
 
 
-def get_complete():
+def get_complete(default=None):
     """ returns the 'complete' from the request
     """
-    complete = get("complete", "no")
+    complete = get("complete", default)
+    if complete is default:
+        return default
     if complete.lower() in ["y", "yes", "1", "true"]:
         return True
     return False
 
 
-def get_children():
+def get_children(default=None):
     """ returns the 'children' from the request
     """
-    complete = get("children", "no")
-    if complete.lower() in ["y", "yes", "1", "true"]:
+    children = get("children", default)
+    if children is default:
+        return default
+    if children.lower() in ["y", "yes", "1", "true"]:
         return True
     return False
 
