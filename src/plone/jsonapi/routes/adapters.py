@@ -98,7 +98,7 @@ class ZCDataProvider(Base):
         # add specific catalog brain mappings
         self.attributes.update({
             "path": "getPath",
-            })
+        })
 
         # ignore some metadata values, which we already mapped
         self.ignore = [
@@ -121,7 +121,7 @@ class ZCDataProvider(Base):
             'listCreators',
             'meta_type',
             'review_state',
-            ]
+        ]
 
 
 class DexterityDataProvider(Base):

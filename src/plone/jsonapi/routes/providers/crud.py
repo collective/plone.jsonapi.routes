@@ -76,7 +76,7 @@ def cut(context, request, uid=None):
         "url": url_for("cut"),
         "count": len(items),
         "items": items,
-        }
+    }
 
 
 # COPY
@@ -90,7 +90,7 @@ def copy(context, request, uid=None):
         "url": url_for("copy"),
         "count": len(items),
         "items": items,
-        }
+    }
 
 
 # PASTE
@@ -104,4 +104,4 @@ def paste(context, request, uid=None):
         "url": url_for("paste"),
         "count": len(items),
         "items": items,
-        }
+    }

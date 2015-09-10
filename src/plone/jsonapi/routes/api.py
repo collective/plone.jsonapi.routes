@@ -508,11 +508,11 @@ def url_for(endpoint, **values):
     """
     try:
         return router.url_for(endpoint, force_external=True, values=values)
-    except:
+    except Exception:
         # XXX plone.jsonapi.core should catch the BuildError of Werkzeug and
         #     throw another error which can be handled here.
-        logger.warn("Could not build API URL for endpoint '%s'. "
-                    "No route provider registered?" % endpoint)
+        logger.debug("Could not build API URL for endpoint '%s'. "
+                     "No route provider registered?" % endpoint)
         return None
 
 
@@ -716,7 +716,7 @@ def mkdir(path):
         if not segment:
             continue
 
-        curpath = "/".join(segments[:n+1])
+        curpath = "/".join(segments[:n + 1])
         obj = get_object_by_path(curpath)
 
         if obj:

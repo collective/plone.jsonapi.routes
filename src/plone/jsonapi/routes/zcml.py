@@ -16,14 +16,10 @@ class IConfig(Interface):
         description=u"""
         Use Advanced Query if installed for catalog searches
         """,
-        required=False
-        )
+        required=False)
 
 
-def configDirective(
-        _context,
-        use_advanced_query=False,
-        ):
+def configDirective(_context, use_advanced_query=False):
 
     if use_advanced_query:
         from plone.jsonapi.routes import query

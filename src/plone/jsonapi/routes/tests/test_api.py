@@ -84,14 +84,14 @@ class TestAPI(APITestCase):
         endpoint = "plonesites"
         uid = "0"
         self.assertEqual(
-                api.url_for(endpoint, uid=uid),
-                "http://foo/plone/api/1.0/plonesites/0")
+            api.url_for(endpoint, uid=uid),
+            "http://foo/plone/api/1.0/plonesites/0")
 
     def test_get_url(self):
         self.assertEqual(
-                api.get_url(self.portal),
-                self.portal.absolute_url()
-                )
+            api.get_url(self.portal),
+            self.portal.absolute_url()
+        )
 
     def test_get_uid(self):
         obj = self.get_document_obj()
@@ -99,11 +99,11 @@ class TestAPI(APITestCase):
 
     def test_get_portal_type(self):
         self.assertEqual(
-                api.get_portal_type(self.get_document_brain()),
-                "Document")
+            api.get_portal_type(self.get_document_brain()),
+            "Document")
         self.assertEqual(
-                api.get_portal_type(self.get_document_obj()),
-                "Document")
+            api.get_portal_type(self.get_document_obj()),
+            "Document")
 
     def test_get_object(self):
         obj = self.get_document_obj()
@@ -171,7 +171,6 @@ class TestAPI(APITestCase):
         obj = self.get_document_obj()
         path = "/".join(obj.getPhysicalPath())
         self.assertEqual(api.get_object_by_path(path), obj)
-
 
     def test_mkdir(self):
         obj = self.portal.folder
