@@ -8,7 +8,7 @@ Changelog
 
 **CLOSED ISSUES**
 
-- no changes yet
+- https://github.com/collective/plone.jsonapi.routes/issues/53: Unit tests: add tests for api module
 
 
 0.8.2 - 2015-09-09
