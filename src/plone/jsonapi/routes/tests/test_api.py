@@ -25,6 +25,10 @@ class TestAPI(APITestCase):
         # give the test user the manager role
         setRoles(self.portal, TEST_USER_ID, ['Manager'])
 
+    # -----------------------------------------------------------------------------
+    #   Testing Helpers
+    # -----------------------------------------------------------------------------
+
     def get_document_obj(self):
         _, obj = self.test_folder.items()[0]
         return obj
@@ -33,6 +37,93 @@ class TestAPI(APITestCase):
         pc = api.get_portal_catalog()
         results = pc({"portal_type": "Document", "limit": 1})
         return results[0]
+
+    # -----------------------------------------------------------------------------
+    #   Test Data Functions
+    # -----------------------------------------------------------------------------
+
+    def test_get_search_results(self):
+        # query portal
+        result = api.get_search_results(portal_type="Plone Site")
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0], self.portal)
+        result = api.get_search_results(uid="0")
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0], self.portal)
+        # query contents
+        result = api.get_search_results(portal_type="Document")
+        self.assertEqual(len(result), 50)
+
+    def test_make_items_for(self):
+        # handles empty data gracefully
+        self.assertEqual(api.make_items_for([]), [])
+        # returns brain results
+        brain = self.get_document_brain()
+        self.assertEqual(len(api.make_items_for([brain])), 1)
+        self.assertEqual(
+            api.make_items_for([brain])[0]["id"],
+            brain.getId)
+        # returns object results
+        obj = self.get_document_obj()
+        self.assertEqual(len(api.make_items_for([obj])), 1)
+        self.assertEqual(
+            api.make_items_for([obj])[0]["uid"],
+            obj.UID())
+
+    def test_get_info(self):
+        # returns brain data
+        brain = self.get_document_brain()
+        self.assertEqual(
+            api.get_info(brain).get("id"),
+            brain.getId)
+        # returns object results
+        obj = self.get_document_obj()
+        self.assertEqual(
+            api.get_info(obj).get("uid"),
+            obj.UID())
+
+    def test_get_url_info(self):
+        # returns brain data
+        brain = self.get_document_brain()
+        self.assertEqual(
+            api.get_url_info(brain).get("url"),
+            brain.getURL())
+        # returns object data
+        obj = self.get_document_obj()
+        self.assertEqual(
+            api.get_url_info(obj).get("url"),
+            obj.absolute_url())
+
+    def test_get_workflow_info(self):
+        # returns brain data
+        brain = self.get_document_brain()
+        # XXX test with assigned worklfow
+        self.assertEqual(api.get_workflow_info(brain), {})
+        # returns object data
+        obj = self.get_document_obj()
+        # XXX test with assigned worklfow
+        self.assertEqual(api.get_workflow_info(obj), {})
+
+    def test_get_parent_info(self):
+        # handles the portal object gracefully
+        self.assertEqual(api.get_parent_info(self.portal), {})
+        # handles catalog brains
+        brain = self.get_document_brain()
+        self.assertEqual(
+            api.get_parent_info(brain).get("parent_id"),
+            self.portal.folder.getId())
+        # handles content objects
+        obj = self.get_document_obj()
+        self.assertEqual(
+            api.get_parent_info(obj).get("parent_id"),
+            self.portal.folder.getId())
+
+    def test_get_children_info(self):
+        folder = self.portal.folder
+        info = api.get_children_info(folder)
+        children = info.get("children", [])
+        # should contain 50 documents
+        self.assertEqual(len(children), 50)
 
     # -----------------------------------------------------------------------------
     #   Test Functional Helpers
@@ -90,8 +181,11 @@ class TestAPI(APITestCase):
     def test_get_url(self):
         self.assertEqual(
             api.get_url(self.portal),
-            self.portal.absolute_url()
-        )
+            self.portal.absolute_url())
+
+    def test_get_id(self):
+        obj = self.get_document_obj()
+        self.assertEqual(api.get_id(obj), obj.getId())
 
     def test_get_uid(self):
         obj = self.get_document_obj()
@@ -112,9 +206,28 @@ class TestAPI(APITestCase):
         self.assertEqual(api.get_object(brain), brain.getObject())
 
     def test_get_parent(self):
-        parent = self.test_folder
+        folder = self.test_folder
+        # works for catalog brains
+        brain = self.get_document_brain()
+        parent = api.get_parent(brain)
+        self.assertEqual(parent.UID, folder.UID())
+
+        # works for content objects
         obj = self.get_document_obj()
-        self.assertEqual(api.get_parent(obj), parent)
+        parent = api.get_parent(obj)
+        self.assertEqual(parent, folder)
+
+    def test_get_parent_path(self):
+        folder = self.portal.folder
+        parent_path = "/".join(folder.getPhysicalPath())
+
+        # works for catalog objects
+        brain = self.get_document_brain()
+        self.assertEqual(api.get_parent_path(brain), parent_path)
+
+        # works for content objects
+        obj = self.get_document_obj()
+        self.assertEqual(api.get_parent_path(obj), parent_path)
 
     def test_get_path(self):
         brain = self.get_document_brain()

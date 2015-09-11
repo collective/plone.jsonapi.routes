@@ -70,6 +70,7 @@ def get_items(portal_type=None, request=None, uid=None, endpoint=None):
     # fetch the catalog results
     results = get_search_results(portal_type=portal_type, uid=uid)
 
+    # check for existing complete flag
     complete = req.get_complete(default=_marker)
     if complete is _marker:
         # if the uid is given, get the complete information set
@@ -90,6 +91,7 @@ def get_batched(portal_type=None, request=None, uid=None, endpoint=None):
     size = req.get_batch_size()
     start = req.get_batch_start()
 
+    # check for existing complete flag
     complete = req.get_complete(default=_marker)
     if complete is _marker:
         # if the uid is given, get the complete information set
@@ -310,52 +312,96 @@ def paste_items(portal_type=None, request=None, uid=None, endpoint=None):
 # -----------------------------------------------------------------------------
 
 def get_search_results(**kw):
-    """ search the catalog and return the results
+    """Search the catalog and return the results
 
-    The request may contain additional query parameters
+    :returns: Catalog search results
+    :rtype: list/Products.ZCatalog.Lazy.LazyMap
     """
+
+    # allow to search for the Plone site
     if kw.get("portal_type") == "Plone Site":
         return [get_portal()]
+    elif kw.get("id") in PORTAL_IDS:
+        return [get_portal()]
+    elif kw.get("uid") in PORTAL_IDS:
+        return [get_portal()]
+
+    # build and execute a catalog query
     query = make_query(**kw)
     return search(query)
 
 
-def make_items_for(brains_or_objects, endpoint=None, complete=True):
-    """ return a list of info dicts
+def make_items_for(brains_or_objects, endpoint=None, complete=False):
+    """Generate API compatible data items for the given list of brains/objects
 
-    @param brains_or_objects: List/LazyMap
+    :param brains_or_objects: List of objects or brains
+    :type brains_or_objects: list/Products.ZCatalog.Lazy.LazyMap
+    :param endpoint: The named URL endpoint for the root of the items
+    :type endpoint: str/unicode
+    :param complete: Flag to wake up the object and fetch all data
+    :type complete: bool
+    :returns: A list of extracted data items
+    :rtype: list
+    """
+    def extract_data(brain_or_object):
+        return get_info(brain_or_object, endpoint=endpoint, complete=complete)
+    return map(extract_data, brains_or_objects)
+
+
+def get_info(brain_or_object, endpoint=None, complete=False):
+    """Extract the data from the catalog brain or object
+
+    :param brain_or_object: A single catalog brain or content object
+    :type brain_or_object: ATContentType/DexterityContentType/CatalogBrain
+    :param endpoint: The named URL endpoint for the root of the items
+    :type endpoint: str/unicode
+    :param complete: Flag to wake up the object and fetch all data
+    :type complete: bool
+    :returns: Data mapping for the object/catalog brain
+    :rtype: dict
     """
 
-    # this function extracts the data for one brain or object
-    def _block(brain_or_object):
+    # extract the data from the initial object with the proper adapter
+    info = IInfo(brain_or_object).to_dict()
 
-        # extract the data using the default info adapter
-        info = IInfo(brain_or_object)()
+    # update with url info (always included)
+    url_info = get_url_info(brain_or_object, endpoint)
+    info.update(url_info)
 
-        # wake up the object and extract the complete data
-        if complete:
-            obj = get_object(brain_or_object)
-            info.update(IInfo(obj)())
-            # also include the parent url info
-            parent = get_parent_info(obj)
-            info.update(parent)
+    # include the parent url info
+    parent = get_parent_info(brain_or_object)
+    info.update(parent)
 
-        # update with url info
-        url_info = get_url_info(brain_or_object, endpoint)
-        info.update(url_info)
+    # add the complete data of the object if requested
+    # -> requires to wake up the object if it is a catalog brain
+    if complete:
+        # ensure we have a full content object
+        obj = get_object(brain_or_object)
+        # get the compatible adapter
+        adapter = IInfo(obj)
+        # update the data set with the complete information
+        info.update(adapter.to_dict())
+        # include workflow info
+        workflow = get_workflow_info(obj)
+        info.update(dict(workflow=workflow))
 
-        # include an array of child contents
-        if req.get_children():
-            children = get_children(brain_or_object, complete)
-            info.update(children)
+    # check if the user requests the contained contents
+    if req.get_children() and is_folderish(brain_or_object):
+        children = get_children_info(brain_or_object, complete=complete)
+        info.update(children)
 
-        return info
-
-    return map(_block, brains_or_objects)
+    return info
 
 
 def get_url_info(brain_or_object, endpoint=None):
-    """ returns the url info for the object
+    """Generate url information for the content object/catalog brain
+
+    :param brain_or_object: A single catalog brain or content object
+    :type brain_or_object: ATContentType/DexterityContentType/CatalogBrain
+    :param endpoint: The named URL endpoint for the root of the items
+    :type endpoint: str/unicode
+    :returns: URL information mapping
+    :rtype: dict
     """
 
     # If no endpoint was given, guess the endpoint by portal type
@@ -370,53 +416,128 @@ def get_url_info(brain_or_object, endpoint=None):
     }
 
 
-def get_parent_info(obj):
-    """ returns the infos for the parent object
+def get_workflow_info(brain_or_object, endpoint=None):
+    """Generate workflow information of the (first) assigned workflow
+
+    :param brain_or_object: A single catalog brain or content object
+    :type brain_or_object: ATContentType/DexterityContentType/CatalogBrain
+    :param endpoint: The named URL endpoint for the root of the items
+    :type endpoint: str/unicode
+    :returns: Workflow information mapping
+    :rtype: dict
     """
 
-    # special case for the portal route
-    if is_root(obj):
+    # ensure we have a full content object
+    obj = get_object(brain_or_object)
+
+    # get the portal workflow tool
+    wf_tool = get_tool("portal_workflow")
+
+    # the assigned workflows of this object
+    wfs = wf_tool.getWorkflowsFor(obj)
+
+    # no worfkflows assigned -> return
+    if not wfs:
         return {}
 
-    parent = get_parent(obj)
-    endpoint = get_endpoint(parent)
+    # get the first one
+    workflow = wfs[0]
 
+    # get the status info of the current state (dictionary)
+    status = wf_tool.getStatusOf(workflow.getId(), obj)
+
+    # https://github.com/collective/plone.jsonapi.routes/issues/33
+    if not status:
+        return {}
+
+    # get the current review_status
+    current_state_id = status.get("review_state", None)
+
+    # get the wf status object
+    current_status = workflow.states[current_state_id]
+
+    # get the title of the current status
+    current_state_title = current_status.title
+
+    def to_transition_info(transition):
+        """ return the transition information
+        """
+        return {
+            "value":   transition["id"],
+            "display": transition["description"],
+            "url":     transition["url"],
+        }
+
+    # get the transition informations
+    transitions = map(to_transition_info, wf_tool.getTransitionsFor(obj))
+
+    return {
+        "workflow":     workflow.getId(),
+        "status":       current_state_title,
+        "review_state": current_state_id,
+        "transitions":  transitions
+    }
+
+
+def get_parent_info(brain_or_object, endpoint=None):
+    """Generate url information for the parent object
+
+    :param brain_or_object: A single catalog brain or content object
+    :type brain_or_object: ATContentType/DexterityContentType/CatalogBrain
+    :param endpoint: The named URL endpoint for the root of the items
+    :type endpoint: str/unicode
+    :returns: URL information mapping
+    :rtype: dict
+    """
+
+
+    # special case for the portal object
+    if is_root(brain_or_object):
+        return {}
+
+    # get the parent object
+    parent = get_parent(brain_or_object)
+
+    # fall back if no endpoint specified
+    if endpoint is None:
+        endpoint = get_endpoint(parent)
+
+    # return portal information
     if is_root(parent):
         return {
-            "parent_id":  parent.getId(),
+            "parent_id": get_id(parent),
             "parent_uid": 0,
             "parent_url": url_for("plonesites", uid=0),
         }
 
     return {
-        "parent_id":  parent.getId(),
+        "parent_id": get_id(parent),
         "parent_uid": get_uid(parent),
         "parent_url": url_for(endpoint, uid=get_uid(parent))
     }
 
 
-def get_children(brain_or_object, complete=False):
-    """ returns the contents for this object
+def get_children_info(brain_or_object, complete=False):
+    """Generate data items of the contained contents
+
+    :param brain_or_object: A single catalog brain or content object
+    :type brain_or_object: ATContentType/DexterityContentType/CatalogBrain
+    :param complete: Flag to wake up the object and fetch all data
+    :type complete: bool
+    :returns: info mapping of contained content items
+    :rtype: list
     """
 
-    children = []
+    # fetch the contents (if folderish)
+    children = get_contents(brain_or_object)
 
-    for brain in get_contents(brain_or_object):
-        child = IInfo(brain)()
-        child.update(get_url_info(brain))
-
-        # if the complete flag is set, we include the full object info for the
-        # child contents.
-        if complete:
-            # wake up the object
-            obj = get_object(brain)
-            # extract and include schema field values
-            child.update(IInfo(obj)())
-        children.append(child)
+    def extract_data(brain_or_object):
+        return get_info(brain_or_object, complete=complete)
+    items = map(extract_data, children)
 
     return {
-        "child_count": len(children),
-        "children": children
+        "children_count": len(items),
+        "children": items
     }
 
 
@@ -529,6 +650,14 @@ def get_url(obj):
     return obj.absolute_url()
 
 
+def get_id(brain_or_object):
+    """ get the ID of the brain/object
+    """
+    if is_brain(brain_or_object):
+        return brain_or_object.getId
+    return brain_or_object.getId()
+
+
 def get_uid(obj):
     """ get the UID of the brain/object
     """
@@ -554,9 +683,43 @@ def get_object(brain_or_object):
 
 
 def get_parent(brain_or_object):
-    """ return the referenced object """
-    obj = get_object(brain_or_object)
-    return obj.aq_parent
+    """Locate the parent object of the content/catalog brain
+
+    :param brain_or_object: A single catalog brain or content object
+    :type brain_or_object: ATContentType/DexterityContentType/CatalogBrain
+    :returns: parent object
+    :rtype: ATContentType/DexterityContentType/PloneSite/CatalogBrain
+    """
+
+    if is_brain(brain_or_object):
+        parent_path = get_parent_path(brain_or_object)
+
+        # parent is the portal object
+        if parent_path == get_path(get_portal()):
+            return get_portal()
+
+        # query for the parent path
+        pc = get_portal_catalog()
+        results = pc(path={
+            "query": parent_path,
+            "depth": 0})
+
+        # fallback to the object
+        if not results:
+            return get_object(brain_or_object).aq_parent
+        # return the brain
+        return results[0]
+
+    return brain_or_object.aq_parent
+
+
+def get_parent_path(brain_or_object):
+    """Calculate the parent path
+    """
+    if is_brain(brain_or_object):
+        path = get_path(brain_or_object)
+        return path.rpartition("/")[0]
+    return get_path(brain_or_object.aq_parent)
 
 
 def get_path(brain_or_object):
