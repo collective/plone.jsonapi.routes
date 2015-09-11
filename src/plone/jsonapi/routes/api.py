@@ -381,12 +381,15 @@ def get_info(brain_or_object, endpoint=None, complete=False):
         adapter = IInfo(obj)
         # update the data set with the complete information
         info.update(adapter.to_dict())
-        # include workflow info
-        workflow = get_workflow_info(obj)
-        info.update(dict(workflow=workflow))
 
-    # check if the user requests the contained contents
-    if req.get_children() and is_folderish(brain_or_object):
+        # add workflow data if the user requested it
+        # -> only possible if `?complete=yes`
+        if req.get_workflow(False):
+            workflow = get_workflow_info(obj)
+            info.update({"workflow": workflow})
+
+    # add contained items if the user requested it
+    if req.get_children(False) and is_folderish(brain_or_object):
         children = get_children_info(brain_or_object, complete=complete)
         info.update(children)
 

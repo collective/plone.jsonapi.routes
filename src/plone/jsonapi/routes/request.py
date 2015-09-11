@@ -71,6 +71,17 @@ def get_filedata(default=None):
     return False
 
 
+def get_workflow(default=None):
+    """ returns the 'workflow' from the request
+    """
+    workflow = get("workflow", default)
+    if workflow is default:
+        return default
+    if workflow.lower() in ["y", "yes", "1", "true"]:
+        return True
+    return False
+
+
 def get_sort_limit():
     """ returns the 'sort_limit' from the request
     """

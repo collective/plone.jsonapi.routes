@@ -55,7 +55,6 @@ class Base(object):
             "effective":   "effective",
             "portal_type": "portal_type",
             "tags":        "Subject",
-            "state":       "review_state",
         }
 
     def to_dict(self):
@@ -122,7 +121,6 @@ class ZCDataProvider(Base):
             'getRemoteUrl',
             'listCreators',
             'meta_type',
-            'review_state',
         ]
 
 
@@ -187,15 +185,6 @@ def extract_keys(obj, keys, ignore=[]):
             logger.debug("Skipping restricted field '%s'" % key)
             continue
         out[key] = get_json_value(obj, key, value=value)
-    if out.get("workflow_info"):
-        logger.warn("Workflow Info ommitted since the key 'workflow_info' "
-                    "was found in the current schema")
-        return out
-
-    # additional workflow information
-    wf_info = get_wf_info(obj)
-    out["workflow_info"] = wf_info
-    out["state"] = wf_info.get("status")
 
     return out
 
@@ -291,57 +280,3 @@ def is_json_serializable(thing):
         return True
     except TypeError:
         return False
-
-
-def get_wf_info(obj):
-    """ returns the workflow information of the first assigned workflow
-    """
-
-    # get the portal workflow tool
-    wf_tool = api.portal.get_tool("portal_workflow")
-
-    # the assigned workflows of this object
-    wfs = wf_tool.getWorkflowsFor(obj)
-
-    # no worfkflows assigned -> return
-    if not wfs:
-        return {}
-
-    # get the first one
-    workflow = wfs[0]
-
-    # get the status info of the current state (dictionary)
-    status = wf_tool.getStatusOf(workflow.getId(), obj)
-
-    # https://github.com/collective/plone.jsonapi.routes/issues/33
-    if not status:
-        return {}
-
-    # get the current review_status
-    current_state_id = status.get("review_state", None)
-
-    # get the wf status object
-    current_status = workflow.states[current_state_id]
-
-    # get the title of the current status
-    current_state_title = current_status.title
-
-    # get the transition informations
-    transitions = map(to_transition_info, wf_tool.getTransitionsFor(obj))
-
-    return {
-        "workflow":     workflow.getId(),
-        "status":       current_state_title,
-        "review_state": current_state_id,
-        "transitions":  transitions
-    }
-
-
-def to_transition_info(transition):
-    """ return the transition information
-    """
-    return {
-        "value":   transition["id"],
-        "display": transition["description"],
-        "url":     transition["url"],
-    }
