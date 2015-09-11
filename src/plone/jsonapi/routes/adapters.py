@@ -366,8 +366,8 @@ def is_date(thing):
     """
     # known date types
     date_types = (datetime.datetime,
-        datetime.date,
-        DateTime.DateTime)
+                  datetime.date,
+                  DateTime.DateTime)
     return isinstance(thing, date_types)
 
 
