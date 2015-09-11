@@ -64,10 +64,11 @@ class Base(object):
         # 1. extract the schema fields
         data = extract_fields(self.context, self.keys, ignore=self.ignore)
 
+
         # 2. include custom key-value pairs listed in the mapping dictionary
         for key, attr in self.attributes.iteritems():
             # key already extracted in the first step
-            if data.get(key):
+            if data.get(key, _marker) is not _marker:
                 continue  # don't overwrite
             if key in self.ignore:
                 continue  # skip ignores
@@ -199,7 +200,7 @@ def extract_fields(obj, fieldnames, ignore=[]):
     return out
 
 
-def get_json_value(obj, fieldname, value, default=None):
+def get_json_value(obj, fieldname, value=_marker, default=None):
     """JSON save value encoding
 
     :param obj: Content object
@@ -217,7 +218,7 @@ def get_json_value(obj, fieldname, value, default=None):
         return default
 
     # extract the value from the object if omitted
-    if value is None:
+    if value is _marker:
         value = IDataManager(obj).get(fieldname)
 
     # check if we have a date
@@ -242,18 +243,22 @@ def get_json_value(obj, fieldname, value, default=None):
     return value
 
 
-def get_file_info(obj, fieldname, field, default=None):
+def get_file_info(obj, fieldname, field=_marker, default=None):
     """Extract file data from a file field
 
     :param obj: Content object
     :type obj: ATContentType/DexterityContentType
     :param fieldname: Schema name of the field
     :type fieldname: str/unicode
-    :param field: The file field
-    :type field: object
+    :param field: Blob field
+    :type field: plone.app.blob.field.BlobWrapper
     :returns: File data mapping
     :rtype: dict
     """
+
+    # extract the file field from the object if omitted
+    if field is _marker:
+        field = IDataManager(obj).get(fieldname)
 
     # check if we have a file field
     if not is_file_field(field):
@@ -274,7 +279,7 @@ def get_file_info(obj, fieldname, field, default=None):
     }
 
 
-def get_download_url(obj, fieldname, field, default=None):
+def get_download_url(obj, fieldname, field=_marker, default=None):
     """Calculate the download url
 
     :param obj: Content object
@@ -286,6 +291,10 @@ def get_download_url(obj, fieldname, field, default=None):
     :returns: The file download url
     :rtype: str
     """
+
+    # extract the file field from the object if omitted
+    if field is _marker:
+        field = IDataManager(obj).get(fieldname)
 
     # check if we have a file field
     if not is_file_field(field):
@@ -303,19 +312,19 @@ def get_download_url(obj, fieldname, field, default=None):
     return download
 
 
-def get_content_type(field, default="application/octet-stream"):
+def get_content_type(obj, default="application/octet-stream"):
     """Get the content type of the file object
 
-    :param field: The file field
-    :type field: object
+    :param obj: ATContentType, DexterityContentType, BlobWrapper
+    :type obj: object
     :returns: The content type of the file
     :rtype: str
     """
-    if hasattr(field, "contentType"):
-        return field.contentType
-    elif hasattr(field, "content_type"):
-        return field.content_type
-    filename = getattr(field, "filename", "")
+    if hasattr(obj, "contentType"):
+        return obj.contentType
+    elif hasattr(obj, "content_type"):
+        return obj.content_type
+    filename = getattr(obj, "filename", "")
     content_type = mimetypes.guess_type(filename)[0]
     return content_type or default
 
