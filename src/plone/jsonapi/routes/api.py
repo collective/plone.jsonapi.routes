@@ -490,7 +490,6 @@ def get_parent_info(brain_or_object, endpoint=None):
     :rtype: dict
     """
 
-
     # special case for the portal object
     if is_root(brain_or_object):
         return {}
