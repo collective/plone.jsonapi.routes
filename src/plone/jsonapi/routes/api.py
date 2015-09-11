@@ -343,8 +343,16 @@ def make_items_for(brains_or_objects, endpoint=None, complete=False):
     :returns: A list of extracted data items
     :rtype: list
     """
+
+    # check if the user wants to include children
+    include_children = req.get_children(False)
+
     def extract_data(brain_or_object):
-        return get_info(brain_or_object, endpoint=endpoint, complete=complete)
+        info = get_info(brain_or_object, endpoint=endpoint, complete=complete)
+        if include_children and is_folderish(brain_or_object):
+            info.update(get_children_info(brain_or_object, complete=complete))
+        return info
+
     return map(extract_data, brains_or_objects)
 
 
@@ -387,11 +395,6 @@ def get_info(brain_or_object, endpoint=None, complete=False):
         if req.get_workflow(False):
             workflow = get_workflow_info(obj)
             info.update({"workflow": workflow})
-
-    # add contained items if the user requested it
-    if req.get_children(False) and is_folderish(brain_or_object):
-        children = get_children_info(brain_or_object, complete=complete)
-        info.update(children)
 
     return info
 
