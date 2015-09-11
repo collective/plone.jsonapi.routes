@@ -64,7 +64,6 @@ class Base(object):
         # 1. extract the schema fields
         data = extract_fields(self.context, self.keys, ignore=self.ignore)
 
-
         # 2. include custom key-value pairs listed in the mapping dictionary
         for key, attr in self.attributes.iteritems():
             # key already extracted in the first step

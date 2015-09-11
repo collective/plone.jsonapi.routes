@@ -11,7 +11,6 @@ from plone.jsonapi.routes import adapters
 from plone.jsonapi.routes.interfaces import IInfo
 
 
-
 class TestAdapters(APITestCase):
     """ Test the Data Adapter
     """
