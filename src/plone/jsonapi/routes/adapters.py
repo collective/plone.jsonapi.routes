@@ -23,10 +23,12 @@ from Products.ATContentTypes.interfaces import IATContentType
 
 from plone.jsonapi.routes.interfaces import IInfo
 from plone.jsonapi.routes.interfaces import IDataManager
+from plone.jsonapi.routes import request as req
 
 __author__ = 'Ramon Bartl <ramon.bartl@googlemail.com>'
 __docformat__ = 'plaintext'
 
+_marker = object
 
 logger = logging.getLogger("plone.jsonapi.routes")
 

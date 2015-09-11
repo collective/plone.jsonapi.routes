@@ -60,6 +60,17 @@ def get_children(default=None):
     return False
 
 
+def get_filedata(default=None):
+    """ returns the 'filedata' from the request
+    """
+    filedata = get("filedata", default)
+    if filedata is default:
+        return default
+    if filedata.lower() in ["y", "yes", "1", "true"]:
+        return True
+    return False
+
+
 def get_sort_limit():
     """ returns the 'sort_limit' from the request
     """
