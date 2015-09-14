@@ -255,7 +255,17 @@ The response format is for all resources the same.
     The URL to the previous batch
 
 
+The API Module
+--------------
+
+:import: `from plone.jsonapi.routes import api`
+:doc: Provides core functionality to all other modules
+
+.. automodule:: plone.jsonapi.routes.api
+   :members:
+   :undoc-members:
+
+
+
 .. _`Plone docs`: http://docs.plone.org/develop/plone/searching_and_indexing/query.html#query-by-path
 .. _`Query by path`: http://docs.plone.org/develop/plone/searching_and_indexing/query.html#query-by-path
-
-.. vim: set ft=rst ts=4 sw=4 expandtab tw=78 :

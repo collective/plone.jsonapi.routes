@@ -574,60 +574,99 @@ def get_batch(sequence, size, start=0, endpoint=None, complete=False):
 # -----------------------------------------------------------------------------
 
 def get_portal():
-    """ get the Plone site
+    """Get the portal object
+
+    :returns: Portal object
+    :rtype: object
     """
     return ploneapi.portal.getSite()
 
 
 def get_tool(name):
-    """ get a tool by name
+    """Get a portal tool by name
+
+    :param name: The name of the tool, e.g. `portal_catalog`
+    :type name: string
+    :returns: Portal Tool
+    :rtype: object
     """
     return ploneapi.portal.get_tool(name)
 
 
 def get_portal_catalog():
-    """ get the portal_catalog tool
+    """Get the portal catalog tool
+
+    :returns: Portal Catalog Tool
+    :rtype: object
     """
     return get_tool("portal_catalog")
 
 
 def get_portal_reference_catalog():
-    """ return reference_catalog tool
+    """Get the portal reference catalog tool
+
+    :returns: Portal Reference Catalog Tool
+    :rtype: object
     """
     return get_tool("reference_catalog")
 
 
 def get_portal_workflow():
-    """ return portal_workflow tool
+    """Get the portal workflow tool
+
+    :returns: Portal Workflow Tool
+    :rtype: object
     """
     return get_tool("portal_workflow")
 
 
 def is_brain(brain_or_object):
-    """ checks if the object is a catalog brain
+    """Checks if the passed in object is a portal catalog brain
+
+    :param brain_or_object: A single catalog brain or content object
+    :type brain_or_object: ATContentType/DexterityContentType/CatalogBrain
+    :returns: True if the object is a catalog brain
+    :rtype: bool
     """
     return ICatalogBrain.providedBy(brain_or_object)
 
 
 def is_root(brain_or_object):
-    """ checks if the object is the site root
+    """Checks if the passed in object is the portal root object
+
+    :param brain_or_object: A single catalog brain or content object
+    :type brain_or_object: ATContentType/DexterityContentType/CatalogBrain
+    :returns: True if the object is the portal root object
+    :rtype: bool
     """
     return ISiteRoot.providedBy(brain_or_object)
 
 
 def is_folderish(brain_or_object):
-    """ checks if the object is folderish
+    """Checks if the passed in object is folderish
+
+    :param brain_or_object: A single catalog brain or content object
+    :type brain_or_object: ATContentType/DexterityContentType/CatalogBrain
+    :returns: True if the object is folderish
+    :rtype: bool
     """
     if is_brain(brain_or_object):
         return brain_or_object.is_folderish
     return IFolderish.providedBy(brain_or_object)
 
 
-def get_locally_allowed_types(obj):
-    """ get the locally allowed types of this object
+def get_locally_allowed_types(brain_or_object):
+    """Checks if the passed in object is folderish
+
+    :param brain_or_object: A single catalog brain or content object
+    :type brain_or_object: ATContentType/DexterityContentType/CatalogBrain
+    :returns: A list of locally allowed content types
+    :rtype: list
     """
-    if not is_folderish(obj):
+    if not is_folderish(brain_or_object):
         return []
+    # ensure we have an object
+    obj = get_object(brain_or_object)
     method = getattr(obj, "getLocallyAllowedTypes", None)
     if not callable(method):
         return []
@@ -635,7 +674,12 @@ def get_locally_allowed_types(obj):
 
 
 def url_for(endpoint, **values):
-    """ returns the api url
+    """Looks up the API URL for the given endpoint
+
+    :param endpoint: The name of the registered route (aka endpoint)
+    :type endpoint: string
+    :returns: External URL for this endpoint
+    :rtype: string/None
     """
     try:
         return router.url_for(endpoint, force_external=True, values=values)
@@ -647,40 +691,65 @@ def url_for(endpoint, **values):
         return None
 
 
-def get_url(obj):
-    """ get the absolute url for this object
+def get_url(brain_or_object):
+    """Get the absolute Plone URL for this object
+
+    :param brain_or_object: A single catalog brain or content object
+    :type brain_or_object: ATContentType/DexterityContentType/CatalogBrain
+    :returns: Plone URL
+    :rtype: string
     """
-    if is_brain(obj):
-        return obj.getURL()
-    return obj.absolute_url()
+    if is_brain(brain_or_object):
+        return brain_or_object.getURL()
+    return brain_or_object.absolute_url()
 
 
 def get_id(brain_or_object):
-    """ get the ID of the brain/object
+    """Get the Plone ID for this object
+
+    :param brain_or_object: A single catalog brain or content object
+    :type brain_or_object: ATContentType/DexterityContentType/CatalogBrain
+    :returns: Plone ID
+    :rtype: string
     """
     if is_brain(brain_or_object):
         return brain_or_object.getId
     return brain_or_object.getId()
 
 
-def get_uid(obj):
-    """ get the UID of the brain/object
+def get_uid(brain_or_object):
+    """Get the Plone UID for this object
+
+    :param brain_or_object: A single catalog brain or content object
+    :type brain_or_object: ATContentType/DexterityContentType/CatalogBrain
+    :returns: Plone UID
+    :rtype: string
     """
-    if is_brain(obj):
-        return obj.UID
-    if is_root(obj):
+    if is_brain(brain_or_object):
+        return brain_or_object.UID
+    if is_root(brain_or_object):
         return 0
-    return obj.UID()
+    return brain_or_object.UID()
 
 
 def get_portal_type(brain_or_object):
-    """ return the portal type of this object
+    """Get the portal type for this object
+
+    :param brain_or_object: A single catalog brain or content object
+    :type brain_or_object: ATContentType/DexterityContentType/CatalogBrain
+    :returns: Portal type
+    :rtype: string
     """
     return brain_or_object.portal_type
 
 
 def get_object(brain_or_object):
-    """ return the referenced object
+    """Get the full content object
+
+    :param brain_or_object: A single catalog brain or content object
+    :type brain_or_object: ATContentType/DexterityContentType/CatalogBrain
+    :returns: Content object
+    :rtype: object
     """
     if is_brain(brain_or_object):
         return brain_or_object.getObject()
@@ -719,7 +788,12 @@ def get_parent(brain_or_object):
 
 
 def get_parent_path(brain_or_object):
-    """Calculate the parent path
+    """Calculate the physical parent path of this object
+
+    :param brain_or_object: A single catalog brain or content object
+    :type brain_or_object: ATContentType/DexterityContentType/CatalogBrain
+    :returns: Physical path of the parent object
+    :rtype: string
     """
     if is_brain(brain_or_object):
         path = get_path(brain_or_object)
@@ -728,7 +802,12 @@ def get_parent_path(brain_or_object):
 
 
 def get_path(brain_or_object):
-    """ return the physical path
+    """Calculate the physical path of this object
+
+    :param brain_or_object: A single catalog brain or content object
+    :type brain_or_object: ATContentType/DexterityContentType/CatalogBrain
+    :returns: Physical path of the object
+    :rtype: string
     """
     if is_brain(brain_or_object):
         return brain_or_object.getPath()
@@ -736,7 +815,12 @@ def get_path(brain_or_object):
 
 
 def get_contents(brain_or_object, depth=1):
-    """ return the folder contents
+    """Lookup folder contents for this object
+
+    :param brain_or_object: A single catalog brain or content object
+    :type brain_or_object: ATContentType/DexterityContentType/CatalogBrain
+    :returns: List of contained contents
+    :rtype: list/Products.ZCatalog.Lazy.LazyMap
     """
     pc = get_portal_catalog()
     contents = pc(path={
@@ -746,11 +830,13 @@ def get_contents(brain_or_object, depth=1):
 
 
 def get_endpoint(brain_or_object):
-    """ get the endpoint for this object
+    """Calculate the endpoint for this object
 
-        The endpoint is used to generate the api url for this content.
+    :param brain_or_object: A single catalog brain or content object
+    :type brain_or_object: ATContentType/DexterityContentType/CatalogBrain
+    :returns: Endpoint for this object (pluralized portal type)
+    :rtype: string
     """
-
     portal_type = get_portal_type(brain_or_object)
     # handle portal types with dots
     portal_type = portal_type.split(".").pop()
@@ -763,11 +849,16 @@ def get_endpoint(brain_or_object):
 
 
 def find_objects(uid=None):
-    """ locate objects
+    """Find the object by its UID
 
     1. get the object from the given uid
     2. fetch objects specified in the request parameters
     3. fetch objects located in the request body
+
+    :param uid: The UID of the object to find
+    :type uid: string
+    :returns: List of found objects
+    :rtype: list
     """
     # The objects to cut
     objects = []
@@ -794,15 +885,26 @@ def find_objects(uid=None):
 
 
 def get_object_by_request():
-    """ locate the object by the request parameters
+    """Find an object by request parameters
+
+    Inspects request parameters to locate an object
+
+    :returns: Found Object or None
+    :rtype: object
     """
     form = req.get_form()
     return get_object_by_record(form)
 
 
 def get_object_by_record(record):
-    """ locate the object by the given record (dictionary).
-    The record is usually contained in the request.body or in the request.form
+    """Find an object by a given record
+
+    Inspects request the record to locate an object
+
+    :param record: A dictionary representation of an object
+    :type record: dict
+    :returns: Found Object or None
+    :rtype: object
     """
 
     # nothing to do here
@@ -822,7 +924,12 @@ def get_object_by_record(record):
 
 
 def get_object_by_uid(uid):
-    """ Fetches an object by uid
+    """Find an object by a given UID
+
+    :param uid: The UID of the object to find
+    :type uid: string
+    :returns: Found Object or None
+    :rtype: object
     """
 
     # nothing to do here
@@ -853,7 +960,12 @@ def get_object_by_uid(uid):
 
 
 def get_object_by_path(path):
-    """ fetch the object by physical path
+    """Find an object by a given physical path
+
+    :param path: The physical path of the object to find
+    :type path: string
+    :returns: Found Object or None
+    :rtype: object
     """
 
     # nothing to do here
@@ -877,9 +989,15 @@ def get_object_by_path(path):
 
 
 def mkdir(path):
-    """ creates a folder structure by a given path
-    """
+    """Crate a folder structure by a given path
 
+    Behavior is similar to `mkdir -p`
+
+    :param path: The physical path of the folder
+    :type path: string
+    :returns: folder located at the path
+    :rtype: object
+    """
     container = get_portal()
     segments = path.split("/")
     curpath = None
@@ -907,9 +1025,13 @@ def mkdir(path):
 
 
 def find_target_container(record):
-    """ find the target container for this record
-    """
+    """Locates a target container for the given record
 
+    :param record: The dictionary representation of a content object
+    :type record: dict
+    :returns: folder which contains the object
+    :rtype: object
+    """
     parent_uid = record.get("parent_uid")
     parent_path = record.get("parent_path")
 
@@ -933,14 +1055,27 @@ def find_target_container(record):
 
 
 def do_action_for(brain_or_object, transition):
-    """ perform wf transition """
+    """Perform a workflow transition
+
+    :param brain_or_object: A single catalog brain or content object
+    :type brain_or_object: ATContentType/DexterityContentType/CatalogBrain
+    :param transition: The workflow transition to perform, e.g. `publish`
+    :type transition: string
+    :returns: Nothing
+    :rtype: None
+    """
     obj = get_object(brain_or_object)
     return ploneapi.content.transition(obj, transition)
 
 
 def delete_object(brain_or_object):
-    """ delete the object """
+    """Delete the given object
 
+    :param brain_or_object: A single catalog brain or content object
+    :type brain_or_object: ATContentType/DexterityContentType/CatalogBrain
+    :returns: Nothing
+    :rtype: None
+    """
     obj = get_object(brain_or_object)
     # we do not want to delete the site root!
     if is_root(obj):
@@ -952,13 +1087,25 @@ def delete_object(brain_or_object):
 
 
 def get_current_user():
-    """ return the current logged in user """
+    """Get the current logged in user
+
+    :returns: Member
+    :rtype: object
+    """
     return ploneapi.user.get_current()
 
 
 def create_object_in_container(container, portal_type, id=None, title=None):
-    """ creates an object with the given data in the container
+    """Creates a content object in the specified container
+
+    :param container: A single folderish catalog brain or content object
+    :type container: ATContentType/DexterityContentType/CatalogBrain
+    :param portal_type: The portal type to create
+    :type portal_type: string
+    :returns: The new content object
+    :rtype: object
     """
+    container = get_object(container)
     allowed_types = get_locally_allowed_types(container)
     if not is_root(container) and portal_type not in allowed_types:
         raise APIError(500, "Creation of this portal type"
@@ -969,6 +1116,11 @@ def create_object_in_container(container, portal_type, id=None, title=None):
 
 
 def create_object(**kw):
+    """Creates an object
+
+    :returns: The new created content object
+    :rtype: object
+    """
     defaults = {"save_id": True}
     defaults.update(kw)
     try:
@@ -978,9 +1130,22 @@ def create_object(**kw):
 
 
 def update_object_with_data(content, record):
-    """ update the content with the values from records
+    """Update the content with the record data
+
+    :param content: A single folderish catalog brain or content object
+    :type content: ATContentType/DexterityContentType/CatalogBrain
+    :param record: The data to update
+    :type record: dict
+    :returns: The updated content object
+    :rtype: object
     """
+
+    # ensure we have a full content object
+    content = get_object(content)
+
+    # get the proper data manager
     dm = IDataManager(content)
+
     if dm is None:
         raise APIError(400, "Update on this object is not allowed")
 
