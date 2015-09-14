@@ -13,6 +13,20 @@ Changelog
 - https://github.com/collective/plone.jsonapi.routes/issues/54: Let complete flag overrule "uid rule"
 - https://github.com/collective/plone.jsonapi.routes/issues/53: Unit tests: add tests for api module
 
+**API CHANGES**
+
+- File data **not** included by default anymore. Use `?filedata=yes`
+
+- Workflow data **not** included by default anymore. Use `?workflow=yes`
+
+- Workflow data is now located at the key `workflow`
+
+- The complete flag can be now negated, even if the full object is displayes `?complete=no`
+
+- The `state` key is removed -- use `review_state` instead
+
+- Parent URL data included now for brain results
+
 
 0.8.2 - 2015-09-09
 ------------------
