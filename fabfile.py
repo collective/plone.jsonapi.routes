@@ -22,9 +22,10 @@ from fabric.tasks import execute
 # CUSTOMER CUSTOM
 # -----------------------------------------------------------------------------
 
-REQUIREMENTS = "sphinx-build".split()
+REQUIREMENTS = "".split()
 ENVIRONMENT = "HOME".split()
 VERSION_PACKAGES = "plone.jsonapi.routes".split()
+
 
 # -----------------------------------------------------------------------------
 # FABRIC BOOTSTRAP
@@ -59,6 +60,7 @@ for req in ENVIRONMENT:
 # load the json config into the fabric environment
 env.package = json.loads(file("package.json", "r").read())
 
+
 # -----------------------------------------------------------------------------
 # HELPER
 # -----------------------------------------------------------------------------
@@ -68,20 +70,24 @@ def get_section(name="main"):
     """
     return env.package.get(name, {})
 
+
 def get_option(name, section="main", default=None):
     """ returns the value of the option
     """
     return get_section(section).get(name, default)
+
 
 def get_customer():
     """ returns the customer name
     """
     return get_option("customer")
 
+
 def get_packages():
     """ returns the packages
     """
     return get_option("packages", default=[])
+
 
 def get_src_dir():
     """ returns the absolute path to the src directory
@@ -89,17 +95,20 @@ def get_src_dir():
     path = get_option("src_dir")
     return j(os.getcwd(), path)
 
+
 def get_dist_dir():
     """ returns the absolute path to the dist directory
     """
     path = get_option("dist_dir")
     return j(os.getcwd(), path)
 
+
 def get_docs_dir():
     """ returns the absolute path to the docs directory
     """
     path = get_option("docs_dir")
     return j(os.getcwd(), path)
+
 
 def get_package_dir(package):
     """ returns the absolute path to the python package
@@ -111,6 +120,7 @@ def get_package_dir(package):
     # different layout -- we are already inside the package
     return src
 
+
 def get_distribution(package):
     """ get the pkg_resources distribution
     """
@@ -121,11 +131,13 @@ def get_distribution(package):
         pkg_resources.working_set.add_entry(get_package_dir(package))
         return pkg_resources.get_distribution(package)
 
+
 def get_version(package):
     """ return the (stripped) version of the given package
     """
     dist = get_distribution(package)
     return dist.version.strip()
+
 
 def get_version_file(package):
     """ return the version file of package or None
@@ -134,6 +146,7 @@ def get_version_file(package):
     subdir = package.split(".")
     subdir.append("version.py")
     return j(package_dir, *subdir)
+
 
 def write_version_info(package):
     """ updates the build and date of the version module
@@ -157,6 +170,7 @@ def write_version_info(package):
             line = "__date__ = '%s'" % now
         print line.strip("\n")
 
+
 def get_full_version(package):
     """ returns the verion from the verion file
     """
@@ -172,6 +186,7 @@ def get_full_version(package):
             # handle version method call gracefully
             out[name] = value.replace("version()", get_version(package))
     return out
+
 
 # -----------------------------------------------------------------------------
 # PUBLIC API
@@ -195,6 +210,7 @@ def preview_docs():
     with lcd("docs"):
         local("open _build/html/index.html")
 
+
 @task
 def bump_version():
     """ Bump up the version number
@@ -217,6 +233,7 @@ def versions():
         print green(
             "{} -> {}".format(
                 package, dist.version.strip()))
+
 
 @task
 def build():
