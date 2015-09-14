@@ -4,6 +4,14 @@ Changelog
 =========
 
 
+0.8.4 - unreleased
+------------------
+
+**CLOSED ISSUES**
+
+- no changes yet
+
+
 0.8.3 - 2015-09-14
 ------------------
 
