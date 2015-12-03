@@ -82,6 +82,17 @@ def get_workflow(default=None):
     return False
 
 
+def get_sharing(default=None):
+    """ returns the 'sharing' from the request
+    """
+    sharing = get("sharing", default)
+    if sharing is default:
+        return default
+    if sharing.lower() in ["y", "yes", "1", "true"]:
+        return True
+    return False
+
+
 def get_sort_limit():
     """ returns the 'sort_limit' from the request
     """
