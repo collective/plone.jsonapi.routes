@@ -126,7 +126,7 @@ Beside the *content resources*, there are some special resources available.
 +----------+--------------------+----------------------------------------+
 | login    |                    | Login with __ac_name and __ac_password |
 +----------+--------------------+----------------------------------------+
-| sharing  |                    | Resource for accesing sharing rights   |
+| sharing  |                    | Resource for accessing sharing rights  |
 +----------+--------------------+----------------------------------------+
 
 
@@ -209,6 +209,82 @@ Example
 
 .. versionadded:: 0.5
     Support for ZPublisher query record format added.
+
+
+Sharing
+~~~~~~~
+
+It is also possible to check the sharing settings for objects
+
+Example:
+
+``http://localhost:8080/Plone/@@API/plone/api/1.0/sharing/<uid:required>``
+``http://localhost:8080/Plone/@@API/plone/api/1.0/folders?sharing=y&complete=y``
+
+Response:
+
+.. code-block:: javascript
+
+    {
+        "sharing": {
+            "inherit": false,
+            "role_settings": [
+                {
+                    "disabled": false,
+                    "id": "AuthenticatedUsers",
+                    "login": null,
+                    "roles": {
+                        "Contributor": false,
+                        "Editor": false,
+                        "Reader": false,
+                        "Reviewer": false
+                    },
+                    "title": "Logged-in users",
+                    "type": "group"
+                }
+            ]
+        }
+    }
+
+
+Update inherit role settings:
+
+``http://localhost:8080/Plone/@@API/plone/api/1.0/sharing/update/<uid:required>``
+
+.. code-block:: javascript
+
+    {
+        "inherit": false
+    }
+
+Update role settings:
+
+``http://localhost:8080/Plone/@@API/plone/api/1.0/sharing/update/<uid:required>``
+
+.. code-block:: javascript
+
+    {
+        "role_settings": [
+            {
+                "id": "AuthenticatedUsers",
+                "type": "group",
+                "roles": [
+                    "Contributor": false,
+                    "Reviewer": false,
+                    "Editor": false,
+                    "Reader": true
+                ]
+            }
+        ]
+    }
+
+.. note:: `role_settings` is a list of dicts with keys id, for the user/group
+          id; type, being either 'user' or 'group'; and roles, containing a
+          list of role ids that are set.
+
+
+.. versionadded:: 0.8.4
+    Support sharing permissions of objects
 
 
 .. _Response_Format:

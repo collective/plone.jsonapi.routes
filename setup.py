@@ -50,5 +50,3 @@ setup(name='plone.jsonapi.routes',
       target = plone
       """,
       )
-
-# vim: set ft=python ts=4 sw=4 expandtab :

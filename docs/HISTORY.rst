@@ -9,7 +9,9 @@ Changelog
 
 **CLOSED ISSUES**
 
-- no changes yet
+- https://github.com/collective/plone.jsonapi.routes/pull/66: api routes: sharing (docs)
+- https://github.com/collective/plone.jsonapi.routes/pull/65: api routes: sharing (code)
+- https://github.com/collective/plone.jsonapi.routes/pull/61: Use IConstrainTypes adapters for dexterity content
 
 
 0.8.3 - 2015-09-14

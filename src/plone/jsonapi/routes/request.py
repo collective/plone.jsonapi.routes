@@ -2,14 +2,28 @@
 
 import json
 import logging
+import pkg_resources
+
+from zope import interface
 
 from zope.globalrequest import getRequest
+
+try:
+    pkg_resources.get_distribution('plone.protect')
+    from plone.protect.interfaces import IDisableCSRFProtection
+except (pkg_resources.DistributionNotFound, ImportError):
+    HAS_PLONE_PROTECT = False
+else:
+    HAS_PLONE_PROTECT = True
 
 from plone.jsonapi.routes import underscore as _
 
 __author__ = 'Ramon Bartl <ramon.bartl@googlemail.com>'
 __docformat__ = 'plaintext'
 
+
+# These values evaluate to True
+TRUE_VALUES = ["y", "yes", "1", "true", True]
 
 logger = logging.getLogger("plone.jsonapi.routes.request")
 
@@ -18,6 +32,18 @@ def get_request():
     """ return the request object
     """
     return getRequest()
+
+
+def disable_csrf_protection():
+    """ disables the CSRF protection
+        https://pypi.python.org/pypi/plone.protect
+    """
+    if not HAS_PLONE_PROTECT:
+        logger.warn("Can not disable CSRF protection – please install plone.protect")
+        return False
+    request = get_request()
+    interface.alsoProvides(request, IDisableCSRFProtection)
+    return True
 
 
 def get_form():
@@ -44,7 +70,7 @@ def get_complete(default=None):
     complete = get("complete", default)
     if complete is default:
         return default
-    if complete.lower() in ["y", "yes", "1", "true"]:
+    if complete.lower() in TRUE_VALUES:
         return True
     return False
 
@@ -55,7 +81,7 @@ def get_children(default=None):
     children = get("children", default)
     if children is default:
         return default
-    if children.lower() in ["y", "yes", "1", "true"]:
+    if children.lower() in TRUE_VALUES:
         return True
     return False
 
@@ -66,7 +92,7 @@ def get_filedata(default=None):
     filedata = get("filedata", default)
     if filedata is default:
         return default
-    if filedata.lower() in ["y", "yes", "1", "true"]:
+    if filedata.lower() in TRUE_VALUES:
         return True
     return False
 
@@ -77,7 +103,7 @@ def get_workflow(default=None):
     workflow = get("workflow", default)
     if workflow is default:
         return default
-    if workflow.lower() in ["y", "yes", "1", "true"]:
+    if workflow.lower() in TRUE_VALUES:
         return True
     return False
 
@@ -88,7 +114,7 @@ def get_sharing(default=None):
     sharing = get("sharing", default)
     if sharing is default:
         return default
-    if sharing.lower() in ["y", "yes", "1", "true"]:
+    if sharing.lower() in TRUE_VALUES:
         return True
     return False
 

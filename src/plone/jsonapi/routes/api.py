@@ -13,9 +13,6 @@ from Products.ZCatalog.interfaces import ICatalogBrain
 from Products.CMFPlone.PloneBatch import Batch
 from Products.CMFPlone.interfaces import IConstrainTypes
 
-from zope.interface import alsoProvides
-from plone.protect.interfaces import IDisableCSRFProtection
-
 # search helpers
 from query import search
 from query import make_query
@@ -355,7 +352,7 @@ def update_sharing(request=None, uid=None):
         raise APIError(400, "Can only get sharing for one object at a time")
 
     # Disable CSRF for sharing view
-    alsoProvides(request, IDisableCSRFProtection)
+    req.disable_csrf_protection()
 
     obj = get_object(objects[0])
     sharing = ploneapi.content.get_view('sharing', obj, req.get_request())

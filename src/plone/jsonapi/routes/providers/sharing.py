@@ -25,8 +25,7 @@ def get(context, request, uid=None):
 
 # UPDATE
 @route("/sharing/update", "sharing_update", methods=["POST"])
-@route("/sharing/update/<string:uid>", "sharing_update",
-       methods=["POST"])
+@route("/sharing/update/<string:uid>", "sharing_update", methods=["POST"])
 def update(context, request, uid=None):
     """ update todos
     """

@@ -3,6 +3,10 @@ Contributors
 
 Thanks to all the contributors
 
+- José Dinuncio
+
+- Jian Aijun
+
 - Jan Müller
 
 - Percy Barboza
@@ -10,7 +14,5 @@ Thanks to all the contributors
 - Gagaro
 
 - Mauro Amico
-
-- José Dinuncio
 
 - Thomas Clement Mogensen
