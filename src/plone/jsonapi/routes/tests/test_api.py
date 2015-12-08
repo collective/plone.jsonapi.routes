@@ -125,6 +125,17 @@ class TestAPI(APITestCase):
         # should contain 50 documents
         self.assertEqual(len(children), 50)
 
+    def test_get_sharing_info(self):
+        # returns brain data
+        brain = self.get_document_brain()
+        sharing = api.get_sharing_info(brain)
+        # default sharing, inherit: true
+        self.assertTrue(sharing['inherit'])
+        # default sharing, one role setting for authenticated users
+        self.assertEqual(
+            sharing['role_settings'][0]['id'],
+            'AuthenticatedUsers')
+
     # -----------------------------------------------------------------------------
     #   Test Functional Helpers
     # -----------------------------------------------------------------------------

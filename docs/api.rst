@@ -126,6 +126,8 @@ Beside the *content resources*, there are some special resources available.
 +----------+--------------------+----------------------------------------+
 | login    |                    | Login with __ac_name and __ac_password |
 +----------+--------------------+----------------------------------------+
+| sharing  |                    | Resource for accesing sharing rights   |
++----------+--------------------+----------------------------------------+
 
 
 .. _Parameters:
@@ -175,6 +177,9 @@ All content resources accept to be filtered by request parameters.
 | recent_modified | today, yesterday      | Specify a recent modified date range, to find all items modified within |
 |                 | this-week, this-month | this date range until today.                                            |
 |                 | this-year             | This uses internally `'range': 'min'` query.                            |
++-----------------+-----------------------+-------------------------------------------------------------------------+
+| sharing         | yes/y/1/True          | Flag to include the sharing rights. Only visible if complete flag is    |
+|                 |                       | true.                                                                   |
 +-----------------+-----------------------+-------------------------------------------------------------------------+
 
 

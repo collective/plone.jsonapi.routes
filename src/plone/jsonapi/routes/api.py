@@ -11,6 +11,10 @@ from Products.CMFCore.interfaces import ISiteRoot
 from Products.CMFCore.interfaces import IFolderish
 from Products.ZCatalog.interfaces import ICatalogBrain
 from Products.CMFPlone.PloneBatch import Batch
+from Products.CMFPlone.interfaces import IConstrainTypes
+
+from zope.interface import alsoProvides
+from plone.protect.interfaces import IDisableCSRFProtection
 
 # search helpers
 from query import search
@@ -308,6 +312,70 @@ def paste_items(portal_type=None, request=None, uid=None, endpoint=None):
 
 
 # -----------------------------------------------------------------------------
+#   Sharing Functions
+# -----------------------------------------------------------------------------
+
+def get_sharing(request=None, uid=None):
+    """ get sharing
+    """
+
+    # try to find the requested objects
+    objects = find_objects(uid=uid)
+
+    # No objects could be found, bail out
+    if not objects:
+        raise APIError(404, "No Objects could be found")
+
+    # We support only one sharing for time
+    if len(objects) > 1:
+        raise APIError(400, "Can only get sharing for one object at a time")
+
+    def info_sharing_from_object(obj):
+        info = get_info(obj)
+        sharing = get_sharing_info(obj)
+        info.update({'sharing': sharing})
+        return info
+
+    info = map(info_sharing_from_object, objects)
+    return info
+
+
+def update_sharing(request=None, uid=None):
+    """ set sharing
+    """
+    # try to find the requested objects
+    objects = find_objects(uid=uid)
+
+    # No objects could be found, bail out
+    if not objects:
+        raise APIError(404, "No Objects could be found")
+
+    # We support only one sharing for time
+    if len(objects) > 1:
+        raise APIError(400, "Can only get sharing for one object at a time")
+
+    # Disable CSRF for sharing view
+    alsoProvides(request, IDisableCSRFProtection)
+
+    obj = get_object(objects[0])
+    sharing = ploneapi.content.get_view('sharing', obj, req.get_request())
+
+    inherit = req.get_json_key('inherit', None)
+    if inherit is not None:
+        sharing.update_inherit(inherit)
+
+    # NOTE: role_settings is a list of dicts with keys id, for the user/group
+    # id; type, being either 'user' or 'group'; and roles, containing A LIST
+    # of role ids that are set.
+    role_settings = req.get_json_key('role_settings', None)
+    if role_settings is not None:
+        sharing.update_role_settings(role_settings)
+
+    info = get_sharing(request, uid)
+    return info
+
+
+# -----------------------------------------------------------------------------
 #   Data Functions
 # -----------------------------------------------------------------------------
 
@@ -395,6 +463,12 @@ def get_info(brain_or_object, endpoint=None, complete=False):
         if req.get_workflow(False):
             workflow = get_workflow_info(obj)
             info.update({"workflow": workflow})
+
+        # add sharing data if the user requested it
+        # -> only possible if `?complete=yes`
+        if req.get_sharing(False):
+            sharing = get_sharing_info(obj)
+            info.update({"sharing": sharing})
 
     return info
 
@@ -546,6 +620,23 @@ def get_children_info(brain_or_object, complete=False):
     }
 
 
+def get_sharing_info(brain_or_object):
+    """Generate sharing info of the given object
+
+    :param brain_or_object: A single catalog brain or content object
+    :type brain_or_object: ATContentType/DexterityContentType/CatalogBrain
+    :returns: sharing information of the object
+    :rtype: dict
+    """
+    obj = get_object(brain_or_object)
+    sharing = ploneapi.content.get_view('sharing', obj, req.get_request())
+
+    return {
+        "role_settings": sharing.role_settings(),
+        "inherit": sharing.inherited()
+    }
+
+
 # -----------------------------------------------------------------------------
 #   Batching Helpers
 # -----------------------------------------------------------------------------
@@ -668,6 +759,10 @@ def get_locally_allowed_types(brain_or_object):
     # ensure we have an object
     obj = get_object(brain_or_object)
     method = getattr(obj, "getLocallyAllowedTypes", None)
+    if method is None:
+        constrains = IConstrainTypes(obj, None)
+        if constrains:
+            method = constrains.getLocallyAllowedTypes
     if not callable(method):
         return []
     return method()
