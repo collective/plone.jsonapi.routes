@@ -11,6 +11,7 @@ from Products.CMFCore.interfaces import ISiteRoot
 from Products.CMFCore.interfaces import IFolderish
 from Products.ZCatalog.interfaces import ICatalogBrain
 from Products.CMFPlone.PloneBatch import Batch
+from Products.CMFPlone.interfaces import IConstrainTypes
 
 from zope.interface import alsoProvides
 from plone.protect.interfaces import IDisableCSRFProtection
@@ -758,6 +759,10 @@ def get_locally_allowed_types(brain_or_object):
     # ensure we have an object
     obj = get_object(brain_or_object)
     method = getattr(obj, "getLocallyAllowedTypes", None)
+    if method is None:
+        constrains = IConstrainTypes(obj, None)
+        if constrains:
+            method = constrains.getLocallyAllowedTypes
     if not callable(method):
         return []
     return method()
