@@ -356,16 +356,33 @@ def update_sharing(request=None, uid=None):
 
     obj = get_object(objects[0])
     sharing = ploneapi.content.get_view('sharing', obj, req.get_request())
+    info = req.get_json_key('sharing', {})
 
-    inherit = req.get_json_key('inherit', None)
+    inherit = info.get('inherit', None)
     if inherit is not None:
         sharing.update_inherit(inherit)
 
-    # NOTE: role_settings is a list of dicts with keys id, for the user/group
-    # id; type, being either 'user' or 'group'; and roles, containing A LIST
-    # of role ids that are set.
-    role_settings = req.get_json_key('role_settings', None)
+    def lst_from_dct(dct):
+        """ convert a roles dictionary in a roles list """
+        return [k for (k,v) in dct.items() if v]
+
+    def transform_role_settings(role_settings_old):
+        """ Converts role_settings from the sharing scheme, where 'roles' is
+        a dictionary with role names as keys and boolean as values, to the
+        scheme required by update_role_settings, where 'roles' is a list with
+        the roles to set.
+        """
+        role_settings = []
+        for setting in role_settings_old:
+            new = dict(**setting)
+            new['roles'] = lst_from_dct(new['roles'])
+            role_settings.append(new)
+
+        return role_settings
+
+    role_settings = info.get('role_settings', None)
     if role_settings is not None:
+        role_settings = transform_role_settings(role_settings)
         sharing.update_role_settings(role_settings)
 
     info = get_sharing(request, uid)
