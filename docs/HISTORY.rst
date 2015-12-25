@@ -13,6 +13,10 @@ Changelog
 - https://github.com/collective/plone.jsonapi.routes/pull/65: api routes: sharing (code)
 - https://github.com/collective/plone.jsonapi.routes/pull/61: Use IConstrainTypes adapters for dexterity content
 
+**API CHANGES**
+
+- Sharing information can be displayed for objects. Use `?sharing=yes`
+
 
 0.8.3 - 2015-09-14
 ------------------
