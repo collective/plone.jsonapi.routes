@@ -218,7 +218,7 @@ It is also possible to check the sharing settings for objects
 
 Example:
 
-``http://localhost:8080/Plone/@@API/plone/api/1.0/sharing/<uid:required>``
+``http://localhost:8080/Plone/@@API/plone/api/1.0/folders/<uid:required>?sharing=y``
 ``http://localhost:8080/Plone/@@API/plone/api/1.0/folders?sharing=y&complete=y``
 
 Response:
@@ -249,39 +249,32 @@ Response:
 
 Update inherit role settings:
 
-``http://localhost:8080/Plone/@@API/plone/api/1.0/sharing/update/<uid:required>``
+``http://localhost:8080/Plone/@@API/plone/api/1.0/update/<uid:required>``
 
 .. code-block:: javascript
 
     {
-        "inherit": false
+        "sharing": {
+            "inherit": false,
+            "role_settings": [
+                {
+                    "disabled": false,
+                    "id": "AuthenticatedUsers",
+                    "login": null,
+                    "roles": {
+                        "Contributor": false,
+                        "Editor": false,
+                        "Reader": false,
+                        "Reviewer": false
+                    },
+                    "title": "Logged-in users",
+                    "type": "group"
+                }
+            ]
+        }
     }
 
-Update role settings:
-
-``http://localhost:8080/Plone/@@API/plone/api/1.0/sharing/update/<uid:required>``
-
-.. code-block:: javascript
-
-    {
-        "role_settings": [
-            {
-                "id": "AuthenticatedUsers",
-                "type": "group",
-                "roles": [
-                    "Contributor": false,
-                    "Reviewer": false,
-                    "Editor": false,
-                    "Reader": true
-                ]
-            }
-        ]
-    }
-
-.. note:: `role_settings` is a list of dicts with keys id, for the user/group
-          id; type, being either 'user' or 'group'; and roles, containing a
-          list of role ids that are set.
-
+.. note:: You can pass in the same format as you got from the API
 
 .. versionadded:: 0.8.4
     Support sharing permissions of objects

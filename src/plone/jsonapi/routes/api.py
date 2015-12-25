@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import logging
+import pkg_resources
 
 from plone import api as ploneapi
 from plone.jsonapi.core import router
@@ -309,87 +310,6 @@ def paste_items(portal_type=None, request=None, uid=None, endpoint=None):
 
 
 # -----------------------------------------------------------------------------
-#   Sharing Functions
-# -----------------------------------------------------------------------------
-
-def get_sharing(request=None, uid=None):
-    """ get sharing
-    """
-
-    # try to find the requested objects
-    objects = find_objects(uid=uid)
-
-    # No objects could be found, bail out
-    if not objects:
-        raise APIError(404, "No Objects could be found")
-
-    # We support only one sharing for time
-    if len(objects) > 1:
-        raise APIError(400, "Can only get sharing for one object at a time")
-
-    def info_sharing_from_object(obj):
-        info = get_info(obj)
-        sharing = get_sharing_info(obj)
-        info.update({'sharing': sharing})
-        return info
-
-    info = map(info_sharing_from_object, objects)
-    return info
-
-
-def update_sharing(request=None, uid=None):
-    """ set sharing
-    """
-    # try to find the requested objects
-    objects = find_objects(uid=uid)
-
-    # No objects could be found, bail out
-    if not objects:
-        raise APIError(404, "No Objects could be found")
-
-    # We support only one sharing for time
-    if len(objects) > 1:
-        raise APIError(400, "Can only get sharing for one object at a time")
-
-    # Disable CSRF for sharing view
-    req.disable_csrf_protection()
-
-    obj = get_object(objects[0])
-    sharing = ploneapi.content.get_view('sharing', obj, req.get_request())
-    info = req.get_json_key('sharing', {})
-
-    inherit = info.get('inherit', None)
-    if inherit is not None:
-        sharing.update_inherit(inherit)
-
-    def lst_from_dct(dct):
-        """ convert a roles dictionary in a roles list """
-        return [k for (k,v) in dct.items() if v]
-
-    def transform_role_settings(role_settings_old):
-        """ Converts role_settings from the sharing scheme, where 'roles' is
-        a dictionary with role names as keys and boolean as values, to the
-        scheme required by update_role_settings, where 'roles' is a list with
-        the roles to set.
-        """
-        role_settings = []
-        for setting in role_settings_old:
-            new = dict(**setting)
-            new['roles'] = lst_from_dct(new['roles'])
-            role_settings.append(new)
-
-        return role_settings
-
-    role_settings = info.get('role_settings', None)
-    if role_settings is not None:
-        role_settings = transform_role_settings(role_settings)
-        sharing.update_role_settings(role_settings)
-
-    info = get_sharing(request, uid)
-    return info
-
-
-# -----------------------------------------------------------------------------
 #   Data Functions
 # -----------------------------------------------------------------------------
 
@@ -642,8 +562,9 @@ def get_sharing_info(brain_or_object):
     :returns: sharing information of the object
     :rtype: dict
     """
+
     obj = get_object(brain_or_object)
-    sharing = ploneapi.content.get_view('sharing', obj, req.get_request())
+    sharing = get_sharing_view_for(obj)
 
     return {
         "role_settings": sharing.role_settings(),
@@ -677,6 +598,35 @@ def get_batch(sequence, size, start=0, endpoint=None, complete=False):
 # -----------------------------------------------------------------------------
 #   Functional Helpers
 # -----------------------------------------------------------------------------
+
+def get_plone_version():
+    """Get the Plone version
+
+    :returns: Plone version
+    :rtype: str or list
+    """
+    dist = pkg_resources.get_distribution("Plone")
+    return dist.version
+
+
+def is_plone4():
+    """Check for Plone
+
+    :returns: True if Plone 4
+    :rtype: boolean
+    """
+    version = get_plone_version()
+    return version.startswith("4")
+
+
+def is_plone5():
+    """Check for Plone 5 series
+
+    :returns: True if Plone 5
+    :rtype: boolean
+    """
+    version = get_plone_version()
+    return version.startswith("5")
 
 def get_portal():
     """Get the portal object
@@ -723,6 +673,15 @@ def get_portal_workflow():
     :rtype: object
     """
     return get_tool("portal_workflow")
+
+
+def get_sharing_view_for(obj):
+    """Get the sharing view
+
+    :returns: Sharing view for the given object
+    :rtype: object
+    """
+    return ploneapi.content.get_view('sharing', obj, req.get_request())
 
 
 def is_brain(brain_or_object):
@@ -1177,6 +1136,43 @@ def do_action_for(brain_or_object, transition):
     return ploneapi.content.transition(obj, transition)
 
 
+def update_sharing_for(brain_or_object, sharing):
+    """Perform a sharing update
+
+    :param brain_or_object: A single catalog brain or content object
+    :type brain_or_object: ATContentType/DexterityContentType/CatalogBrain
+    :param sharing: The sharing dictionary as returned from the API
+    :type sharing: dict
+    :returns: change status
+    :rtype: boolean
+    """
+
+    obj = get_object(brain_or_object)
+    view = get_sharing_view_for(obj)
+
+    # 1. Update inherit settings for this object
+    inherit = sharing.get("inherit", _marker)
+    if inherit is not _marker:
+        view.update_inherit(inherit)
+
+    def fix_role_settings(settings):
+        # transform the roles to be compatible with the sharing views API
+        roles = settings.get("roles", {})
+        settings["roles"] = [k for (k, v) in roles.items() if v]
+        return settings
+
+    # 2. Prepare data for the sharing view API
+    role_settings = sharing.get("role_settings", [])
+    settings = map(fix_role_settings, role_settings)
+
+    # disable CSRF for Plone 5
+    if is_plone5():
+        req.disable_csrf_protection()
+
+    # 3. Update sharing settings
+    return view.update_role_settings(settings)
+
+
 def delete_object(brain_or_object):
     """Delete the given object
 
@@ -1274,8 +1270,14 @@ def update_object_with_data(content, record):
     # do a wf transition
     if record.get("transition", None):
         t = record.get("transition")
-        logger.info(">>> Do Transition '%s' for Object %s", t, content.getId())
+        logger.debug(">>> Do Transition '%s' for Object %s", t, content.getId())
         do_action_for(content, t)
+
+    # do a sharing update
+    if record.get("sharing", None):
+        s = record.get("sharing")
+        logger.debug(">>> Update sharing to %r for Object %s", s, content.getId())
+        update_sharing_for(content, s)
 
     # reindex the object
     content.reindexObject()
