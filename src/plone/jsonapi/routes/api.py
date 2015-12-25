@@ -628,6 +628,7 @@ def is_plone5():
     version = get_plone_version()
     return version.startswith("5")
 
+
 def get_portal():
     """Get the portal object
 
