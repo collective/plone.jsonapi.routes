@@ -55,6 +55,7 @@ class Base(object):
             "effective":   "effective",
             "portal_type": "portal_type",
             "tags":        "Subject",
+            "author":      "Creator",
         }
 
     def to_dict(self):
