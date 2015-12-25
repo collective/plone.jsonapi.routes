@@ -131,9 +131,9 @@ def login(context, request):
     logger.info("*** LOGIN %s ***" % __ac_name)
 
     if __ac_name is None:
-        raise APIError(400, "Username is missing")
+        raise APIError(400, "__ac_name is missing")
     if __ac_password is None:
-        raise APIError(400, "Password is missing")
+        raise APIError(400, "__ac_password is missing")
 
     acl_users = ploneapi.portal.get_tool("acl_users")
 
