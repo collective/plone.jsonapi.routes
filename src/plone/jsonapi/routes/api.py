@@ -1166,9 +1166,8 @@ def update_sharing_for(brain_or_object, sharing):
     role_settings = sharing.get("role_settings", [])
     settings = map(fix_role_settings, role_settings)
 
-    # disable CSRF for Plone 5
-    if is_plone5():
-        req.disable_csrf_protection()
+    # disable CSRF
+    req.disable_csrf_protection()
 
     # 3. Update sharing settings
     return view.update_role_settings(settings)
