@@ -126,8 +126,6 @@ Beside the *content resources*, there are some special resources available.
 +----------+--------------------+----------------------------------------+
 | login    |                    | Login with __ac_name and __ac_password |
 +----------+--------------------+----------------------------------------+
-| sharing  |                    | Resource for accessing sharing rights  |
-+----------+--------------------+----------------------------------------+
 
 
 .. _Parameters:
