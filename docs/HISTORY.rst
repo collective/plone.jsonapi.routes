@@ -4,7 +4,7 @@ Changelog
 =========
 
 
-0.8.4 - unreleased
+0.8.4 - 2016-01-14
 ------------------
 
 **CLOSED ISSUES**
