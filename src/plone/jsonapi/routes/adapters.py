@@ -304,11 +304,16 @@ def get_download_url(obj, fieldname, field=_marker, default=None):
     if is_dexterity_content(obj):
         # calculate the download url
         filename = getattr(field, "filename", "")
-        download = "{}/@@download/{}/{}".format(
-            obj.absolute_url(), fieldname, filename)
+        download = "{url}/@@download/{fieldname}/{filename}".format(
+            url=obj.absolute_url(),
+            fieldname=fieldname,
+            filename=filename,
+        )
     else:
         # calculate the download url
-        download = "{}/download".format(obj.absolute_url())
+        download = "{url}/download".format(
+            url=obj.absolute_url(),
+        )
     return download
 
 
