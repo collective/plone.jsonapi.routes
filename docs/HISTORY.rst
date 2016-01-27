@@ -3,6 +3,11 @@
 Changelog
 =========
 
+0.8.x - Unreleased
+------------------
+
+- Fix api invocation on the zope root
+  [ale-rt]
 
 0.8.4 - 2016-01-14
 ------------------

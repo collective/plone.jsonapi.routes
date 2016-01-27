@@ -322,7 +322,11 @@ def get_search_results(**kw):
 
     # allow to search for the Plone site
     if kw.get("portal_type") == "Plone Site":
-        return [get_portal()]
+        portal = get_portal()
+        if portal:
+            return [portal]
+        else:
+            return []
     elif kw.get("id") in PORTAL_IDS:
         return [get_portal()]
     elif kw.get("uid") in PORTAL_IDS:
