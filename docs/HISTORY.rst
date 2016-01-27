@@ -3,6 +3,12 @@
 Changelog
 =========
 
+0.8.x - Unreleased
+------------------
+
+- Using specifiers to format string (helps compatibility with Python 2.6,
+  improves code readability)
+  [ale-rt]
 
 0.8.4 - 2016-01-14
 ------------------
