@@ -3,7 +3,7 @@
 Changelog
 =========
 
-0.8.x - Unreleased
+0.8.5 - unreleased
 ------------------
 
 - Reuse and improve code to check if a parameter in the request
@@ -11,6 +11,7 @@ Changelog
 - Using specifiers to format string (helps compatibility with Python 2.6,
   improves code readability)
   [ale-rt]
+
 
 0.8.4 - 2016-01-14
 ------------------
