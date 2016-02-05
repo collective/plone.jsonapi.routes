@@ -188,7 +188,7 @@ This adapter has to implement the `IDataManager` interface.
 
 
 .. important:: Please be aware that you have to implement security for field
-               level access by your own.
+               level access on your own.
 
 .. code-block:: python
 
