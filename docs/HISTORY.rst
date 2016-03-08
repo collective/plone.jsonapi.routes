@@ -6,6 +6,7 @@ Changelog
 0.8.5 - unreleased
 ------------------
 
+- https://github.com/collective/plone.jsonapi.routes/issues/62: 'reference_catalog' not found
 - Reuse and improve code to check if a parameter in the request
   has a True value
 - Using specifiers to format string (helps compatibility with Python 2.6,
