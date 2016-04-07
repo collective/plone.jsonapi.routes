@@ -3,9 +3,11 @@
 Changelog
 =========
 
-0.8.5 - unreleased
+0.8.x - Unreleased
 ------------------
 
+- Fix api invocation on the zope root
+  [ale-rt]
 - Reuse and improve code to check if a parameter in the request
   has a True value
 - Using specifiers to format string (helps compatibility with Python 2.6,

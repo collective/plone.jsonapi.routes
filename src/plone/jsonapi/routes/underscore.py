@@ -174,7 +174,12 @@ def to_list(thing):
 
         >>> to_list(dict(a=1, b=2))
         [{'a': 1, 'b': 2}]
+
+        >>> to_list(None)
+        []
     """
+    if thing is None:
+        return []
     if not (is_list(thing) or is_tuple(thing)):
         return [thing]
     return list(thing)
