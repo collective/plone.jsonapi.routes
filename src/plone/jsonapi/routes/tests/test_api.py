@@ -164,9 +164,14 @@ class TestAPI(APITestCase):
             getToolByName(self.portal, "portal_catalog"))
 
     def test_get_portal_reference_catalog(self):
+        try:
+            rc = getToolByName(self.portal, "reference_catalog")
+        except AttributeError:
+            rc = None
+
         self.assertEqual(
             api.get_portal_reference_catalog(),
-            getToolByName(self.portal, "reference_catalog"))
+            rc)
 
     def test_get_portal_workflow(self):
         self.assertEqual(
