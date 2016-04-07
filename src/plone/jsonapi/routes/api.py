@@ -13,6 +13,7 @@ from Products.CMFCore.interfaces import IFolderish
 from Products.ZCatalog.interfaces import ICatalogBrain
 from Products.CMFPlone.PloneBatch import Batch
 from Products.CMFPlone.interfaces import IConstrainTypes
+from plone.api.exc import InvalidParameterError
 
 # search helpers
 from query import search
@@ -662,9 +663,12 @@ def get_portal_reference_catalog():
     """Get the portal reference catalog tool
 
     :returns: Portal Reference Catalog Tool
-    :rtype: object
+    :rtype: object | None
     """
-    return get_tool("reference_catalog")
+    try:
+        return get_tool("reference_catalog")
+    except InvalidParameterError:
+        return None
 
 
 def get_portal_workflow():
@@ -1014,7 +1018,7 @@ def get_object_by_uid(uid):
     rc = get_portal_reference_catalog()
 
     # try to find the object with the reference catalog first
-    obj = rc.lookupObject(uid)
+    obj = rc and rc.lookupObject(uid)
     if obj:
         return obj
 
