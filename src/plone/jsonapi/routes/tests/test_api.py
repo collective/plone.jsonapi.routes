@@ -54,6 +54,16 @@ class TestAPI(APITestCase):
         result = api.get_search_results(portal_type="Document")
         self.assertEqual(len(result), 50)
 
+    def test_get_search_results_issue75(self):
+        # handle api invocation gracefully if w/o Plone site
+        def faux_get_portal():
+            return []
+        get_portal = api.get_portal
+        api.get_portal = faux_get_portal
+        result = api.get_search_results(portal_type="Plone Site")
+        self.assertEqual(len(result), 0)
+        api.get_portal = get_portal
+
     def test_make_items_for(self):
         # handles empty data gracefully
         self.assertEqual(api.make_items_for([]), [])
