@@ -1258,10 +1258,14 @@ def update_object_with_data(content, record):
     if dm is None:
         raise APIError(400, "Update on this object is not allowed")
 
+    # https://github.com/collective/plone.jsonapi.routes/issues/77
+    # filter out bogus keywords
+    field_kwargs = _.omit(record, "file")
+
     # Iterate through record items
     for k, v in record.items():
         try:
-            success = dm.set(k, v, **record)
+            success = dm.set(k, v, **field_kwargs)
         except Unauthorized:
             raise APIError(401, "Not allowed to set the field '%s'" % k)
 

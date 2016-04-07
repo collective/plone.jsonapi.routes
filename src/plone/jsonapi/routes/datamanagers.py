@@ -163,11 +163,6 @@ class ATDataManager(object):
         mutator = field.getMutator(self.context)
         # Inspect function and apply positional and keyword arguments if
         # possible.
-        if 'file' in kw:
-            kw_copy = kw.copy()
-            del kw_copy['file']
-            return mapply(mutator, value, **kw_copy)
-
         return mapply(mutator, value, **kw)
 
     def get(self, name):
