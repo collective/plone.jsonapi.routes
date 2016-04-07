@@ -39,7 +39,9 @@ def disable_csrf_protection():
         https://pypi.python.org/pypi/plone.protect
     """
     if not HAS_PLONE_PROTECT:
-        logger.warn("Can not disable CSRF protection – please install plone.protect")
+        logger.warn(
+            "Can not disable CSRF protection – please install plone.protect"
+        )
         return False
     request = get_request()
     interface.alsoProvides(request, IDisableCSRFProtection)
@@ -58,6 +60,19 @@ def get(key, default=None):
     return get_form().get(key, default)
 
 
+def is_true(key, default=False):
+    ''' Check if the value is in TRUE_VALUES
+    '''
+    value = get(key, default)
+    if isinstance(value, list):
+        value = value[0]
+    if isinstance(value, bool):
+        return value
+    if value is default:
+        return default
+    return value.lower() in TRUE_VALUES
+
+
 def get_cookie(key, default=None):
     """ return the key from the request
     """
@@ -67,56 +82,31 @@ def get_cookie(key, default=None):
 def get_complete(default=None):
     """ returns the 'complete' from the request
     """
-    complete = get("complete", default)
-    if complete is default:
-        return default
-    if complete.lower() in TRUE_VALUES:
-        return True
-    return False
+    return is_true("complete", default)
 
 
 def get_children(default=None):
     """ returns the 'children' from the request
     """
-    children = get("children", default)
-    if children is default:
-        return default
-    if children.lower() in TRUE_VALUES:
-        return True
-    return False
+    return is_true("children", default)
 
 
 def get_filedata(default=None):
     """ returns the 'filedata' from the request
     """
-    filedata = get("filedata", default)
-    if filedata is default:
-        return default
-    if filedata.lower() in TRUE_VALUES:
-        return True
-    return False
+    return is_true('filedata')
 
 
 def get_workflow(default=None):
     """ returns the 'workflow' from the request
     """
-    workflow = get("workflow", default)
-    if workflow is default:
-        return default
-    if workflow.lower() in TRUE_VALUES:
-        return True
-    return False
+    return is_true("workflow", default)
 
 
 def get_sharing(default=None):
     """ returns the 'sharing' from the request
     """
-    sharing = get("sharing", default)
-    if sharing is default:
-        return default
-    if sharing.lower() in TRUE_VALUES:
-        return True
-    return False
+    return is_true("sharing", default)
 
 
 def get_sort_limit():

@@ -1,18 +1,20 @@
 Contributors
 ============
 
-Thanks to all the contributors
+Thanks to all the contributors!
 
-- José Dinuncio
+- José Dinuncio [jdinuncio]
 
-- Jian Aijun
+- Jian Aijun [jianaijun]
 
-- Jan Müller
+- Jan Müller [jan-mue]
 
 - Percy Barboza
 
-- Gagaro
+- Gagaro [Gagaro]
 
-- Mauro Amico
+- Mauro Amico [mamico] 
 
-- Thomas Clement Mogensen
+- Thomas Clement Mogensen [tmog]
+
+- Alessandro Pisa [ale-rt]
