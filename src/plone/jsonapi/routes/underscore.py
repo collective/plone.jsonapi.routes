@@ -178,7 +178,7 @@ def to_list(thing):
         >>> to_list(None)
         []
     """
-    if type(thing) is types.NoneType:
+    if thing is None:
         return []
     if not (is_list(thing) or is_tuple(thing)):
         return [thing]
