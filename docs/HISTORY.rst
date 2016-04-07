@@ -6,15 +6,13 @@ Changelog
 0.8.x - Unreleased
 ------------------
 
-- Fix api invocation on the zope root
-  [ale-rt]
-- https://github.com/collective/plone.jsonapi.routes/issues/62: 'reference_catalog' not found
-- Reuse and improve code to check if a parameter in the request
-  has a True value
-- Using specifiers to format string (helps compatibility with Python 2.6,
-  improves code readability)
-  [ale-rt]
+**CLOSED ISSUES**
 
+- https://github.com/collective/plone.jsonapi.routes/issues/77: Problem with creating files
+- https://github.com/collective/plone.jsonapi.routes/issues/62: 'reference_catalog' not found
+- https://github.com/collective/plone.jsonapi.routes/pull/75: Fix api invocation on the zope root
+- https://github.com/collective/plone.jsonapi.routes/pull/74: Reuse and improve code to check if a parameter in the request has a True value
+- https://github.com/collective/plone.jsonapi.routes/pull/73: Using specifiers to format string (helps compatibility with Python 2.6, improves code readability)
 
 0.8.4 - 2016-01-14
 ------------------
