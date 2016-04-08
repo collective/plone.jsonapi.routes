@@ -14,6 +14,7 @@ from plone.jsonapi.routes.interfaces import IDataManager
 
 FILENAME = u"TestDoc.docx"
 
+
 def dummy_file():
     from plone.namedfile.file import NamedBlobImage
     path = os.path.join(os.path.dirname(__file__), FILENAME)
@@ -21,6 +22,7 @@ def dummy_file():
         data=open(path, 'r').read(),
         filename=FILENAME
     )
+
 
 class TestAdapters(APITestCase):
     """ Test the Data Adapter
