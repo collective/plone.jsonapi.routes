@@ -27,6 +27,7 @@ from plone.jsonapi.routes.interfaces import IInfo
 from plone.jsonapi.routes.interfaces import IBatch
 from plone.jsonapi.routes.interfaces import IDataManager
 from plone.jsonapi.routes import underscore as _
+from plone.jsonapi.routes import NAMESPACE
 
 __author__ = 'Ramon Bartl <ramon.bartl@googlemail.com>'
 __docformat__ = 'plaintext'
@@ -772,6 +773,11 @@ def url_for(endpoint, **values):
     :returns: External URL for this endpoint
     :rtype: string/None
     """
+
+    # add namespace
+    # https://github.com/collective/plone.jsonapi.routes/issues/60
+    endpoint = ".".join([NAMESPACE, endpoint])
+
     try:
         return router.url_for(endpoint, force_external=True, values=values)
     except Exception:
@@ -779,7 +785,11 @@ def url_for(endpoint, **values):
         #     throw another error which can be handled here.
         logger.debug("Could not build API URL for endpoint '%s'. "
                      "No route provider registered?" % endpoint)
-        return None
+
+        # build generic API URL
+        # https://github.com/collective/plone.jsonapi.routes/issues/59
+        endpoint = ".".join([NAMESPACE, "get"])
+        return router.url_for(endpoint, force_external=True, values=values)
 
 
 def get_url(brain_or_object):

@@ -11,6 +11,7 @@ __docformat__ = 'plaintext'
 
 
 BASE_URL = "/plone/api/1.0"
+NAMESPACE = "plone.jsonapi.routes"
 
 logger = logging.getLogger("plone.jsonapi.routes")
 
@@ -23,7 +24,7 @@ def add_plone_route(rule, endpoint=None, **kw):
 
     # add namespace
     # https://github.com/collective/plone.jsonapi.routes/issues/60
-    endpoint = "plone.jsonapi.routes." + endpoint
+    endpoint = ".".join([NAMESPACE, endpoint])
 
     def wrapper(f):
         try:

@@ -8,6 +8,7 @@ Changelog
 
 **CLOSED ISSUES**
 
+- https://github.com/collective/plone.jsonapi.routes/issues/59: API URL for non standard content types
 - https://github.com/collective/plone.jsonapi.routes/issues/60: Add a namespace to the route registrations
 - https://github.com/collective/plone.jsonapi.routes/issues/63: handle richtext fields
 - https://github.com/collective/plone.jsonapi.routes/issues/82: Plone 5 CSFR Protection
