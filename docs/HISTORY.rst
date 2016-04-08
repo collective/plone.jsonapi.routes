@@ -3,7 +3,7 @@
 Changelog
 =========
 
-0.8.x - Unreleased
+0.8.5 - 2016-04-08
 ------------------
 
 **CLOSED ISSUES**
@@ -18,6 +18,7 @@ Changelog
 - https://github.com/collective/plone.jsonapi.routes/pull/75: Fix api invocation on the zope root
 - https://github.com/collective/plone.jsonapi.routes/pull/74: Reuse and improve code to check if a parameter in the request has a True value
 - https://github.com/collective/plone.jsonapi.routes/pull/73: Using specifiers to format string (helps compatibility with Python 2.6, improves code readability)
+
 
 0.8.4 - 2016-01-14
 ------------------
