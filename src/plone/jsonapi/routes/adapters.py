@@ -231,17 +231,13 @@ def get_json_value(obj, fieldname, value=_marker, default=None):
     :rtype: field dependent
     """
 
-    # extract the value from the object if omitted
-    if value is _marker:
-        value = IDataManager(obj).get(fieldname)
-
     # returned from catalog brain metadata
     if value is Missing.Value:
         return default
 
-    # check if the value is callable
-    if callable(value):
-        value = value()
+    # extract the value from the object if omitted
+    if value is _marker:
+        value = IDataManager(obj).get(fieldname)
 
     # check if we have a date
     if is_date(value):
@@ -261,6 +257,10 @@ def get_json_value(obj, fieldname, value=_marker, default=None):
 
         # return the donwload url as the default file field value
         value = get_download_url(obj, fieldname, value)
+
+    # check if the value is callable
+    if callable(value):
+        value = value()
 
     # check if the value is JSON serializable
     if not is_json_serializable(value):
