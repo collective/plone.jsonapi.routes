@@ -238,7 +238,7 @@ class DexterityDataManager(object):
         """ checks if field is a file field
         """
         if _.is_string(field):
-            field = get_field(field)
+            field = self.get_field(field)
         if self.is_richtext_field(field):
             return False
         return IObject.providedBy(field)
@@ -247,7 +247,7 @@ class DexterityDataManager(object):
         """ checks if field is a rich-text field
         """
         if _.is_string(field):
-            field = get_field(field)
+            field = self.get_field(field)
         if HAS_PLONE_APP_TEXTFIELD:
             return IRichText.providedBy(field)
         return False
