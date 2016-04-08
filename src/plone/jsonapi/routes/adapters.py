@@ -231,7 +231,6 @@ def get_json_value(obj, fieldname, value=_marker, default=None):
     :rtype: field dependent
     """
 
-
     # check if the value is callable
     if callable(value):
         value = value()
