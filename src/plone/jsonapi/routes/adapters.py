@@ -11,7 +11,6 @@ import simplejson as json
 from zope import interface
 from zope import component
 
-from plone.dexterity.schema import SCHEMA_CACHE
 from plone.dexterity.interfaces import IDexterityContent
 
 from AccessControl import Unauthorized
@@ -22,8 +21,19 @@ from Products.ATContentTypes.interfaces import IATContentType
 
 from plone.jsonapi.routes.interfaces import IInfo
 from plone.jsonapi.routes.interfaces import IDataManager
+from plone.jsonapi.routes.datamanagers import ATDataManager
+from plone.jsonapi.routes.datamanagers import DexterityDataManager
 from plone.jsonapi.routes import api
 from plone.jsonapi.routes import request as req
+
+import pkg_resources
+try:
+    pkg_resources.get_distribution('plone.app.textfield')
+    from plone.app.textfield.interfaces import IRichTextValue
+except (pkg_resources.DistributionNotFound, ImportError):
+    HAS_PLONE_APP_TEXTFIELD = False
+else:
+    HAS_PLONE_APP_TEXTFIELD = True
 
 __author__ = 'Ramon Bartl <ramon.bartl@googlemail.com>'
 __docformat__ = 'plaintext'
@@ -134,8 +144,12 @@ class DexterityDataProvider(Base):
     def __init__(self, context):
         super(DexterityDataProvider, self).__init__(context)
 
-        schema = SCHEMA_CACHE.get(context.portal_type)
-        self.keys = schema.names()
+        # get the behavior and schema fields from the data manager
+        dm = DexterityDataManager(context)
+        schema = dm.get_schema()
+        behaviors = dm.get_behaviors()
+
+        self.keys = schema.names() + behaviors.keys()
 
 
 class ATDataProvider(Base):
@@ -146,7 +160,10 @@ class ATDataProvider(Base):
 
     def __init__(self, context):
         super(ATDataProvider, self).__init__(context)
-        schema = context.Schema()
+
+        # get the schema fields from the data manager
+        dm = ATDataManager(context)
+        schema = dm.get_schema()
         self.keys = schema.keys()
 
 
@@ -195,6 +212,11 @@ def extract_fields(obj, fieldnames, ignore=[]):
         except Unauthorized:
             logger.debug("Skipping restricted field '%s'" % fieldname)
             continue
+
+        # handle richtext values
+        if is_richtext_value(fieldvalue):
+            fieldvalue = fieldvalue.output
+
         out[fieldname] = get_json_value(obj, fieldname, fieldvalue)
 
     return out
@@ -409,3 +431,16 @@ def is_file_field(field):
     :rtype: bool
     """
     return hasattr(field, "filename")
+
+
+def is_richtext_value(thing):
+    """Checks if the value is a richtext value
+
+    :param thing: The thing to test
+    :type thing: any
+    :returns: True if the thing is a richtext value
+    :rtype: bool
+    """
+    if HAS_PLONE_APP_TEXTFIELD:
+        return IRichTextValue.providedBy(thing)
+    return False
