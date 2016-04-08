@@ -326,8 +326,12 @@ def get_content_type(obj, default="application/octet-stream"):
     :rtype: str
     """
     if hasattr(obj, "contentType"):
+        if callable(obj.contentType):
+            return obj.contentType()
         return obj.contentType
     elif hasattr(obj, "content_type"):
+        if callable(obj.content_type):
+            return obj.content_type()
         return obj.content_type
     filename = getattr(obj, "filename", "")
     content_type = mimetypes.guess_type(filename)[0]
