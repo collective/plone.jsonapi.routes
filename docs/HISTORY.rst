@@ -8,6 +8,7 @@ Changelog
 
 **CLOSED ISSUES**
 
+- https://github.com/collective/plone.jsonapi.routes/issues/60: Add a namespace to the route registrations
 - https://github.com/collective/plone.jsonapi.routes/issues/63: handle richtext fields
 - https://github.com/collective/plone.jsonapi.routes/issues/82: Plone 5 CSFR Protection
 - https://github.com/collective/plone.jsonapi.routes/issues/80: Tests for Plone 5
