@@ -213,10 +213,6 @@ def extract_fields(obj, fieldnames, ignore=[]):
             logger.debug("Skipping restricted field '%s'" % fieldname)
             continue
 
-        # handle richtext values
-        if is_richtext_value(fieldvalue):
-            fieldvalue = fieldvalue.output
-
         out[fieldname] = get_json_value(obj, fieldname, fieldvalue)
 
     return out
@@ -235,6 +231,11 @@ def get_json_value(obj, fieldname, value=_marker, default=None):
     :rtype: field dependent
     """
 
+
+    # check if the value is callable
+    if callable(value):
+        value = value()
+
     # returned from catalog brain metadata
     if value is Missing.Value:
         return default
@@ -246,6 +247,10 @@ def get_json_value(obj, fieldname, value=_marker, default=None):
     # check if we have a date
     if is_date(value):
         return get_iso_date(value)
+
+    # handle richtext values
+    if is_richtext_value(value):
+        value = value.output
 
     # check if the value is a file field
     if is_file_field(value):
