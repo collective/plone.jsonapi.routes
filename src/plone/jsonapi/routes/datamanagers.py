@@ -16,6 +16,17 @@ from Products.CMFCore import permissions
 from Products.Archetypes.utils import mapply
 
 from plone.jsonapi.routes.interfaces import IDataManager
+from plone.jsonapi.routes import underscore as _
+
+import pkg_resources
+try:
+    pkg_resources.get_distribution('plone.app.textfield')
+    from plone.app.textfield.interfaces import IRichText
+    from plone.app.textfield.value import RichTextValue
+except (pkg_resources.DistributionNotFound, ImportError):
+    HAS_PLONE_APP_TEXTFIELD = False
+else:
+    HAS_PLONE_APP_TEXTFIELD = True
 
 __author__ = 'Ramon Bartl <ramon.bartl@googlemail.com>'
 __docformat__ = 'plaintext'
@@ -104,6 +115,11 @@ class ATDataManager(object):
 
     def __init__(self, context):
         self.context = context
+
+    def get_schema(self):
+        """ get the schema
+        """
+        return self.context.Schema()
 
     def is_file_field(self, field):
         """ checks if field is a file field
@@ -221,7 +237,20 @@ class DexterityDataManager(object):
     def is_file_field(self, field):
         """ checks if field is a file field
         """
+        if _.is_string(field):
+            field = self.get_field(field)
+        if self.is_richtext_field(field):
+            return False
         return IObject.providedBy(field)
+
+    def is_richtext_field(self, field):
+        """ checks if field is a rich-text field
+        """
+        if _.is_string(field):
+            field = self.get_field(field)
+        if HAS_PLONE_APP_TEXTFIELD:
+            return IRichText.providedBy(field)
+        return False
 
     def get_filename(self, **kw):
         """ extract the filename from the keywords
@@ -279,6 +308,12 @@ class DexterityDataManager(object):
 
         # Check the write permission of the field
         self.can_write(field)
+
+        if self.is_richtext_field(field):
+            logger.debug("DexterityDataManager::set:RichText field"
+                         "detected ('%r'), creating RichTextValue", field)
+            value = RichTextValue(raw=value,
+                                  outputMimeType=field.output_mime_type)
 
         if self.is_file_field(field):
             logger.debug("DexterityDataManager::set:File field"
