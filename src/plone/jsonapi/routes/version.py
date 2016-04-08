@@ -13,8 +13,8 @@ def version():
     return dist.version
 
 __version__ = version()
-__build__ = 470
-__date__ = '2016-04-07'
+__build__ = 471
+__date__ = '2016-04-08'
 
 
 @add_plone_route("/version", "ploneapiversion", methods=["GET"])
