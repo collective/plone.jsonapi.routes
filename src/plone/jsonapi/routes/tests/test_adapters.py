@@ -50,6 +50,8 @@ class TestAdapters(APITestCase):
         # handle plone 5 dexterity based file content
         if adapters.is_dexterity_content(self.doc):
             self.doc.file = dummy_file()
+        else:
+            self.doc.setFilename(FILENAME)
 
     # -----------------------------------------------------------------------------
     #   Testing Helpers
@@ -150,7 +152,7 @@ class TestAdapters(APITestCase):
 
     def test_is_dexterity_content(self):
         obj = self.get_document_obj()
-        if api.is_plone5:
+        if api.is_plone5():
             # std. content types are dexterity in plone 5
             self.assertTrue(adapters.is_dexterity_content(obj))
         else:
