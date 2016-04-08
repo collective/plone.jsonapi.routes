@@ -102,7 +102,7 @@ class TestFilesAPI(APITestCase):
 
         # Wake up the object by traversing to the detail page
         # Issue #57: Explicitly ask for the filedata
-        self.browser.open(self.api_url + "/files/%s?filedata=yes" % obj.UID())
+        self.browser.open(self.api_url + "/files/%s?complete=yes&filedata=yes" % obj.UID())
         # Get the items list from the detail page
         items = self.get_items()
         # There should be exactly one item in the list
