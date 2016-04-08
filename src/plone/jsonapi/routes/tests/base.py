@@ -12,9 +12,10 @@ from plone.app.testing import setRoles
 from plone.app.testing import TEST_USER_ID
 from plone.testing import z2
 
-
 from plone.app.testing.layers import IntegrationTesting
 from zope.configuration import xmlconfig
+
+from plone import api
 
 
 class TestLayer(PloneSandboxLayer):
@@ -40,6 +41,10 @@ class TestLayer(PloneSandboxLayer):
 
     def setUpPloneSite(self, portal):
         setRoles(portal, TEST_USER_ID, ['Manager'])
+
+        # fix for *** ValueError: No such content type: Folder
+        if api.env.plone_version().startswith("5"):
+            portal.portal_quickinstaller.installProduct("plone.app.contenttypes")
 
         # add a folder, so we can test with it
         _ = portal.invokeFactory("Folder", "folder", title="Test Folder")

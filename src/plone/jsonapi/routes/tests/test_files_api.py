@@ -10,9 +10,20 @@ from plone.app.testing import SITE_OWNER_NAME
 from plone.app.testing import SITE_OWNER_PASSWORD
 from plone.testing.z2 import Browser
 
+from plone.jsonapi.routes import adapters
 from plone.jsonapi.routes.tests.base import APITestCase
 
 API_BASE_URL = "/@@API/plone/api/1.0"
+FILENAME = u"TestDoc.docx"
+
+
+def dummy_file():
+    from plone.namedfile.file import NamedBlobImage
+    path = os.path.join(os.path.dirname(__file__), FILENAME)
+    return NamedBlobImage(
+        data=open(path, 'r').read(),
+        filename=FILENAME
+    )
 
 
 class TestFilesAPI(APITestCase):
@@ -66,10 +77,16 @@ class TestFilesAPI(APITestCase):
         file_contents = open(path).read()
         _ = self.portal.invokeFactory("File",
                                       "testdoc.docx",
-                                      title="TestDoc.docx",
+                                      title=FILENAME,
                                       file=file_contents)
+
         transaction.commit()
         obj = self.portal.get(_)
+
+        # handle plone 5 dexterity based file content
+        if adapters.is_dexterity_content(obj):
+            obj.file = dummy_file()
+            transaction.commit()
 
         # Call the files route
         self.browser.open(self.api_url + "/files")
@@ -89,6 +106,7 @@ class TestFilesAPI(APITestCase):
         # Get the items list from the detail page
         items = self.get_items()
         # There should be exactly one item in the list
+
         self.assertEqual(len(items), 1)
 
         # Check the file contents

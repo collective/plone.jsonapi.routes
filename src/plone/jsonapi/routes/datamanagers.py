@@ -311,6 +311,8 @@ class DexterityDataManager(object):
         """ get the value of the field by name
         """
         field = self.get_field(name)
+        if field is None:
+            return None
         # Check the read permission of the field
         self.can_read(field)
         return field.get(self.context)

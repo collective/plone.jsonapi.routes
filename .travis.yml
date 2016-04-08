@@ -7,11 +7,11 @@ cache:
   - parts/node
 env:
 - PLONE_VERSION=4.3
-#- PLONE_VERSION=5.0
+- PLONE_VERSION=5.0
 matrix:
   fast_finish: true
 install:
-- sed -ie "s#test-4.3#test-$PLONE_VERSION#" buildout.cfg
+- sed -ie "s#test-5.0#test-$PLONE_VERSION#" buildout.cfg
 - python bootstrap.py
 - bin/buildout annotate
 - bin/buildout -Nq
