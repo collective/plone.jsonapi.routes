@@ -21,6 +21,10 @@ def add_plone_route(rule, endpoint=None, **kw):
     def apiurl(rule):
         return '/'.join(s.strip('/') for s in ["", BASE_URL, rule])
 
+    # add namespace
+    # https://github.com/collective/plone.jsonapi.routes/issues/60
+    endpoint = "plone.jsonapi.routes." + endpoint
+
     def wrapper(f):
         try:
             DefaultRouter.add_url_rule(apiurl(rule),
