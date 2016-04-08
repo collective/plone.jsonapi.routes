@@ -231,17 +231,17 @@ def get_json_value(obj, fieldname, value=_marker, default=None):
     :rtype: field dependent
     """
 
-    # check if the value is callable
-    if callable(value):
-        value = value()
+    # extract the value from the object if omitted
+    if value is _marker:
+        value = IDataManager(obj).get(fieldname)
 
     # returned from catalog brain metadata
     if value is Missing.Value:
         return default
 
-    # extract the value from the object if omitted
-    if value is _marker:
-        value = IDataManager(obj).get(fieldname)
+    # check if the value is callable
+    if callable(value):
+        value = value()
 
     # check if we have a date
     if is_date(value):

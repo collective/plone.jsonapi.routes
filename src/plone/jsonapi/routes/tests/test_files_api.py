@@ -73,10 +73,10 @@ class TestFilesAPI(APITestCase):
         self.assertEqual(self.get_key("count"), 0)
 
         # Add a Word Document
-        path = os.path.join(os.path.dirname(__file__), u'TestDoc.docx')
+        path = os.path.join(os.path.dirname(__file__), FILENAME)
         file_contents = open(path).read()
         _ = self.portal.invokeFactory("File",
-                                      "testdoc.docx",
+                                      FILENAME,
                                       title=FILENAME,
                                       file=file_contents)
 
@@ -96,7 +96,7 @@ class TestFilesAPI(APITestCase):
         # Get the Item
         item = self.get_items().pop()
         # Test if it is has the same ID
-        self.assertEqual(item.get("id"), "testdoc.docx")
+        self.assertEqual(item.get("id"), FILENAME)
         # Test if it is has the same UID
         self.assertEqual(item.get("uid"), obj.UID())
 
