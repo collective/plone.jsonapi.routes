@@ -8,6 +8,8 @@ Changelog
 
 **CLOSED ISSUES**
 
+- https://github.com/collective/plone.jsonapi.routes/issues/82: Plone 5 CSFR Protection
+- https://github.com/collective/plone.jsonapi.routes/issues/80: Tests for Plone 5
 - https://github.com/collective/plone.jsonapi.routes/issues/77: Problem with creating files
 - https://github.com/collective/plone.jsonapi.routes/issues/62: 'reference_catalog' not found
 - https://github.com/collective/plone.jsonapi.routes/pull/75: Fix api invocation on the zope root

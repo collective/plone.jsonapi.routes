@@ -117,6 +117,9 @@ def create_items(portal_type=None, request=None, uid=None, endpoint=None):
         - `parent_path` specifies the *physical path* of the target folder
     """
 
+    # disable CSRF
+    req.disable_csrf_protection()
+
     # destination where to create the content
     dest = uid and get_object_by_uid(uid) or None
 
@@ -152,6 +155,9 @@ def update_items(portal_type=None, request=None, uid=None, endpoint=None):
     2. If no uid is given, the user wants to update a bunch of objects.
        -> each record contains either an UID, path or parent_path + id
     """
+
+    # disable CSRF
+    req.disable_csrf_protection()
 
     # the data to update
     records = req.get_request_data()
@@ -196,6 +202,9 @@ def delete_items(portal_type=None, request=None, uid=None, endpoint=None):
        wants to delete the right content.
     """
 
+    # disable CSRF
+    req.disable_csrf_protection()
+
     # try to find the requested objects
     objects = find_objects(uid=uid)
 
@@ -219,6 +228,9 @@ def delete_items(portal_type=None, request=None, uid=None, endpoint=None):
 def cut_items(portal_type=None, request=None, uid=None, endpoint=None):
     """ cut items
     """
+
+    # disable CSRF
+    req.disable_csrf_protection()
 
     # try to find the requested objects
     objects = find_objects(uid=uid)
@@ -249,6 +261,9 @@ def copy_items(portal_type=None, request=None, uid=None, endpoint=None):
     """ copy items
     """
 
+    # disable CSRF
+    req.disable_csrf_protection()
+
     # try to find the requested objects
     objects = find_objects(uid=uid)
 
@@ -277,6 +292,9 @@ def copy_items(portal_type=None, request=None, uid=None, endpoint=None):
 def paste_items(portal_type=None, request=None, uid=None, endpoint=None):
     """ paste items
     """
+
+    # disable CSRF
+    req.disable_csrf_protection()
 
     # try to find the requested objects
     objects = find_objects(uid=uid)
@@ -1169,9 +1187,6 @@ def update_sharing_for(brain_or_object, sharing):
     # 2. Prepare data for the sharing view API
     role_settings = sharing.get("role_settings", [])
     settings = map(fix_role_settings, role_settings)
-
-    # disable CSRF
-    req.disable_csrf_protection()
 
     # 3. Update sharing settings
     return view.update_role_settings(settings)
