@@ -350,4 +350,15 @@ class DexterityDataManager(object):
             return None
         # Check the read permission of the field
         self.can_read(field)
-        return field.get(self.context)
+
+        value = None
+        # XXX: How to handle behaviors right?
+        interface = getattr(field, "interface", None)
+        if interface is not None:
+            adapter = field.interface(self.context, None)
+            value = getattr(adapter, name)
+
+        if value is None:
+            value = field.get(self.context)
+
+        return value
