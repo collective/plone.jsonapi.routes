@@ -49,14 +49,14 @@ def update(context, request, uid=None):
 
 
 # DELETE
-@route("/images/delete", "images_delete", methods=["POST"])
-@route("/images/delete/<string:uid>", "images_delete", methods=["POST"])
+@route("/images/delete", "plone.jsonapi.routes.images_delete", methods=["POST"])
+@route("/images/delete/<string:uid>", "plone.jsonapi.routes.images_delete", methods=["POST"])
 def delete(context, request, uid=None):
     """ delete images
     """
-    items = delete_items("Image", uid=uid, endpoint="images")
+    items = delete_items("Image", uid=uid, endpoint="plone.jsonapi.routes.images")
     return {
-        "url": url_for("images_delete"),
+        "url": url_for("plone.jsonapi.routes.images_delete"),
         "count": len(items),
         "items": items,
     }

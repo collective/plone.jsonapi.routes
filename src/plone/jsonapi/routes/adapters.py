@@ -13,6 +13,7 @@ from zope import component
 
 from plone.dexterity.interfaces import IDexterityContent
 
+from Acquisition import ImplicitAcquisitionWrapper
 from AccessControl import Unauthorized
 
 from Products.CMFCore.interfaces import ISiteRoot
@@ -209,8 +210,11 @@ def extract_fields(obj, fieldnames, ignore=[]):
             fieldvalue = dm.get(fieldname)
         # https://github.com/collective/plone.jsonapi.routes/issues/52
         # -> skip restricted fields
-        except Unauthorized:
+        except Unauthorized, exc:
             logger.debug("Skipping restricted field '%s'" % fieldname)
+            continue
+        except ValueError, exc:
+            logger.debug("Skipping invalid field '%s'" % fieldname)
             continue
 
         out[fieldname] = get_json_value(obj, fieldname, fieldvalue)
@@ -230,6 +234,10 @@ def get_json_value(obj, fieldname, value=_marker, default=None):
     :returns: JSON encoded field value
     :rtype: field dependent
     """
+
+    # handle objects from reference fields
+    if isinstance(value, ImplicitAcquisitionWrapper):
+        return api.get_url_info(value)
 
     # returned from catalog brain metadata
     if value is Missing.Value:

@@ -12,51 +12,51 @@ from plone.jsonapi.routes.api import url_for
 
 
 # GET
-@route("/newsitems", "newsitems", methods=["GET"])
-@route("/newsitems/<string:uid>", "newsitems", methods=["GET"])
+@route("/newsitems", "plone.jsonapi.routes.newsitems", methods=["GET"])
+@route("/newsitems/<string:uid>", "plone.jsonapi.routes.newsitems", methods=["GET"])
 def get(context, request, uid=None):
     """ get newsitems
     """
-    return get_batched("News Item", uid=uid, endpoint="newsitems")
+    return get_batched("News Item", uid=uid, endpoint="plone.jsonapi.routes.newsitems")
 
 
 # CREATE
-@route("/newsitems/create", "newsitems_create", methods=["POST"])
-@route("/newsitems/create/<string:uid>", "newsitems_create", methods=["POST"])
+@route("/newsitems/create", "plone.jsonapi.routes.newsitems_create", methods=["POST"])
+@route("/newsitems/create/<string:uid>", "plone.jsonapi.routes.newsitems_create", methods=["POST"])
 def create(context, request, uid=None):
     """ create newsitems
     """
-    items = create_items("News Item", uid=uid, endpoint="newsitems")
+    items = create_items("News Item", uid=uid, endpoint="plone.jsonapi.routes.newsitems")
     return {
-        "url": url_for("newsitems_create"),
+        "url": url_for("plone.jsonapi.routes.newsitems_create"),
         "count": len(items),
         "items": items,
     }
 
 
 # UPDATE
-@route("/newsitems/update", "newsitems_update", methods=["POST"])
-@route("/newsitems/update/<string:uid>", "newsitems_update", methods=["POST"])
+@route("/newsitems/update", "plone.jsonapi.routes.newsitems_update", methods=["POST"])
+@route("/newsitems/update/<string:uid>", "plone.jsonapi.routes.newsitems_update", methods=["POST"])
 def update(context, request, uid=None):
     """ update newsitems
     """
-    items = update_items("News Item", uid=uid, endpoint="newsitems")
+    items = update_items("News Item", uid=uid, endpoint="plone.jsonapi.routes.newsitems")
     return {
-        "url": url_for("newsitems_update"),
+        "url": url_for("plone.jsonapi.routes.newsitems_update"),
         "count": len(items),
         "items": items,
     }
 
 
 # DELETE
-@route("/newsitems/delete", "newsitems_delete", methods=["POST"])
-@route("/newsitems/delete/<string:uid>", "newsitems_delete", methods=["POST"])
+@route("/newsitems/delete", "plone.jsonapi.routes.newsitems_delete", methods=["POST"])
+@route("/newsitems/delete/<string:uid>", "plone.jsonapi.routes.newsitems_delete", methods=["POST"])
 def delete(context, request, uid=None):
     """ delete newsitems
     """
-    items = delete_items("News Item", uid=uid, endpoint="newsitems")
+    items = delete_items("News Item", uid=uid, endpoint="plone.jsonapi.routes.newsitems")
     return {
-        "url": url_for("newsitems_delete"),
+        "url": url_for("plone.jsonapi.routes.newsitems_delete"),
         "count": len(items),
         "items": items,
     }

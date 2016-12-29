@@ -304,6 +304,8 @@ def first(lst, n=None):
     """
     if not is_list(lst):
         return None
+    if len(lst) < 1:
+        return None
     return n is None and lst[0] or lst[0:n]
 
 

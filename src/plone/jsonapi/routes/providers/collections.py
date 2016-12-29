@@ -12,55 +12,51 @@ from plone.jsonapi.routes.api import url_for
 
 
 # GET
-@route("/collections", "collections", methods=["GET"])
-@route("/collections/<string:uid>",
-       "collections", methods=["GET"])
+@route("/collections", "plone.jsonapi.routes.collections", methods=["GET"])
+@route("/collections/<string:uid>", "plone.jsonapi.routes.collections", methods=["GET"])
 def get(context, request, uid=None):
     """ get collections
     """
-    return get_batched("Collection", uid=uid, endpoint="collections")
+    return get_batched("Collection", uid=uid, endpoint="plone.jsonapi.routes.collections")
 
 
 # CREATE
-@route("/collections/create", "collections_create", methods=["POST"])
-@route("/collections/create/<string:uid>",
-       "collections_create", methods=["POST"])
+@route("/collections/create", "plone.jsonapi.routes.collections_create", methods=["POST"])
+@route("/collections/create/<string:uid>", "plone.jsonapi.routes.collections_create", methods=["POST"])
 def create(context, request, uid=None):
     """ create collections
     """
     items = create_items("Collection", uid=uid, endpoint="collections")
     return {
-        "url": url_for("collections_create"),
+        "url": url_for("plone.jsonapi.routes.collections_create"),
         "count": len(items),
         "items": items,
     }
 
 
 # UPDATE
-@route("/collections/update", "collections_update", methods=["POST"])
-@route("/collections/update/<string:uid>",
-       "collections_update", methods=["POST"])
+@route("/collections/update", "plone.jsonapi.routes.collections_update", methods=["POST"])
+@route("/collections/update/<string:uid>", "plone.jsonapi.routes.collections_update", methods=["POST"])
 def update(context, request, uid=None):
     """ update collections
     """
-    items = update_items("Collection", uid=uid, endpoint="collections")
+    items = update_items("Collection", uid=uid, endpoint="plone.jsonapi.routes.collections")
     return {
-        "url": url_for("collections_update"),
+        "url": url_for("plone.jsonapi.routes.collections_update"),
         "count": len(items),
         "items": items,
     }
 
 
 # DELETE
-@route("/collections/delete", "collections_delete", methods=["POST"])
-@route("/collections/delete/<string:uid>",
-       "collections_delete", methods=["POST"])
+@route("/collections/delete", "plone.jsonapi.routes.collections_delete", methods=["POST"])
+@route("/collections/delete/<string:uid>", "plone.jsonapi.routes.collections_delete", methods=["POST"])
 def delete(context, request, uid=None):
     """ delete collections
     """
-    items = delete_items("Collection", uid=uid, endpoint="collections")
+    items = delete_items("Collection", uid=uid, endpoint="plone.jsonapi.routes.collections")
     return {
-        "url": url_for("collections_delete"),
+        "url": url_for("plone.jsonapi.routes.collections_delete"),
         "count": len(items),
         "items": items,
     }

@@ -12,51 +12,51 @@ from plone.jsonapi.routes.api import url_for
 
 
 # GET
-@route("/documents", "documents", methods=["GET"])
-@route("/documents/<string:uid>", "documents", methods=["GET"])
+@route("/documents", "plone.jsonapi.routes.documents", methods=["GET"])
+@route("/documents/<string:uid>", "plone.jsonapi.routes.documents", methods=["GET"])
 def get(context, request, uid=None):
     """ get documents
     """
-    return get_batched("Document", uid=uid, endpoint="documents")
+    return get_batched("Document", uid=uid, endpoint="plone.jsonapi.routes.documents")
 
 
 # CREATE
-@route("/documents/create", "documents_create", methods=["POST"])
-@route("/documents/create/<string:uid>", "documents_create", methods=["POST"])
+@route("/documents/create", "plone.jsonapi.routes.documents_create", methods=["POST"])
+@route("/documents/create/<string:uid>", "plone.jsonapi.routes.documents_create", methods=["POST"])
 def create(context, request, uid=None):
     """ create documents
     """
-    items = create_items("Document", uid=uid, endpoint="documents")
+    items = create_items("Document", uid=uid, endpoint="plone.jsonapi.routes.documents")
     return {
-        "url": url_for("documents_create"),
+        "url": url_for("plone.jsonapi.routes.documents_create"),
         "count": len(items),
         "items": items,
     }
 
 
 # UPDATE
-@route("/documents/update", "documents_update", methods=["POST"])
-@route("/documents/update/<string:uid>", "documents_update", methods=["POST"])
+@route("/documents/update", "plone.jsonapi.routes.documents_update", methods=["POST"])
+@route("/documents/update/<string:uid>", "plone.jsonapi.routes.documents_update", methods=["POST"])
 def update(context, request, uid=None):
     """ update documents
     """
-    items = update_items("Document", uid=uid, endpoint="documents")
+    items = update_items("Document", uid=uid, endpoint="plone.jsonapi.routes.documents")
     return {
-        "url": url_for("documents_update"),
+        "url": url_for("plone.jsonapi.routes.documents_update"),
         "count": len(items),
         "items": items,
     }
 
 
 # DELETE
-@route("/documents/delete", "documents_delete", methods=["POST"])
-@route("/documents/delete/<string:uid>", "documents_delete", methods=["POST"])
+@route("/documents/delete", "plone.jsonapi.routes.documents_delete", methods=["POST"])
+@route("/documents/delete/<string:uid>", "plone.jsonapi.routes.documents_delete", methods=["POST"])
 def delete(context, request, uid=None):
     """ delete documents
     """
-    items = delete_items("Document", uid=uid, endpoint="documents")
+    items = delete_items("Document", uid=uid, endpoint="plone.jsonapi.routes.documents")
     return {
-        "url": url_for("documents_delete"),
+        "url": url_for("plone.jsonapi.routes.documents_delete"),
         "count": len(items),
         "items": items,
     }

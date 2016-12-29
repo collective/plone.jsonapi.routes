@@ -3,7 +3,7 @@
 import os
 from setuptools import setup, find_packages
 
-version = '0.8.6'
+version = '0.8.7'
 
 long_description = (
     open('README.rst').read()

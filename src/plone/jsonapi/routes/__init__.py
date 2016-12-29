@@ -11,7 +11,7 @@ __docformat__ = 'plaintext'
 
 
 BASE_URL = "/plone/api/1.0"
-NAMESPACE = "plone.jsonapi.routes"
+REGISTER_API_ROUTES = True
 
 logger = logging.getLogger("plone.jsonapi.routes")
 
@@ -21,10 +21,6 @@ def add_plone_route(rule, endpoint=None, **kw):
     """
     def apiurl(rule):
         return '/'.join(s.strip('/') for s in ["", BASE_URL, rule])
-
-    # add namespace
-    # https://github.com/collective/plone.jsonapi.routes/issues/60
-    endpoint = ".".join([NAMESPACE, endpoint])
 
     def wrapper(f):
         try:
@@ -81,6 +77,12 @@ def initialize(context):
     """
     logger.info("*** PLONE.JSONAPI.ROUTES INITIALIZE ***")
 
+    if not REGISTER_API_ROUTES:
+        logger.info("*** ROUTE INITIALIZATION DEACTIVATED VIA ZCML ***")
+        from providers import get
+        logger.info("*** ADDED DEFAULT ROUTE PROVIDER ***")
+        return
+
     # We have to import the modules so that the routes get initialized
     import pkgutil
     import providers
@@ -90,6 +92,3 @@ def initialize(context):
             providers.__path__, prefix):
         module = __import__(modname, fromlist="dummy")
         logger.info("INITIALIZED ROUTE PROVIDER ---> %s" % module.__name__)
-
-    import version
-    logger.info("INITIALIZED ROUTE PROVIDER ---> %s" % version.__name__)

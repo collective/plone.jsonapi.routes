@@ -32,7 +32,7 @@ def get_user_info(username=None, short=True):
     info = {
         "id":       user.getId(),
         "username": user.getUserName(),
-        "url":      url_for("users", username=user.getUserName())
+        "url":      url_for("plone.jsonapi.routes.users", username=user.getUserName())
     }
 
     # return base info
@@ -69,8 +69,8 @@ def get_user_info(username=None, short=True):
 # API ROUTES
 # -----------------------------------------------------------------------------
 
-@route("/users", "users", methods=["GET"])
-@route("/users/<string:username>", "users", methods=["GET"])
+@route("/users", "plone.jsonapi.routes.users", methods=["GET"])
+@route("/users/<string:username>", "plone.jsonapi.routes.users", methods=["GET"])
 def get(context, request, username=None):
     """ Plone users route
     """
@@ -98,13 +98,13 @@ def get(context, request, username=None):
         items.append(info)
 
     return {
-        "url":   url_for("users"),
+        "url":   url_for("plone.jsonapi.routes.users"),
         "count": len(items),
         "items": items
     }
 
 
-@route("/auth", "auth", methods=["GET"])
+@route("/auth", "plone.jsonapi.routes.auth", methods=["GET"])
 def auth(context, request):
     """ Basic Authentication
     """
@@ -118,7 +118,7 @@ def auth(context, request):
     return {}
 
 
-@route("/login", "login", methods=["GET"])
+@route("/login", "plone.jsonapi.routes.login", methods=["GET"])
 def login(context, request):
     """ Login Route
 
@@ -152,7 +152,7 @@ def login(context, request):
     return get(context, request, username=__ac_name)
 
 
-@route("/logout", "logout", methods=["GET"])
+@route("/logout", "plone.jsonapi.routes.logout", methods=["GET"])
 def logout(context, request):
     """ Logout Route
     """
@@ -162,6 +162,6 @@ def logout(context, request):
     acl_users.logout(request)
 
     return {
-        "url":     url_for("users"),
+        "url":     url_for("plone.jsonapi.routes.users"),
         "success": True
     }

@@ -6,8 +6,8 @@ from plone.jsonapi.routes.api import get_record
 
 
 # GET
-@route("/portal", "portal", methods=["GET"])
-@route("/portal/<string:uid>", "portal", methods=["GET"])
+@route("/portal", "plone.jsonapi.routes.portal", methods=["GET"])
+@route("/portal/<string:uid>", "plone.jsonapi.routes.portal", methods=["GET"])
 def get(context, request, uid=0):
     """ get the Portal
     """
