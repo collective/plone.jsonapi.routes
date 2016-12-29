@@ -210,10 +210,10 @@ def extract_fields(obj, fieldnames, ignore=[]):
             fieldvalue = dm.get(fieldname)
         # https://github.com/collective/plone.jsonapi.routes/issues/52
         # -> skip restricted fields
-        except Unauthorized, exc:
+        except Unauthorized:
             logger.debug("Skipping restricted field '%s'" % fieldname)
             continue
-        except ValueError, exc:
+        except ValueError:
             logger.debug("Skipping invalid field '%s'" % fieldname)
             continue
 

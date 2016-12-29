@@ -80,7 +80,7 @@ def initialize(context):
     if not REGISTER_API_ROUTES:
         logger.info("*** ROUTE INITIALIZATION DEACTIVATED VIA ZCML ***")
         from providers import get
-        logger.info("*** ADDED DEFAULT ROUTE PROVIDER ***")
+        logger.info("*** ADDED DEFAULT ROUTE PROVIDER --> %s ***" % get.__name__)
         return
 
     # We have to import the modules so that the routes get initialized
