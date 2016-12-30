@@ -114,7 +114,7 @@ class TestFilesAPI(APITestCase):
 
         # File contents should be the same (base64 encoded)
         self.assertEqual(
-            file_data["data"],
+            file_data.get("data"),
             str(file_contents).encode("base64")
         )
 
