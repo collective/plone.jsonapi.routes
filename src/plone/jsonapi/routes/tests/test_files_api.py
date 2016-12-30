@@ -88,8 +88,8 @@ class TestFilesAPI(APITestCase):
             obj.file = dummy_file()
             transaction.commit()
 
-        # Call the files route
-        self.browser.open(self.api_url + "/files")
+        # Issue #57: Explicitly ask for the filedata
+        self.browser.open(self.api_url + "/files?complete=yes&filedata=yes")
         # There should be one file in the portal
         self.assertEqual(self.get_key("count"), 1)
 
@@ -100,9 +100,6 @@ class TestFilesAPI(APITestCase):
         # Test if it is has the same UID
         self.assertEqual(item.get("uid"), obj.UID())
 
-        # Wake up the object by traversing to the detail page
-        # Issue #57: Explicitly ask for the filedata
-        self.browser.open(self.api_url + "/files/%s?filedata=yes" % obj.UID())
         # Get the items list from the detail page
         items = self.get_items()
         # There should be exactly one item in the list
