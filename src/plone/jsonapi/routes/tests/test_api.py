@@ -203,7 +203,7 @@ class TestAPI(APITestCase):
             allowed_content_types)
 
     def test_url_for(self):
-        endpoint = "plonesites"
+        endpoint = "plone.jsonapi.routes.plonesites"
         uid = "0"
         self.assertEqual(
             api.url_for(endpoint, uid=uid),

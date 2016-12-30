@@ -2,8 +2,9 @@
 
 from plone.jsonapi.core import router
 
-from plone.jsonapi.routes import NAMESPACE
 from plone.jsonapi.routes.tests.base import APITestCase
+
+NAMESPACE = "plone.jsonapi.routes"
 
 
 class TestSetup(APITestCase):

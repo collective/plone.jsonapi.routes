@@ -133,7 +133,7 @@ def get_batch_start():
 def get_sort_on(allowed_indexes=None):
     """ returns the 'sort_on' from the request
     """
-    sort_on = get("sort_on")
+    sort_on = get("sort_on", "getObjPositionInParent")
     if allowed_indexes and sort_on not in allowed_indexes:
         logger.warn("Index '%s' is not in allowed_indexes" % sort_on)
         return "id"

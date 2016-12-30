@@ -20,6 +20,7 @@ Changelog
     />
 
 - Version route is now part of the standard route providers
+- Dropped AdvancedQuery handling
 
 
 0.8.6 - 2016-04-08

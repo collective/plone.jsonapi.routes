@@ -14,7 +14,6 @@
     <!-- Enable/Disable Route Registration on Startup (default: True) -->
     <!-- <plone:jsonapi -->
     <!--     register_api_routes="False" -->
-    <!--     use_advanced_query="False" -->
     <!-- /> -->
 
     <!-- BATCHING

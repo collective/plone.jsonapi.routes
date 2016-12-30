@@ -331,7 +331,7 @@ def paste_items(portal_type=None, request=None, uid=None, endpoint=None):
 #   Data Functions
 # -----------------------------------------------------------------------------
 
-def get_search_results(portal_type, uid, **kw):
+def get_search_results(portal_type=None, uid=None, **kw):
     """Search the catalog and return the results
 
     :returns: Catalog search results

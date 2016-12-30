@@ -10,4 +10,4 @@ from plone.jsonapi.routes.api import get_batched
 def get(context, request):
     """ search all contents
     """
-    return get_batched([])
+    return get_batched()

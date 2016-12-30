@@ -2,25 +2,14 @@
 
 import types
 import logging
-import pkg_resources
 
-from plone import api
+from plone import api as ploneapi
 from ZPublisher import HTTPRequest
 
 from DateTime import DateTime
 
 from plone.jsonapi.routes import request as req
 from plone.jsonapi.routes import underscore as _
-
-try:
-    pkg_resources.get_distribution('Products.AdvancedQuery')
-    from Products.AdvancedQuery import Eq
-    from Products.AdvancedQuery import In
-    from Products.AdvancedQuery import Generic
-except pkg_resources.DistributionNotFound:
-    HAS_ADVANCED_QUERY = False
-else:
-    HAS_ADVANCED_QUERY = True
 
 __author__ = 'Ramon Bartl <ramon.bartl@googlemail.com>'
 __docformat__ = 'plaintext'
@@ -31,10 +20,6 @@ __all__ = ['search']
 
 logger = logging.getLogger("plone.jsonapi.routes.query")
 
-# TODO: make this an configurable option -- maybe zcml?
-#       or Environment Variable?
-USE_ADVANCED_QUERY = False
-
 
 # -----------------------------------------------------------------------------
 #   Public API
@@ -44,83 +29,41 @@ def search(**kw):
     """Execute a catalog search
     """
 
-    # Gather the right catalog
+    # Fetch the right catalog
     catalog = get_catalog(**kw)
 
     # Make a catalog query suitable for the catalog
     query = make_query(catalog, **kw)
 
-    # Execute the search
-    if USE_ADVANCED_QUERY and HAS_ADVANCED_QUERY and type(query) is tuple:
-        return advanced_search(catalog, *query, **kw)
-    return standard_search(catalog, query, **kw)
+    return catalog(query)
 
 
 # -----------------------------------------------------------------------------
 #   Query Builders
 # -----------------------------------------------------------------------------
 
-def make_query(catalog, **kw):
-    """ generates a catalog query
-    """
-
-    if USE_ADVANCED_QUERY and HAS_ADVANCED_QUERY:
-        return make_advanced_query(catalog, **kw)
-    return make_standard_query(catalog, **kw)
-
-
 def get_catalog(**kw):
-    """ get the right catalog
+    """Get the right catalog for the query.
     """
     catalog = None
 
     portal_type = kw.get("portal_type")
-    if portal_type:
-        at = api.portal.get_tool("archetype_tool")
-        catalogs = at.getCatalogsByType(portal_type)
+    archetype_tool = get_tool("archetype_tool")
+
+    if portal_type and archetype_tool is not None:
+        catalogs = archetype_tool.getCatalogsByType(portal_type)
         catalog = _.first(catalogs)
     else:
-        catalog = api.portal.get_tool("portal_catalog")
+        catalog = get_tool("portal_catalog")
 
     return catalog
 
 
-def make_standard_query(catalog, **kw):
-    """ generates a query for the portal catalog
+def make_query(catalog, **kw):
+    """Generate a query for the given catalog
     """
-    logger.info("Building **standard** query")
 
-    # build a default query from the request parameters and the keywords
-    query = build_catalog_query(catalog, **kw)
-
-    sort_on, sort_order = get_sort_spec(catalog)
-    query.update(dict(sort_order=sort_order, sort_on=sort_on))
-
-    return query
-
-
-def make_advanced_query(catalog, **kw):
-    """ generates a query suitable for the portal catalog
-    """
-    logger.info("Building **advanced** query")
-
-    # build the initial query
-    query = build_catalog_query(catalog, **kw)
-
-    # transform to advanced query
-    advanced_query = to_advanced_query(query)
-
-    # get the sort specification
-    sort = get_sort_spec(catalog)
-
-    return advanced_query, (sort, )
-
-
-def build_catalog_query(catalog, **kw):
-    """ build an initial query object
-
-    this query can be used directly for a std. catalog query
-    """
+    # build a query from the request parameters and the keywords
     query = {}
 
     # note: order is important!
@@ -128,7 +71,11 @@ def build_catalog_query(catalog, **kw):
     query.update(get_custom_query(catalog))
     query.update(get_keyword_query(catalog, **kw))
 
-    logger.info("build_catalog_query::catalog=%r, query=%s" % (catalog, query))
+    sort_on, sort_order = get_sort_spec(catalog)
+    query.update(dict(sort_order=sort_order, sort_on=sort_on))
+
+    logger.info("make_query:: query=%s --> catalog=%s" % (query, catalog.__name__))
+
     return query
 
 
@@ -146,7 +93,7 @@ def get_request_query(catalog):
     for idx in indexes:
         val = request.form.get(idx)
         if val:
-            query[idx] = to_index_value(val, idx)
+            query[idx] = to_index_value(catalog, val, idx)
 
     return query
 
@@ -190,7 +137,7 @@ def get_keyword_query(catalog, **kw):
 
     for k, v in kw.iteritems():
         # handle uid
-        if v and k.lower() == "uid":
+        if k.lower() == "uid":
             if v:
                 query["UID"] = v
             continue
@@ -212,48 +159,26 @@ def get_keyword_query(catalog, **kw):
     return query
 
 
-def to_advanced_query(query):
-    """ convert a dictionary to an advanced query
-    """
-
-    # nothing to do
-    if not query:
-        return Eq("Title", "")
-
-    a_query = None
-
-    def get_query_expression_for(value):
-        # return the Advanced Query Expression
-        if type(value) in (tuple, list):
-            return In
-        if type(value) is dict:
-            return Generic
-        return Eq
-
-    for k, v in query.iteritems():
-        exp = get_query_expression_for(v)
-        # first loop, build the initial query expression
-        if a_query is None:
-            a_query = exp(k, v)
-        else:
-            a_query = a_query & exp(k, v)
-
-    return a_query
-
-
 # -----------------------------------------------------------------------------
 #   Functional Helpers
 # -----------------------------------------------------------------------------
+
+def get_tool(name):
+    try:
+        return ploneapi.portal.get_tool(name)
+    except ploneapi.exc.InvalidParameterError:
+        return None
+
 
 def calculate_delta_date(literal):
     """ calculate the date in the past from the given literal
     """
     mapping = {
-        "today":      0,
-        "yesterday":  1,
-        "this-week":  7,
+        "today": 0,
+        "yesterday": 1,
+        "this-week": 7,
         "this-month": 30,
-        "this-year":  365,
+        "this-year": 365,
     }
     today = DateTime(DateTime().Date())  # current date without the time
     return today - mapping.get(literal, 0)
@@ -272,12 +197,15 @@ def get_catalog_indexes(catalog):
 def get_index(catalog, name):
     """ get the index object by name
     """
-    return catalog._catalog.getIndex(name)
+    index = catalog._catalog.getIndex(name)
+    logger.info("get_index=%s of catalog '%s' --> %s" % (name, catalog.__name__, index))
+    return index
 
 
 def to_index_value(catalog, value, index):
-    """ convert the value for the given index
+    """Convert the value for a given index
     """
+
     # ZPublisher records can be passed to the catalog as is.
     if isinstance(value, HTTPRequest.record):
         return value
@@ -296,24 +224,9 @@ def to_index_value(catalog, value, index):
 
 
 def get_sort_spec(catalog):
-    """ build sort specification
+    """Build sort specification
     """
-    all_indexes = catalog.indexes()
+    all_indexes = get_catalog_indexes(catalog)
     si = req.get_sort_on(allowed_indexes=all_indexes)
     so = req.get_sort_order()
     return si, so
-
-
-def standard_search(catalog, query, **kw):
-    """ search the portal catalog
-    """
-    logger.info("Standard Query %r -> %s" % (catalog, query))
-
-    return catalog(query, **kw)
-
-
-def advanced_search(catalog, query, sort_specs=()):
-    """ search the portal catalog with the advanced query
-    """
-    logger.info("Advanced Query -> %s sort_specs=%r" % (query, sort_specs))
-    return catalog.evalAdvancedQuery(query, sort_specs)
