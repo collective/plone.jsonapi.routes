@@ -99,22 +99,17 @@ class TestFilesAPI(APITestCase):
         # Test if it is has the same UID
         self.assertEqual(item.get("uid"), obj.UID())
 
+        # Issue #57: Explicitly ask for the filedata
+        self.browser.open(self.api_url + "/files/%s?filedata=yes&complete=yes" % obj.UID())
+
         # Get the items list from the detail page
         items = self.get_items()
         # There should be exactly one item in the list
 
         self.assertEqual(len(items), 1)
 
-        # Issue #57: Explicitly ask for the filedata
-        self.browser.open(self.api_url + "/files/%s?filedata=yes" % obj.UID())
-
         # Check the file contents
         file_data = items[0]["file"]
-
-        self.assertEqual(
-            file_data.get("filename"),
-            FILENAME
-        )
 
         # File contents should be the same (base64 encoded)
         self.assertEqual(
