@@ -18,9 +18,9 @@ FILENAME = u"TestDoc.docx"
 
 
 def dummy_file():
-    from plone.namedfile.file import NamedBlobImage
+    from plone.namedfile.file import NamedBlobFile
     path = os.path.join(os.path.dirname(__file__), FILENAME)
-    return NamedBlobImage(
+    return NamedBlobFile(
         data=open(path, 'r').read(),
         filename=FILENAME
     )
@@ -111,6 +111,11 @@ class TestFilesAPI(APITestCase):
 
         # Check the file contents
         file_data = items[0]["file"]
+
+        self.assertEqual(
+            file_data.get("filename"),
+            FILENAME
+        )
 
         # File contents should be the same (base64 encoded)
         self.assertEqual(
