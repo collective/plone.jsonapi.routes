@@ -731,9 +731,11 @@ def is_folderish(brain_or_object):
     :returns: True if the object is folderish
     :rtype: bool
     """
-    if is_brain(brain_or_object):
+    if hasattr(brain_or_object, "is_folderish"):
+        if callable(brain_or_object.is_folderish):
+            return brain_or_object.is_folderish()
         return brain_or_object.is_folderish
-    return IFolderish.providedBy(brain_or_object)
+    return IFolderish.providedBy(get_object(brain_or_object))
 
 
 def get_locally_allowed_types(brain_or_object):
