@@ -934,7 +934,16 @@ def get_endpoint(brain_or_object):
     # lower and pluralize
     portal_type = portal_type.lower() + "s"
 
-    return portal_type
+    # XXX Hack to get the right namespaced endpoint
+    endpoints = router.DefaultRouter.view_functions.keys()
+    if portal_type in endpoints:
+        return portal_type  # exact match
+    endpoint_candidates = filter(lambda e: e.endswith(portal_type), endpoints)
+    if len(endpoint_candidates) == 1:
+        # only return the namespaced endpoint, if we have an exact match
+        return endpoint_candidates[0]
+    # default
+    return None
 
 
 def find_objects(uid=None):
