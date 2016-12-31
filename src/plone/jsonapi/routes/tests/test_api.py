@@ -203,7 +203,7 @@ class TestAPI(APITestCase):
             allowed_content_types)
 
     def test_url_for(self):
-        endpoint = "plonesites"
+        endpoint = "plone.jsonapi.routes.plonesites"
         uid = "0"
         self.assertEqual(
             api.url_for(endpoint, uid=uid),
@@ -277,7 +277,8 @@ class TestAPI(APITestCase):
 
     def test_get_endpoint(self):
         obj = self.portal.folder
-        self.assertEqual(api.get_endpoint(obj), "folders")
+        # we should get the namespaced endpoint now by this function
+        self.assertEqual(api.get_endpoint(obj), "plone.jsonapi.routes.folders")
 
     def test_find_objects(self):
         obj = self.portal.folder

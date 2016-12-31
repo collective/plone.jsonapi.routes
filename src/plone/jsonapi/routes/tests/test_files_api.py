@@ -18,9 +18,9 @@ FILENAME = u"TestDoc.docx"
 
 
 def dummy_file():
-    from plone.namedfile.file import NamedBlobImage
+    from plone.namedfile.file import NamedBlobFile
     path = os.path.join(os.path.dirname(__file__), FILENAME)
-    return NamedBlobImage(
+    return NamedBlobFile(
         data=open(path, 'r').read(),
         filename=FILENAME
     )
@@ -88,7 +88,6 @@ class TestFilesAPI(APITestCase):
             obj.file = dummy_file()
             transaction.commit()
 
-        # Call the files route
         self.browser.open(self.api_url + "/files")
         # There should be one file in the portal
         self.assertEqual(self.get_key("count"), 1)
@@ -100,9 +99,9 @@ class TestFilesAPI(APITestCase):
         # Test if it is has the same UID
         self.assertEqual(item.get("uid"), obj.UID())
 
-        # Wake up the object by traversing to the detail page
         # Issue #57: Explicitly ask for the filedata
-        self.browser.open(self.api_url + "/files/%s?complete=yes&filedata=yes" % obj.UID())
+        self.browser.open(self.api_url + "/files/%s?filedata=yes&complete=yes" % obj.UID())
+
         # Get the items list from the detail page
         items = self.get_items()
         # There should be exactly one item in the list
@@ -114,7 +113,7 @@ class TestFilesAPI(APITestCase):
 
         # File contents should be the same (base64 encoded)
         self.assertEqual(
-            file_data["data"],
+            file_data.get("data"),
             str(file_contents).encode("base64")
         )
 

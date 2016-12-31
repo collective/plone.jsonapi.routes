@@ -12,51 +12,51 @@ from plone.jsonapi.routes.api import url_for
 
 
 # GET
-@route("/images", "images", methods=["GET"])
-@route("/images/<string:uid>", "images", methods=["GET"])
+@route("/images", "plone.jsonapi.routes.images", methods=["GET"])
+@route("/images/<string:uid>", "plone.jsonapi.images", methods=["GET"])
 def get(context, request, uid=None):
     """ get images
     """
-    return get_batched("Image", uid=uid, endpoint="images")
+    return get_batched("Image", uid=uid, endpoint="plone.jsonapi.images")
 
 
 # CREATE
-@route("/images/create", "images_create", methods=["POST"])
-@route("/images/create/<string:uid>", "images_create", methods=["POST"])
+@route("/images/create", "plone.jsonapi.images_create", methods=["POST"])
+@route("/images/create/<string:uid>", "plone.jsonapi.images_create", methods=["POST"])
 def create(context, request, uid=None):
     """ create images
     """
-    items = create_items("Image", uid=uid, endpoint="images")
+    items = create_items("Image", uid=uid, endpoint="plone.jsonapi.images")
     return {
-        "url": url_for("images_create"),
+        "url": url_for("plone.jsonapi.images_create"),
         "count": len(items),
         "items": items,
     }
 
 
 # UPDATE
-@route("/images/update", "images_update", methods=["POST"])
-@route("/images/update/<string:uid>", "images_update", methods=["POST"])
+@route("/images/update", "plone.jsonapi.images_update", methods=["POST"])
+@route("/images/update/<string:uid>", "plone.jsonapi.images_update", methods=["POST"])
 def update(context, request, uid=None):
     """ update images
     """
-    items = update_items("Image", uid=uid, endpoint="images")
+    items = update_items("Image", uid=uid, endpoint="plone.jsonapi.images")
     return {
-        "url": url_for("images_update"),
+        "url": url_for("plone.jsonapi.images_update"),
         "count": len(items),
         "items": items,
     }
 
 
 # DELETE
-@route("/images/delete", "images_delete", methods=["POST"])
-@route("/images/delete/<string:uid>", "images_delete", methods=["POST"])
+@route("/images/delete", "plone.jsonapi.routes.images_delete", methods=["POST"])
+@route("/images/delete/<string:uid>", "plone.jsonapi.routes.images_delete", methods=["POST"])
 def delete(context, request, uid=None):
     """ delete images
     """
-    items = delete_items("Image", uid=uid, endpoint="images")
+    items = delete_items("Image", uid=uid, endpoint="plone.jsonapi.routes.images")
     return {
-        "url": url_for("images_delete"),
+        "url": url_for("plone.jsonapi.routes.images_delete"),
         "count": len(items),
         "items": items,
     }

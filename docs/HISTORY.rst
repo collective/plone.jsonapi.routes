@@ -3,6 +3,26 @@
 Changelog
 =========
 
+
+0.8.7 - unreleased
+------------------
+
+**API Changes**
+
+- Get the catalog to query from Archtype Tool and default to `portal_catalog`
+- Use explicit namespace in route providers
+- Handle Reference Fields (Fields containing and `ImplicitAcquisitionWrapper` object)
+- Added ZCML directive to enable/disable route registrations (default enabled)::
+
+    <!-- Disable route registration -->
+    <plone:jsonapi
+        register_api_routes="False"
+    />
+
+- Version route is now part of the standard route providers
+- Dropped AdvancedQuery handling
+
+
 0.8.6 - 2016-04-08
 ------------------
 

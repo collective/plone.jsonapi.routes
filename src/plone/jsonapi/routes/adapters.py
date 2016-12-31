@@ -13,6 +13,7 @@ from zope import component
 
 from plone.dexterity.interfaces import IDexterityContent
 
+from Acquisition import ImplicitAcquisitionWrapper
 from AccessControl import Unauthorized
 
 from Products.CMFCore.interfaces import ISiteRoot
@@ -212,6 +213,9 @@ def extract_fields(obj, fieldnames, ignore=[]):
         except Unauthorized:
             logger.debug("Skipping restricted field '%s'" % fieldname)
             continue
+        except ValueError:
+            logger.debug("Skipping invalid field '%s'" % fieldname)
+            continue
 
         out[fieldname] = get_json_value(obj, fieldname, fieldvalue)
 
@@ -235,6 +239,22 @@ def get_json_value(obj, fieldname, value=_marker, default=None):
     if value is Missing.Value:
         return default
 
+    # check if the value is a file field
+    if is_file_field(value):
+
+        # Issue https://github.com/collective/plone.jsonapi.routes/issues/54
+        # -> return file data only if requested
+
+        if req.get_filedata(False):
+            return get_file_info(obj, fieldname, value)
+
+        # return the donwload url as the default file field value
+        value = get_download_url(obj, fieldname, value)
+
+    # handle objects from reference fields
+    if isinstance(value, ImplicitAcquisitionWrapper):
+        return api.get_url_info(value)
+
     # extract the value from the object if omitted
     if value is _marker:
         value = IDataManager(obj).get(fieldname)
@@ -246,17 +266,6 @@ def get_json_value(obj, fieldname, value=_marker, default=None):
     # handle richtext values
     if is_richtext_value(value):
         value = value.output
-
-    # check if the value is a file field
-    if is_file_field(value):
-
-        # Issue https://github.com/collective/plone.jsonapi.routes/issues/54
-        # -> return file data only if requested
-        if req.get_filedata(False):
-            return get_file_info(obj, fieldname, value)
-
-        # return the donwload url as the default file field value
-        value = get_download_url(obj, fieldname, value)
 
     # check if the value is callable
     if callable(value):

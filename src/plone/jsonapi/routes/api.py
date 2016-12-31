@@ -17,7 +17,6 @@ from plone.api.exc import InvalidParameterError
 
 # search helpers
 from query import search
-from query import make_query
 
 # request helpers
 from plone.jsonapi.routes import request as req
@@ -27,7 +26,6 @@ from plone.jsonapi.routes.interfaces import IInfo
 from plone.jsonapi.routes.interfaces import IBatch
 from plone.jsonapi.routes.interfaces import IDataManager
 from plone.jsonapi.routes import underscore as _
-from plone.jsonapi.routes import NAMESPACE
 
 __author__ = 'Ramon Bartl <ramon.bartl@googlemail.com>'
 __docformat__ = 'plaintext'
@@ -72,7 +70,7 @@ def get_items(portal_type=None, request=None, uid=None, endpoint=None):
     """
 
     # fetch the catalog results
-    results = get_search_results(portal_type=portal_type, uid=uid)
+    results = get_search_results(portal_type, uid)
 
     # check for existing complete flag
     complete = req.get_complete(default=_marker)
@@ -89,7 +87,7 @@ def get_batched(portal_type=None, request=None, uid=None, endpoint=None):
     """
 
     # fetch the catalog results
-    results = get_search_results(portal_type=portal_type, uid=uid)
+    results = get_search_results(portal_type, uid)
 
     # fetch the batch params from the request
     size = req.get_batch_size()
@@ -333,7 +331,7 @@ def paste_items(portal_type=None, request=None, uid=None, endpoint=None):
 #   Data Functions
 # -----------------------------------------------------------------------------
 
-def get_search_results(**kw):
+def get_search_results(portal_type=None, uid=None, **kw):
     """Search the catalog and return the results
 
     :returns: Catalog search results
@@ -341,16 +339,11 @@ def get_search_results(**kw):
     """
 
     # allow to search for the Plone site
-    if kw.get("portal_type") == "Plone Site":
-        return _.to_list(get_portal())
-    elif kw.get("id") in PORTAL_IDS:
-        return _.to_list(get_portal())
-    elif kw.get("uid") in PORTAL_IDS:
+    if portal_type == "Plone Site" or uid in PORTAL_IDS:
         return _.to_list(get_portal())
 
     # build and execute a catalog query
-    query = make_query(**kw)
-    return search(query)
+    return search(portal_type=portal_type, uid=uid, **kw)
 
 
 def make_items_for(brains_or_objects, endpoint=None, complete=False):
@@ -765,7 +758,7 @@ def get_locally_allowed_types(brain_or_object):
     return method()
 
 
-def url_for(endpoint, **values):
+def url_for(endpoint, default="plone.jsonapi.routes.get", **values):
     """Looks up the API URL for the given endpoint
 
     :param endpoint: The name of the registered route (aka endpoint)
@@ -773,10 +766,6 @@ def url_for(endpoint, **values):
     :returns: External URL for this endpoint
     :rtype: string/None
     """
-
-    # add namespace
-    # https://github.com/collective/plone.jsonapi.routes/issues/60
-    endpoint = ".".join([NAMESPACE, endpoint])
 
     try:
         return router.url_for(endpoint, force_external=True, values=values)
@@ -788,8 +777,7 @@ def url_for(endpoint, **values):
 
         # build generic API URL
         # https://github.com/collective/plone.jsonapi.routes/issues/59
-        endpoint = ".".join([NAMESPACE, "get"])
-        return router.url_for(endpoint, force_external=True, values=values)
+        return router.url_for(default, force_external=True, values=values)
 
 
 def get_url(brain_or_object):
@@ -946,7 +934,16 @@ def get_endpoint(brain_or_object):
     # lower and pluralize
     portal_type = portal_type.lower() + "s"
 
-    return portal_type
+    # XXX Hack to get the right namespaced endpoint
+    endpoints = router.DefaultRouter.view_functions.keys()
+    if portal_type in endpoints:
+        return portal_type  # exact match
+    endpoint_candidates = filter(lambda e: e.endswith(portal_type), endpoints)
+    if len(endpoint_candidates) == 1:
+        # only return the namespaced endpoint, if we have an exact match
+        return endpoint_candidates[0]
+    # default
+    return None
 
 
 def find_objects(uid=None):

@@ -22,5 +22,5 @@ after_success:
 - bin/createcoverage
 - pip install -q coveralls
 - coveralls
-notifications:
-  irc: irc.freenode.org#plone-testing
+# notifications:
+#   irc: irc.freenode.org#plone-testing

@@ -11,7 +11,7 @@ from plone.jsonapi.routes.providers.users import get as get_user
 logger = logging.getLogger("plone.jsonapi.routes.users")
 
 
-@route("/auth", "auth", methods=["GET"])
+@route("/auth", "plone.jsonapi.routes.auth", methods=["GET"])
 def auth(context, request):
     """ Basic Authentication
     """
@@ -25,7 +25,7 @@ def auth(context, request):
     return {}
 
 
-@route("/login", "login", methods=["GET"])
+@route("/login", "plone.jsonapi.routes.login", methods=["GET"])
 def login(context, request):
     """ Login Route
 
@@ -59,7 +59,7 @@ def login(context, request):
     return get_user(context, request, username=__ac_name)
 
 
-@route("/logout", "logout", methods=["GET"])
+@route("/logout", "plone.jsonapi.routes.logout", methods=["GET"])
 def logout(context, request):
     """ Logout Route
     """
@@ -69,6 +69,6 @@ def logout(context, request):
     acl_users.logout(request)
 
     return {
-        "url":     url_for("users"),
+        "url":     url_for("plone.jsonapi.routes.users"),
         "success": True
     }
