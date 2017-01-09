@@ -192,16 +192,6 @@ class TestAPI(APITestCase):
         self.assertTrue(api.is_folderish(self.portal))
         self.assertFalse(api.is_folderish(self.get_document_brain()))
 
-    def test_get_locally_allowed_types(self):
-        folder = self.portal.folder
-        method = getattr(folder, "getLocallyAllowedTypes", None)
-        if adapters.is_dexterity_content(folder):
-            method = getattr(folder, "allowedContentTypes", None)
-        allowed_content_types = callable(method) and method() or []
-        self.assertTrue(
-            api.get_locally_allowed_types(folder),
-            allowed_content_types)
-
     def test_url_for(self):
         endpoint = "plone.jsonapi.routes.plonesites"
         uid = "0"
@@ -346,17 +336,10 @@ class TestAPI(APITestCase):
         user = api.get_current_user()
         self.assertEqual(user.id, TEST_USER_ID)
 
-    def test_create_object_in_container(self):
-        folder = self.portal.folder
-        doc = api.create_object_in_container(folder, "Document", id="foo")
-        self.assertEqual(doc.UID(), folder.get("foo").UID())
-
     def test_create_object(self):
         folder = self.portal.folder
-        obj = api.create_object(
-            container=folder, type="Document", id="foo")
-        self.assertEqual(obj.aq_parent, folder)
-        self.assertEqual(obj.id, "foo")
+        doc = api.create_object(folder, "Document")
+        self.assertEqual(doc.UID(), folder.get(doc.id).UID())
 
     def test_update_object_with_data(self):
         doc = self.get_document_obj()
@@ -390,7 +373,7 @@ class TestCRUDAPI(APITestCase):
 
     def test_create_items(self):
         # create a folder inside the testfolder
-        data = {"title": "Subfolder"}
+        data = {"id": "subfolder", "title": "Subfolder"}
         self.request["BODY"] = json.dumps(data)
         api.create_items("Folder", uid=self.test_folder.UID())
         results = api.get_items("Folder")

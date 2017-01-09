@@ -3,6 +3,7 @@
 import logging
 import pkg_resources
 
+import transaction
 from zope import interface
 
 from plone import api as ploneapi
@@ -142,13 +143,10 @@ def create_items(portal_type=None, request=None, uid=None, endpoint=None):
             container = find_target_container(record)
         if portal_type is None:
             portal_type = record.get("portal_type", None)
-        # create an object slug
-        obj = create_object(container, portal_type)
-        # update the object
+        # create the object
         try:
-            update_object_with_data(obj, record)
+            obj = create_object(container, portal_type, **record)
         except APIError:
-            # Update during creation! Cleanup the invalid created object.
             container.manage_delObjects(obj.id)
             # reraise the error
             raise
@@ -1221,30 +1219,44 @@ def get_current_user():
     return ploneapi.user.get_current()
 
 
-def create_object(container, portal_type):
+def create_object(container, portal_type, **data):
     """Creates an object slug
 
     :returns: The new created content object
     :rtype: object
     """
 
-    # Temporary ID of the new content type
-    id = "{}-{}".format(portal_type, DateTime().strftime("%s"))
+    # temporary object ID for the new content type
+    obj_id = tmp_id = "{}-{}".format(portal_type, DateTime().strftime("%s"))
 
     try:
-        # create the new object with security checks enabled
-        obj_id = container.invokeFactory(portal_type, id)
-        # get the object by its id
-        obj = container[obj_id]
-
-        if IBaseObject.providedBy(obj):
-            # Will finish Archetypes content item creation process,
-            # rename-after-creation and such
-            obj.processForm()
-
-        return obj
+        # create the new object (with security checks enabled)
+        obj_id = container.invokeFactory(portal_type, tmp_id)
     except Unauthorized:
         raise APIError(401, "You are not allowed to create this content")
+
+    # get the object by its object ID
+    obj = container[obj_id]
+
+    if IBaseObject.providedBy(obj):
+        # Will finish Archetypes content item creation process,
+        # rename-after-creation and such
+        obj.processForm()
+
+    # Allow manual override of the id only if the object was not renamed
+    # after creation by a custom user function (obj.id != obj_id)
+    if obj.id == tmp_id and data.get("id"):
+        id = data.get("id")
+        # do a partial commit, else the renaming fails because
+        # the object isn't in the zodb yet.
+        transaction.savepoint(optimistic=True)
+        ploneapi.content.rename(obj=obj, new_id=id, safe_id=True)
+
+    # Update the object with the given data, but omit the id
+    data = _.omit(data, "id")
+    update_object_with_data(obj, data)
+
+    return obj
 
 
 def update_object_with_data(content, record):
