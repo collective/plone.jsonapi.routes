@@ -1204,6 +1204,25 @@ def update_sharing_for(brain_or_object, sharing):
     return view.update_role_settings(settings)
 
 
+def validate_object(brain_or_object, data):
+    """Validate the entire object
+
+    :param brain_or_object: A single catalog brain or content object
+    :type brain_or_object: ATContentType/DexterityContentType/CatalogBrain
+    :param data: The sharing dictionary as returned from the API
+    :type data: dict
+    :returns: invalidity status
+    :rtype: dict
+    """
+    obj = get_object(brain_or_object)
+
+    # Call the validator of AT Content Types
+    if is_atct(obj):
+        return obj.validate(data=data)
+
+    return {}
+
+
 def delete_object(brain_or_object):
     """Delete the given object
 
@@ -1310,13 +1329,8 @@ def update_object_with_data(content, record):
 
         logger.debug("update_object_with_data::field %r updated", k)
 
-    # Validate
-    invalid = False
-
-    # Call the validator of AT Content Types
-    if is_atct(content):
-        invalid = content.validate(data=record)
-
+    # Validate the entire content object
+    invalid = validate_object(content, record)
     if invalid:
         raise APIError(400, _.to_json(invalid))
 
