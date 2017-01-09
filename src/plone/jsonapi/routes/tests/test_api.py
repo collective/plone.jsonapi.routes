@@ -6,7 +6,6 @@ from plone.app.testing import TEST_USER_ID
 from plone.app.testing import setRoles
 
 from plone.jsonapi.routes.tests.base import APITestCase
-from plone.jsonapi.routes import adapters
 from plone.jsonapi.routes import api
 
 from Products.CMFCore.utils import getToolByName
