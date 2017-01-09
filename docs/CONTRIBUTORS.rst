@@ -13,7 +13,7 @@ Thanks to all the contributors!
 
 - Gagaro [Gagaro]
 
-- Mauro Amico [mamico] 
+- Mauro Amico [mamico]
 
 - Thomas Clement Mogensen [tmog]
 
