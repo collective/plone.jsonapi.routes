@@ -736,6 +736,18 @@ def is_root(brain_or_object):
     return ISiteRoot.providedBy(brain_or_object)
 
 
+def is_atct(brain_or_object):
+    """Checks if the passed in object is an Archetype Content Type
+
+    :param brain_or_object: A single catalog brain or content object
+    :type brain_or_object: ATContentType/DexterityContentType/CatalogBrain
+    :returns: True if the object is an ATCT
+    :rtype: bool
+    """
+    obj = get_object(brain_or_object)
+    return IBaseObject.providedBy(obj)
+
+
 def is_folderish(brain_or_object):
     """Checks if the passed in object is folderish
 
@@ -1238,7 +1250,7 @@ def create_object(container, portal_type, **data):
     # get the object by its object ID
     obj = container[obj_id]
 
-    if IBaseObject.providedBy(obj):
+    if is_atct(obj):
         # Will finish Archetypes content item creation process,
         # rename-after-creation and such
         obj.processForm()
@@ -1298,9 +1310,11 @@ def update_object_with_data(content, record):
 
         logger.debug("update_object_with_data::field %r updated", k)
 
-    invalid = content.validate(data=record)
-    if invalid:
-        raise APIError(400, _.to_json(invalid))
+    # Call the validator of AT Content Types
+    if is_atct(content):
+        invalid = content.validate(data=record)
+        if invalid:
+            raise APIError(400, _.to_json(invalid))
 
     # do a wf transition
     if record.get("transition", None):
