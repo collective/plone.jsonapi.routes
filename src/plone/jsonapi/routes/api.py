@@ -147,7 +147,7 @@ def create_items(portal_type=None, request=None, uid=None, endpoint=None):
         # update the object
         try:
             update_object_with_data(obj, record)
-        except:
+        except APIError:
             # Update during creation! Cleanup the invalid created object.
             container.manage_delObjects(obj.id)
             # reraise the error
