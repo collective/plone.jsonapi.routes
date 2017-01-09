@@ -193,7 +193,11 @@ def get_request_data():
     returns a list of dictionaries
     """
     request = get_request()
-    return _.convert(json.loads(request.get("BODY", "{}")), _.to_list)
+    data = request.get("BODY", "{}")
+    if not is_json_deserializable(data):
+        from plone.jsonapi.routes.exceptions import APIError
+        raise APIError(400, "Request Data is not JSON deserializable – Check JSON Syntax!")
+    return _.convert(json.loads(data), _.to_list)
 
 
 def get_json():
@@ -217,3 +221,18 @@ def set_json_item(key, value):
 
     request = get_request()
     request["BODY"] = json.dumps(data)
+
+
+def is_json_deserializable(thing):
+    """Checks if the given thing can be deserialized from JSON
+
+    :param thing: The object to check if it can be serialized
+    :type thing: arbitrary object
+    :returns: True if it can be JSON deserialized
+    :rtype: bool
+    """
+    try:
+        json.loads(thing)
+        return True
+    except (ValueError):
+        return False
