@@ -3,6 +3,8 @@
 import logging
 import pkg_resources
 
+from zope import interface
+
 from plone import api as ploneapi
 from plone.jsonapi.core import router
 
@@ -13,14 +15,12 @@ from Products.CMFCore.interfaces import ISiteRoot
 from Products.CMFCore.interfaces import IFolderish
 from Products.ZCatalog.interfaces import ICatalogBrain
 from Products.CMFPlone.PloneBatch import Batch
-from Products.CMFPlone.interfaces import IConstrainTypes
-from Products.CMFPlone.utils import _createObjectByType
 from plone.api.exc import InvalidParameterError
 
 try:
     pkg_resources.get_distribution('Products.Archetypes')
-except DistributionNotFound:
-    class IBaseObject(Interface):
+except pkg_resources.DistributionNotFound:
+    class IBaseObject(interface.Interface):
         """Fake Products.Archetypes.interfaces.base.IBaseObject"""
 else:
     from Products.Archetypes.interfaces.base import IBaseObject
