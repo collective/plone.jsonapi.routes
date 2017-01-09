@@ -152,6 +152,11 @@ class ATDataManager(object):
         if not field.checkPermission("write", self.context):
             raise Unauthorized("Not allowed to write the field %s" % name)
 
+        # Validate the field
+        invalid = field.validate(value=value, instance=self.context)
+        if invalid:
+            raise ValueError(invalid)
+
         # set the field value
         if self.is_file_field(field):
             logger.debug("ATDataManager::set:File field detected ('%r'), "
@@ -169,6 +174,7 @@ class ATDataManager(object):
 
         # set the value to the field
         self._set(field, value, **kw)
+
         return True
 
     def _set(self, field, value, **kw):

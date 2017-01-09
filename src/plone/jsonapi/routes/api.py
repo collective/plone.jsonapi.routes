@@ -6,6 +6,7 @@ import pkg_resources
 from plone import api as ploneapi
 from plone.jsonapi.core import router
 
+from DateTime import DateTime
 from AccessControl import Unauthorized
 
 from Products.CMFCore.interfaces import ISiteRoot
@@ -13,7 +14,16 @@ from Products.CMFCore.interfaces import IFolderish
 from Products.ZCatalog.interfaces import ICatalogBrain
 from Products.CMFPlone.PloneBatch import Batch
 from Products.CMFPlone.interfaces import IConstrainTypes
+from Products.CMFPlone.utils import _createObjectByType
 from plone.api.exc import InvalidParameterError
+
+try:
+    pkg_resources.get_distribution('Products.Archetypes')
+except DistributionNotFound:
+    class IBaseObject(Interface):
+        """Fake Products.Archetypes.interfaces.base.IBaseObject"""
+else:
+    from Products.Archetypes.interfaces.base import IBaseObject
 
 # search helpers
 from query import search
@@ -120,23 +130,28 @@ def create_items(portal_type=None, request=None, uid=None, endpoint=None):
     req.disable_csrf_protection()
 
     # destination where to create the content
-    dest = uid and get_object_by_uid(uid) or None
+    container = uid and get_object_by_uid(uid) or None
 
     # extract the data from the request
     records = req.get_request_data()
 
     results = []
     for record in records:
-        if dest is None:
+        if container is None:
             # find the container for content creation
-            dest = find_target_container(record)
+            container = find_target_container(record)
         if portal_type is None:
             portal_type = record.get("portal_type", None)
-        id = record.get("id", None)
-        title = record.get("title", None)
-        obj = create_object_in_container(dest, portal_type, id=id, title=title)
+        # create an object slug with just the 
+        obj = create_object(container, portal_type)
         # update the object
-        update_object_with_data(obj, record)
+        try:
+            update_object_with_data(obj, record)
+        except:
+            # Failed during creation! Cleanup the invalid created object.
+            container.manage_delObjects(obj.id)
+            # reraise the error
+            raise
         results.append(obj)
 
     if not results:
@@ -738,28 +753,6 @@ def is_folderish(brain_or_object):
     return IFolderish.providedBy(get_object(brain_or_object))
 
 
-def get_locally_allowed_types(brain_or_object):
-    """Checks if the passed in object is folderish
-
-    :param brain_or_object: A single catalog brain or content object
-    :type brain_or_object: ATContentType/DexterityContentType/CatalogBrain
-    :returns: A list of locally allowed content types
-    :rtype: list
-    """
-    if not is_folderish(brain_or_object):
-        return []
-    # ensure we have an object
-    obj = get_object(brain_or_object)
-    method = getattr(obj, "getLocallyAllowedTypes", None)
-    if method is None:
-        constrains = IConstrainTypes(obj, None)
-        if constrains:
-            method = constrains.getLocallyAllowedTypes
-    if not callable(method):
-        return []
-    return method()
-
-
 def url_for(endpoint, default="plone.jsonapi.routes.get", **values):
     """Looks up the API URL for the given endpoint
 
@@ -1228,36 +1221,28 @@ def get_current_user():
     return ploneapi.user.get_current()
 
 
-def create_object_in_container(container, portal_type, id=None, title=None):
-    """Creates a content object in the specified container
-
-    :param container: A single folderish catalog brain or content object
-    :type container: ATContentType/DexterityContentType/CatalogBrain
-    :param portal_type: The portal type to create
-    :type portal_type: string
-    :returns: The new content object
-    :rtype: object
-    """
-    container = get_object(container)
-    allowed_types = get_locally_allowed_types(container)
-    if not is_root(container) and portal_type not in allowed_types:
-        raise APIError(500, "Creation of this portal type"
-                            "is not allowed in this context.")
-
-    return create_object(container=container, id=id, title=title,
-                         type=portal_type)
-
-
-def create_object(**kw):
-    """Creates an object
+def create_object(container, portal_type):
+    """Creates an object slug
 
     :returns: The new created content object
     :rtype: object
     """
-    defaults = {"save_id": True}
-    defaults.update(kw)
+
+    # Temporary ID of the new content type
+    id = "{}-{}".format(portal_type, DateTime().strftime("%s"))
+
     try:
-        return ploneapi.content.create(**defaults)
+        # create the new object with security checks enabled
+        obj_id = container.invokeFactory(portal_type, id)
+        # get the object by its id
+        obj = container[obj_id]
+
+        if IBaseObject.providedBy(obj):
+            # Will finish Archetypes content item creation process,
+            # rename-after-creation and such
+            obj.processForm()
+
+        return obj
     except Unauthorized:
         raise APIError(401, "You are not allowed to create this content")
 
@@ -1292,12 +1277,18 @@ def update_object_with_data(content, record):
             success = dm.set(k, v, **field_kwargs)
         except Unauthorized:
             raise APIError(401, "Not allowed to set the field '%s'" % k)
+        except ValueError, exc:
+            raise APIError(400, str(exc))
 
         if not success:
             logger.warn("update_object_with_data::skipping key=%r", k)
             continue
 
         logger.debug("update_object_with_data::field %r updated", k)
+
+    invalid = content.validate(data=record)
+    if invalid:
+        raise APIError(400, _.to_json(invalid))
 
     # do a wf transition
     if record.get("transition", None):

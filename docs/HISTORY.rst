@@ -9,6 +9,7 @@ Changelog
 
 **API Changes**
 
+- Validation for the entire object added
 - Get the catalog to query from Archtype Tool and default to `portal_catalog`
 - Use explicit namespace in route providers
 - Handle Reference Fields (Fields containing and `ImplicitAcquisitionWrapper` object)

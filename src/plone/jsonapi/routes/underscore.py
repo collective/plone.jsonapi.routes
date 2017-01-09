@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import json
 import types
 
 __author__ = 'Ramon Bartl <ramon.bartl@nexiles.com>'
@@ -307,6 +308,15 @@ def first(lst, n=None):
     if len(lst) < 1:
         return None
     return n is None and lst[0] or lst[0:n]
+
+
+def to_json(thing):
+    """ parse to JSON
+    """
+    try:
+        return json.dumps(thing)
+    except TypeError:
+        return None
 
 
 if __name__ == '__main__':
