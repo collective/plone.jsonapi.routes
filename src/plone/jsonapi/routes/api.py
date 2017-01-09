@@ -1310,11 +1310,15 @@ def update_object_with_data(content, record):
 
         logger.debug("update_object_with_data::field %r updated", k)
 
+    # Validate
+    invalid = False
+
     # Call the validator of AT Content Types
     if is_atct(content):
         invalid = content.validate(data=record)
-        if invalid:
-            raise APIError(400, _.to_json(invalid))
+
+    if invalid:
+        raise APIError(400, _.to_json(invalid))
 
     # do a wf transition
     if record.get("transition", None):
