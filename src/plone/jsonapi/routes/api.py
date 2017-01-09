@@ -144,12 +144,7 @@ def create_items(portal_type=None, request=None, uid=None, endpoint=None):
         if portal_type is None:
             portal_type = record.get("portal_type", None)
         # create the object
-        try:
-            obj = create_object(container, portal_type, **record)
-        except APIError:
-            container.manage_delObjects(obj.id)
-            # reraise the error
-            raise
+        obj = create_object(container, portal_type, **record)
         results.append(obj)
 
     if not results:
@@ -1284,8 +1279,14 @@ def create_object(container, portal_type, **data):
         ploneapi.content.rename(obj=obj, new_id=id, safe_id=True)
 
     # Update the object with the given data, but omit the id
-    data = _.omit(data, "id")
-    update_object_with_data(obj, data)
+    try:
+        data = _.omit(data, "id")
+        update_object_with_data(obj, data)
+    except APIError:
+        # Failure in creation process, delete the invalid object
+        container.manage_delObjects(obj.id)
+        # reraise the error
+        raise
 
     return obj
 
@@ -1299,6 +1300,9 @@ def update_object_with_data(content, record):
     :type record: dict
     :returns: The updated content object
     :rtype: object
+    :raises:
+        APIError,
+        :class:`~plone.jsonapi.routes.exceptions.APIError`
     """
 
     # ensure we have a full content object
@@ -1308,7 +1312,7 @@ def update_object_with_data(content, record):
     dm = IDataManager(content)
 
     if dm is None:
-        raise APIError(400, "Update on this object is not allowed")
+        raise APIError(400, "Update for this object is not allowed")
 
     # https://github.com/collective/plone.jsonapi.routes/issues/77
     # filter out bogus keywords

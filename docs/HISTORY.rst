@@ -7,8 +7,9 @@ Changelog
 0.8.7 - unreleased
 ------------------
 
-**API Changes**
+**Changes**
 
+- Added module `underscore` to the tests suite
 - Validation for the entire object added
 - Get the catalog to query from Archtype Tool and default to `portal_catalog`
 - Use explicit namespace in route providers

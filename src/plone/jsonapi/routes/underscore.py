@@ -312,11 +312,27 @@ def first(lst, n=None):
 
 def to_json(thing):
     """ parse to JSON
+
+        >>> data = {}
+        >>> to_json(data)
+        '{}'
+        >>> data = None
+        >>> to_json(data)
+        'null'
+        >>> data = object()
+        >>> to_json(data)
+        ''
+        >>> data = {"format": "json"}
+        >>> to_json(data)
+        '{"format": "json"}'
+        >>> data = 1
+        >>> to_json(data)
+        '1'
     """
     try:
         return json.dumps(thing)
     except TypeError:
-        return None
+        return ""
 
 
 if __name__ == '__main__':
