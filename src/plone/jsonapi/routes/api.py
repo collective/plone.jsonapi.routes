@@ -142,13 +142,13 @@ def create_items(portal_type=None, request=None, uid=None, endpoint=None):
             container = find_target_container(record)
         if portal_type is None:
             portal_type = record.get("portal_type", None)
-        # create an object slug with just the 
+        # create an object slug
         obj = create_object(container, portal_type)
         # update the object
         try:
             update_object_with_data(obj, record)
         except:
-            # Failed during creation! Cleanup the invalid created object.
+            # Update during creation! Cleanup the invalid created object.
             container.manage_delObjects(obj.id)
             # reraise the error
             raise
