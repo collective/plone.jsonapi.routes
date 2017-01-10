@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import types
 import logging
 
 from zope import interface
@@ -129,6 +130,11 @@ class ATDataManager(object):
             return True
         return False
 
+    def is_reference_field(sekf, field):
+        """ checks if the field is a reference field
+        """
+        return hasattr(field, "relationship")
+
     def get_field(self, name):
         """ return the field by name
         """
@@ -162,6 +168,20 @@ class ATDataManager(object):
                 logger.debug("ATDataManager::set: No Filename detected "
                              "-> using title or id")
                 kw["filename"] = kw.get("id") or kw.get("title")
+
+        # Handle Reference Fields
+        if self.is_reference_field(field):
+            logger.debug("ATDataManager::set:Reference Field detected -> ('%r')", field)
+            if not isinstance(value, types.DictType):
+                logger.warn("Value for reference fields must be a dictionary")
+                return False
+            reference = field.get(self.context)
+            if reference is None:
+                logger.warn("Skipping empty Reference Field")
+                return False
+            # update the reference
+            from plone.jsonapi.routes.api import update_object_with_data
+            value = update_object_with_data(reference, value)
 
         # id fields take only strings
         if name == "id":

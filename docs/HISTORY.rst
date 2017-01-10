@@ -4,10 +4,20 @@ Changelog
 =========
 
 
-0.8.7 - unreleased
+0.8.7 - 2017-01-10
 ------------------
 
 **Changes**
+
+- Handle Reference Fields: Reference fields containing a reference can be
+  updated with a dictionary, e.g.::
+
+      {
+        uid: <UID of a content containing a reference field>,
+        ReferenceField: {
+          "title": "New Title"
+        }
+      }
 
 - Added module `underscore` to the tests suite
 - Validation for the entire object added
