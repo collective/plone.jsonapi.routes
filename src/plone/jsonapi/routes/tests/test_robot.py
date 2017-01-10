@@ -6,6 +6,7 @@ from plone.testing import layered
 
 from plone.jsonapi.routes.tests.base import ROBOT_TESTING
 
+
 def test_suite():
     suite = unittest.TestSuite()
     suite.addTests([
