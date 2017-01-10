@@ -42,6 +42,10 @@ setup(name='plone.jsonapi.routes',
           'test': [
                'plone.app.testing',
                'unittest2',
+               'robotsuite',
+               'robotframework-selenium2library',
+               'plone.app.robotframework',
+               'robotframework-debuglibrary',
            ]
       },
       entry_points="""

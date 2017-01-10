@@ -2,20 +2,23 @@
 
 import simplejson as json
 
-import unittest2 as unittest
-
-from plone.testing.z2 import Browser
-
-from plone.app.testing import PloneSandboxLayer
-from plone.app.testing import PLONE_FIXTURE
-from plone.app.testing import setRoles
-from plone.app.testing import TEST_USER_ID
-from plone.testing import z2
-
-from plone.app.testing.layers import IntegrationTesting
 from zope.configuration import xmlconfig
 
+import unittest2 as unittest
+
 from plone import api
+
+from plone.testing import z2
+from plone.testing.z2 import Browser
+
+from plone.app.testing import setRoles
+from plone.app.testing import TEST_USER_ID
+from plone.app.testing import PLONE_FIXTURE
+from plone.app.testing import FunctionalTesting
+from plone.app.testing import PloneSandboxLayer
+from plone.app.testing.layers import IntegrationTesting
+
+from plone.app.robotframework.testing import AUTOLOGIN_LIBRARY_FIXTURE
 
 
 class TestLayer(PloneSandboxLayer):
@@ -64,9 +67,14 @@ class TestLayer(PloneSandboxLayer):
 
 
 TEST_FIXTURE = TestLayer()
+
 INTEGRATION_TESTING = IntegrationTesting(
     bases=(TEST_FIXTURE,),
     name="plone.jsonapi.routes:Integration")
+
+ROBOT_TESTING = FunctionalTesting(
+    bases=(TEST_FIXTURE, AUTOLOGIN_LIBRARY_FIXTURE, z2.ZSERVER_FIXTURE),
+    name="plone.jsonapi.routes:Robot")
 
 
 class APITestCase(unittest.TestCase):

@@ -1,0 +1,23 @@
+*** Settings ***
+
+Library  Selenium2Library  timeout=10  implicit_wait=0.5
+Resource  plone/app/robotframework/selenium.robot
+
+Suite Setup  Start browser
+Suite Teardown  Close All Browsers
+
+*** Variables ***
+
+${BROWSER} =  Chrome
+
+*** Test Cases ***
+
+Version
+    [Tags]  version
+    Go to  ${PLONE_URL}/@@API/plone/api/1.0/version
+    Page should contain  "url": "http://localhost:55001/plone/@@API/plone/api/1.0/version"
+
+*** Keywords ***
+
+Start browser
+    Open browser  http://localhost:55001/plone/  browser=${BROWSER}

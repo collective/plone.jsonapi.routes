@@ -37,3 +37,7 @@ docs/_build
 TAGS
 cscope.files
 cscope.out
+log.html
+output.xml
+report.html
+selenium-screenshot-1.png
