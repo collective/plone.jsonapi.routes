@@ -3,6 +3,16 @@
 Changelog
 =========
 
+0.8.8 - 2017-01-10
+------------------
+
+**Changes**
+
+- Handle catalog queries for multiple contents, which might be located in
+  different catalogs.
+- Fixed an issue where the batch navigation did not show more results when using
+  multiple `portal_type` request parameters.
+
 
 0.8.7 - 2017-01-10
 ------------------

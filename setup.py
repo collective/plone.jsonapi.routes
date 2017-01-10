@@ -3,7 +3,7 @@
 import os
 from setuptools import setup, find_packages
 
-version = '0.8.7'
+version = '0.8.8'
 
 long_description = (
     open('README.rst').read()
@@ -20,12 +20,15 @@ setup(name='plone.jsonapi.routes',
       classifiers=[
         "Programming Language :: Python",
         "Framework :: Plone",
+        "Framework :: Plone :: 4.3",
+        "Framework :: Plone :: 5.0",
+        "Framework :: Plone :: 5.1",
         "Framework :: Zope2",
         ],
       keywords='',
       author='Ramon Bartl',
       author_email='rb@ridingbytes.com',
-      url='https://github.com/ramonski/plone.jsonapi',
+      url='https://github.com/collective/plone.jsonapi.routes',
       license='MIT',
       packages=find_packages('src'),
       package_dir = {'': 'src'},

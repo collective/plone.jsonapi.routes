@@ -2,15 +2,17 @@ plone.jsonapi.routes
 ====================
 
 :Author: Ramon Bartl
-:Version: 0.8.7
+:Version: 0.8.8
 
 
 .. contents:: Table of Contents
    :depth: 2
 
 
-Latest Build Status
--------------------
+Lastest Build Status
+--------------------
+
+Master Branch https://github.com/collective/plone.jsonapi.routes
 
 .. image:: https://api.travis-ci.org/collective/plone.jsonapi.routes.png?branch=master
     :target: https://travis-ci.org/collective/plone.jsonapi.routes
@@ -38,7 +40,7 @@ a RESTful_ API with their Plone site.
 Compatibility
 -------------
 
-The plone.jsonapi.routes_ is compatible with Plone_ 4.
+The plone.jsonapi.routes_ is compatible with Plone_ 4 and 5.
 
 
 Documentation

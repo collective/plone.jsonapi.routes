@@ -29,34 +29,45 @@ def search(**kw):
     """Execute a catalog search
     """
 
-    # Fetch the right catalog
-    catalog = get_catalog(**kw)
+    # Support different Catalogs (e.g. like in Bika LIMS)
+    #
+    # The portal_type can be added as a keyword from an explicit route provider or
+    # as a request parameter (multiple times) in a generic search provider.
+    #
+    # A keyword takes precedence over a request parameter to avoid searches like this:
+    # http://localhost:8080/@@API/plone/api/1.0/folders?portal_type=Document&portal_type=Collection
+    portal_types = _.to_list(kw.get("portal_type")) or _.to_list(req.get("portal_type"))
 
-    # Make a catalog query suitable for the catalog
-    query = make_query(catalog, **kw)
+    # Handle portal_types
+    if len(portal_types) == 0:
+        catalog = get_tool("portal_catalog")
+        query = make_query(catalog, **kw)
+        return catalog(query)
 
-    return catalog(query)
+    search_results = []
+    for portal_type in portal_types:
+        catalogs = get_catalogs(portal_type)
+        for catalog in _.to_list(catalogs):
+            # Make a catalog query suitable for the catalog
+            query = make_query(catalog, **kw)
+            for brain in catalog(query):
+                if brain not in search_results:
+                    search_results.append(brain)
+
+    return search_results
 
 
 # -----------------------------------------------------------------------------
 #   Query Builders
 # -----------------------------------------------------------------------------
 
-def get_catalog(**kw):
-    """Get the right catalog for the query.
+def get_catalogs(portal_type):
+    """Get the right catalog for the portal_type.
     """
-    catalog = None
-
-    portal_type = kw.get("portal_type")
     archetype_tool = get_tool("archetype_tool")
-
-    if portal_type and archetype_tool is not None:
-        catalogs = archetype_tool.getCatalogsByType(portal_type)
-        catalog = _.first(catalogs)
-    else:
-        catalog = get_tool("portal_catalog")
-
-    return catalog
+    if archetype_tool is not None:
+        return archetype_tool.getCatalogsByType(portal_type)
+    return get_tool("portal_catalog")
 
 
 def make_query(catalog, **kw):
@@ -213,6 +224,8 @@ def to_index_value(catalog, value, index):
     if type(index) in types.StringTypes:
         index = get_index(catalog, index)
 
+    if index.id == "portal_type":
+        return _.to_list(value)
     if index.meta_type == "DateIndex":
         return DateTime(value)
     if index.meta_type == "BooleanIndex":

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import ast
 import json
 import types
 
@@ -166,21 +167,29 @@ def to_list(thing):
 
         >>> to_list(1)
         [1]
-
         >>> to_list([1,2,3])
         [1, 2, 3]
-
         >>> to_list(("a", "b", "c"))
         ['a', 'b', 'c']
-
         >>> to_list(dict(a=1, b=2))
         [{'a': 1, 'b': 2}]
-
         >>> to_list(None)
         []
+        >>> to_list("['a', 'b', 'c']")
+        ['a', 'b', 'c']
+        >>> to_list("")
+        ['']
+        >>> to_list([])
+        []
+        >>> to_list("['[]']")
+        ['[]']
     """
     if thing is None:
         return []
+    if isinstance(thing, types.StringTypes):
+        if thing.startswith("["):
+            # handle a list inside a string coming from the batch navigation
+            return ast.literal_eval(thing)
     if not (is_list(thing) or is_tuple(thing)):
         return [thing]
     return list(thing)
@@ -294,7 +303,7 @@ def alias(col, mapping):
     return map(_block, col)
 
 
-def first(lst, n=None):
+def first(thing, n=None):
     """ get the first element of a list
 
         >>> lst = [1, 2, 3, 4, 5]
@@ -302,12 +311,21 @@ def first(lst, n=None):
         1
         >>> first(lst, 3)
         [1, 2, 3]
+        >>> first(lst, 10)
+        [1, 2, 3, 4, 5]
+        >>> first({"key": "value"})
+        {'key': 'value'}
+        >>> first("")
+        ''
+        >>> first(None)
+        >>> first(("a", "b", "c"))
+        'a'
     """
-    if not is_list(lst):
+    if not is_list(thing) and not is_tuple(thing):
+        return thing
+    if len(thing) == 0:
         return None
-    if len(lst) < 1:
-        return None
-    return n is None and lst[0] or lst[0:n]
+    return n is None and thing[0] or thing[0:n]
 
 
 def to_json(thing):
