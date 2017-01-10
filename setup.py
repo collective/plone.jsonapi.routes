@@ -35,7 +35,7 @@ setup(name='plone.jsonapi.routes',
       install_requires=[
           'setuptools',
           'plone.api',
-          'plone.jsonapi.core>=0.5',
+          'plone.jsonapi.core>=0.6',
           # -*- Extra requirements: -*-
       ],
       extras_require={

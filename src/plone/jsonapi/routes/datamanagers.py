@@ -6,7 +6,7 @@ from zope import interface
 from zope.schema import getFields
 from zope.schema.interfaces import IObject
 
-from plone import api
+from plone import api as ploneapi
 from plone.behavior.interfaces import IBehaviorAssignable
 
 from AccessControl import Unauthorized
@@ -152,11 +152,6 @@ class ATDataManager(object):
         if not field.checkPermission("write", self.context):
             raise Unauthorized("Not allowed to write the field %s" % name)
 
-        # Validate the field
-        invalid = field.validate(value=value, instance=self.context)
-        if invalid:
-            raise ValueError(invalid)
-
         # set the field value
         if self.is_file_field(field):
             logger.debug("ATDataManager::set:File field detected ('%r'), "
@@ -231,7 +226,7 @@ class DexterityDataManager(object):
         return out
 
     def get_schema(self):
-        pt = api.portal.get_tool("portal_types")
+        pt = ploneapi.portal.get_tool("portal_types")
         fti = pt.getTypeInfo(self.context.portal_type)
         return fti.lookupSchema()
 
