@@ -1,7 +1,10 @@
 *** Settings ***
 
 Library  Selenium2Library  timeout=10  implicit_wait=0.5
+
 Resource  plone/app/robotframework/selenium.robot
+
+Library  Remote  ${PLONE_URL}/RobotRemote
 
 Suite Setup  Start browser
 Suite Teardown  Close All Browsers
@@ -16,6 +19,16 @@ Version
     [Tags]  version
     Go to  ${PLONE_URL}/@@API/plone/api/1.0/version
     Page should contain  "url": "http://localhost:55001/plone/@@API/plone/api/1.0/version"
+
+Documents
+    [Tags]  documents
+    Go to  ${PLONE_URL}/@@API/plone/api/1.0/documents
+    Page should contain  "count": 50
+
+Folders
+    [Tags]  folders
+    Go to  ${PLONE_URL}/@@API/plone/api/1.0/folders
+    Page should contain  "count": 1
 
 *** Keywords ***
 
