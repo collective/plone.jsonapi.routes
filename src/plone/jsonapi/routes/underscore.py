@@ -192,9 +192,13 @@ def to_list(thing):
         []
         >>> to_list("['[]']")
         ['[]']
+        >>> sorted(to_list(set(["a", "b", "c"])))
+        ['a', 'b', 'c']
     """
     if thing is None:
         return []
+    if isinstance(thing, set):
+        return list(thing)
     if isinstance(thing, types.StringTypes):
         if thing.startswith("["):
             # handle a list inside a string coming from the batch navigation

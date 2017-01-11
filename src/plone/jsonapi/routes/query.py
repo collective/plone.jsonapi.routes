@@ -29,51 +29,53 @@ def search(**kw):
     """Execute a catalog search
     """
 
-    # Support different Catalogs (e.g. like in Bika LIMS)
-    #
-    # The portal_type can be added as a keyword from an explicit route provider or
-    # as a request parameter (multiple times) in a generic search provider.
-    #
-    # A keyword takes precedence over a request parameter to avoid searches like this:
-    # http://localhost:8080/@@API/plone/api/1.0/folders?portal_type=Document&portal_type=Collection
-    portal_types = kw.get("portal_type") or req.get("portal_type")
+    # Fetch the right catalogs
+    catalogs = get_catalogs(**kw)
 
-    # Fetch the catalog depending on the portal_type
-    # N.B. The conversion to list takes care of string representations of
-    #      lists, which might get returned from the batch navigation, e.g.
-    #      "['Document', 'Folder']"
-    catalog = get_catalog(_.first(portal_types))
+    # Only one catalog to search
+    if len(catalogs) == 1:
+        catalog = catalogs[0]
+        query = make_query(catalog, **kw)
+        return catalog(query)
 
-    # create catalog query
-    query = make_query(catalog, **kw)
+    # Multiple catalogs need to be queried
+    results = []
+    for catalog in catalogs:
+        query = make_query(catalog, **kw)
+        results.extend(catalog(query))
 
-    return catalog(query)
+    return _.to_list(set(results))
 
 
 # -----------------------------------------------------------------------------
 #   Query Builders
 # -----------------------------------------------------------------------------
 
-def get_catalog(portal_type=None):
-    """Get the right catalog for the portal_type.
+def get_catalogs(**kw):
+    """Get the catalogs to query
     """
 
     # Check if the user asked for a specific catalog to use
-    catalog = get_tool(req.get("catalog"))
-    if catalog is not None:
-        return catalog
+    requested_catalogs = _.to_list(req.get("catalog"))
+    if requested_catalogs:
+        catalogs = map(get_tool, requested_catalogs)
+        return catalogs
 
-    # Ask the archetype_tool if it knows the right catalog for this portal_type
+    # Check the Archetype Tool for the right catalogs
     archetype_tool = get_tool("archetype_tool")
-    if portal_type and archetype_tool:
-        # make sure we don't have a list here
-        portal_type = _.first(portal_type)
-        # returns a list
-        catalog = archetype_tool.getCatalogsByType(portal_type)
-        return _.first(catalog)
+    if archetype_tool:
+        catalogs = []
+        portal_types = _.to_list(kw.get("portal_type")) or _.to_list(req.get("portal_type"))
+        for portal_type in portal_types:
+            catalogs.extend(archetype_tool.getCatalogsByType(portal_type))
+        # avoid duplicate catalogs
+        catalogs = _.to_list(set(catalogs))
+        # make sure we have catalogs to return
+        if len(catalogs) > 0:
+            return catalogs
 
     # Return the portal_catalog tool by default
-    return get_tool("portal_catalog")
+    return _.to_list(get_tool("portal_catalog"))
 
 
 def make_query(catalog, **kw):
