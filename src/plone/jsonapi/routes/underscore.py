@@ -158,8 +158,17 @@ def to_string(thing):
         '[]'
         >>> to_string(u"a")
         'a'
+        >>> to_string(None)
+        'None'
+        >>> to_string(object())
+        '<object ...>'
+        >>> to_string(u"üu")
+        '??u'
     """
-    return str(thing) or None
+    try:
+        return str(thing)
+    except UnicodeEncodeError:
+        return thing.encode('ascii', 'replace')
 
 
 def to_list(thing):

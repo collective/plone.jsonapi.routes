@@ -355,16 +355,19 @@ def get_search_results(portal_type=None, uid=None, **kw):
 
     # allow to search search for the Plone Site with portal_type
     include_portal = False
-    if portal_type is not None and portal_type.lower() == "Plone Site":
+    if _.to_string(portal_type) == "Plone Site":
         include_portal = True
-    if _.first(_.to_list(req.get("portal_type"))) == "Plone Site":
+
+    # The request may contain a list of portal_types, e.g.
+    # `?portal_type=Document&portal_type=Plone Site`
+    if "Plone Site" in _.to_list(req.get("portal_type")):
         include_portal = True
 
     # Build and execute a catalog query
     results = search(portal_type=portal_type, uid=uid, **kw)
 
     if include_portal:
-        results = list(results) + [get_portal()]
+        results = list(results) + _.to_list(get_portal())
 
     return results
 
