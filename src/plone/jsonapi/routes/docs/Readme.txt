@@ -114,6 +114,98 @@ We can also use 'descending' sort::
     ['folder', 'document-49', 'document-48']
 
 
+Search
+======
+
+The `search` route can be used to search the `portal_catalog` for all kinds of
+contents and returns the results batch-wise.
+
+Let's search for `Documents` first::
+
+    >>> browser.open(api_url + "/search?portal_type=Document")
+    >>> response = self.decode(browser.contents)
+    >>> len(response.get('items'))
+    25
+    >>> response.get('pages')
+    2
+
+Now we limt the search to 1. We should have 50 pages with 1 Document on each page::
+
+    >>> browser.open(api_url + "/search?portal_type=Document&limit=1")
+    >>> response = self.decode(browser.contents)
+    >>> len(response.get('items'))
+    1
+    >>> response.get('pages')
+    50
+
+Try to find a Document with a specific title::
+
+    >>> browser.open(api_url + "/search?portal_type=Document&Title=Document 10")
+    >>> response = self.decode(browser.contents)
+    >>> len(response.get('items'))
+    1
+    >>> response.get('pages')
+    1
+    >>> document = response.get('items')[0]
+    >>> document.get('title')
+    'Test Document 10'
+
+Try to search for `Document` and `Folder` content types::
+
+    >>> browser.open(api_url + "/search?portal_type=Document&portal_type=Folder")
+    >>> response = self.decode(browser.contents)
+    >>> response.get('count')
+    51
+    >>> response.get('pages')
+    3
+    >>> document = response.get('items')[0]
+    >>> document.get('title')
+    'Test Document 0'
+
+Change to descending sort order, so the folder should appear first::
+
+    >>> browser.open(api_url + "/search?portal_type=Document&portal_type=Folder&sort_order=descending&sort_on=sortable_title")
+    >>> response = self.decode(browser.contents)
+    >>> response.get('items')[0]['title']
+    'Test Folder'
+
+Make use of the `SearchableText` via the `q` request parameter::
+
+    >>> browser.open(api_url + "/search?q=Test Document")
+    >>> response = self.decode(browser.contents)
+    >>> response.get('count')
+    50
+    >>> response.get('pages')
+    2
+    >>> [x['id'] for x in response.get('items')][:3]
+    ['document-0', 'document-1', 'document-2']
+
+    >>> browser.open(api_url + "/search?q=Test Folder")
+    >>> response = self.decode(browser.contents)
+    >>> response.get('count')
+    1
+    >>> response.get('pages')
+    1
+    >>> [x['id'] for x in response.get('items')][:3]
+    ['folder']
+
+Make use of the  `recent_created` custom query::
+
+    >>> browser.open(api_url + "/search?recent_created=today")
+    >>> response = self.decode(browser.contents)
+    >>> response.get('count')
+    51
+    >>> [x['id'] for x in response.get('items')][:3]
+    ['document-0', 'document-1', 'document-2']
+
+Make use of the `path` custom query with `depth`::
+
+    >>> browser.open(api_url + "/search?path=/" + portal.id + "/folder&depth=1")
+    >>> response = self.decode(browser.contents)
+    >>> [x['id'] for x in response.get('items')][:3]
+    ['document-0', 'document-1', 'document-2']
+
+
 Results data
 ============
 

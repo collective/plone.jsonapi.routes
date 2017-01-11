@@ -19,7 +19,7 @@ from plone.jsonapi.routes.api import url_for
 def create(context, request, uid=None):
     """ create content
     """
-    items = create_items(uid=uid, request=request)
+    items = create_items(uid=uid)
     return {
         "url": url_for("plone.jsonapi.routes.create"),
         "count": len(items),
@@ -33,7 +33,7 @@ def create(context, request, uid=None):
 def update(context, request, uid=None):
     """ update content
     """
-    items = update_items(uid=uid, request=request)
+    items = update_items(uid=uid)
     return {
         "url": url_for("plone.jsonapi.routes.update"),
         "count": len(items),
@@ -47,7 +47,7 @@ def update(context, request, uid=None):
 def delete(context, request, uid=None):
     """ delete content
     """
-    items = delete_items(uid=uid, request=request)
+    items = delete_items(uid=uid)
     return {
         "url": url_for("plone.jsonapi.routes.delete"),
         "count": len(items),
@@ -61,7 +61,7 @@ def delete(context, request, uid=None):
 def cut(context, request, uid=None):
     """ cut content
     """
-    items = cut_items(uid=uid, request=request)
+    items = cut_items(uid=uid)
     return {
         "url": url_for("plone.jsonapi.routes.cut"),
         "count": len(items),
@@ -75,7 +75,7 @@ def cut(context, request, uid=None):
 def copy(context, request, uid=None):
     """ copy content
     """
-    items = copy_items(uid=uid, request=request)
+    items = copy_items(uid=uid)
     return {
         "url": url_for("plone.jsonapi.routes.copy"),
         "count": len(items),
@@ -89,7 +89,7 @@ def copy(context, request, uid=None):
 def paste(context, request, uid=None):
     """ paste content
     """
-    items = paste_items(uid=uid, request=request)
+    items = paste_items(uid=uid)
     return {
         "url": url_for("plone.jsonapi.routes.paste"),
         "count": len(items),

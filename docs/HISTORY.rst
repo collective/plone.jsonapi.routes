@@ -3,6 +3,18 @@
 Changelog
 =========
 
+0.8.9 - 2017-01-11
+------------------
+
+**Changes**
+
+- Catalog to query can now be set via the `catalog` request parameter.
+- Optimized search logic
+- Fixed issue with multiple `portal_type` parameters in request
+- Code Refactoring
+- More tests
+
+
 0.8.8 - 2017-01-10
 ------------------
 

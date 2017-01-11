@@ -73,7 +73,7 @@ def get_record(uid=None):
 
 
 # GET
-def get_items(portal_type=None, request=None, uid=None, endpoint=None):
+def get_items(portal_type=None, uid=None, endpoint=None, **kw):
     """ returns a list of items
 
     1. If the UID is given, fetch the object directly => should return 1 item
@@ -81,7 +81,7 @@ def get_items(portal_type=None, request=None, uid=None, endpoint=None):
     """
 
     # fetch the catalog results
-    results = get_search_results(portal_type, uid)
+    results = get_search_results(portal_type=portal_type, uid=uid, **kw)
 
     # check for existing complete flag
     complete = req.get_complete(default=_marker)
@@ -93,12 +93,12 @@ def get_items(portal_type=None, request=None, uid=None, endpoint=None):
 
 
 # GET BATCHED
-def get_batched(portal_type=None, request=None, uid=None, endpoint=None):
+def get_batched(portal_type=None, uid=None, endpoint=None, **kw):
     """ returns a batched result record (dictionary)
     """
 
     # fetch the catalog results
-    results = get_search_results(portal_type, uid)
+    results = get_search_results(portal_type=portal_type, uid=uid, **kw)
 
     # fetch the batch params from the request
     size = req.get_batch_size()
@@ -116,7 +116,7 @@ def get_batched(portal_type=None, request=None, uid=None, endpoint=None):
 
 
 # CREATE
-def create_items(portal_type=None, request=None, uid=None, endpoint=None):
+def create_items(portal_type=None, uid=None, endpoint=None, **kw):
     """ create items
 
     1. If the uid is given, get the object and create the content in there
@@ -154,7 +154,7 @@ def create_items(portal_type=None, request=None, uid=None, endpoint=None):
 
 
 # UPDATE
-def update_items(portal_type=None, request=None, uid=None, endpoint=None):
+def update_items(portal_type=None, uid=None, endpoint=None, **kw):
     """ update items
 
     1. If the uid is given, the user wants to update the object with the data
@@ -196,7 +196,7 @@ def update_items(portal_type=None, request=None, uid=None, endpoint=None):
 
 
 # DELETE
-def delete_items(portal_type=None, request=None, uid=None, endpoint=None):
+def delete_items(portal_type=None, uid=None, endpoint=None, **kw):
     """ delete items
 
     1. If the uid is given, we can ignore the request body and delete the
@@ -232,7 +232,7 @@ def delete_items(portal_type=None, request=None, uid=None, endpoint=None):
 
 
 # CUT
-def cut_items(portal_type=None, request=None, uid=None, endpoint=None):
+def cut_items(portal_type=None, uid=None, endpoint=None, **kw):
     """ cut items
     """
 
@@ -264,7 +264,7 @@ def cut_items(portal_type=None, request=None, uid=None, endpoint=None):
 
 
 # COPY
-def copy_items(portal_type=None, request=None, uid=None, endpoint=None):
+def copy_items(portal_type=None, uid=None, endpoint=None, **kw):
     """ copy items
     """
 
@@ -296,7 +296,7 @@ def copy_items(portal_type=None, request=None, uid=None, endpoint=None):
 
 
 # PASTE
-def paste_items(portal_type=None, request=None, uid=None, endpoint=None):
+def paste_items(portal_type=None, uid=None, endpoint=None, **kw):
     """ paste items
     """
 
@@ -343,14 +343,19 @@ def get_search_results(portal_type=None, uid=None, **kw):
     """Search the catalog and return the results
 
     :returns: Catalog search results
-    :rtype: list/Products.ZCatalog.Lazy.LazyMap
+    :rtype: list or Products.ZCatalog.Lazy.LazyMap
     """
 
     # allow to search for the Plone site
     if portal_type == "Plone Site" or uid in PORTAL_IDS:
         return _.to_list(get_portal())
 
-    # build and execute a catalog query
+    # If we have an UID, return the object immediately
+    if uid is not None:
+        logger.info("UID '%s' found, returning the object immediately" % uid)
+        return _.to_list(get_object_by_uid(uid))
+
+    # Build and execute a catalog query
     return search(portal_type=portal_type, uid=uid, **kw)
 
 

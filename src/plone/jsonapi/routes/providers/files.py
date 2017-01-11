@@ -17,7 +17,7 @@ from plone.jsonapi.routes.api import url_for
 def get(context, request, uid=None):
     """ get files
     """
-    return get_batched("File", request, uid=uid, endpoint="plone.jsonapi.routes.files")
+    return get_batched("File", uid=uid, endpoint="plone.jsonapi.routes.files")
 
 
 # CREATE
@@ -26,7 +26,7 @@ def get(context, request, uid=None):
 def create(context, request, uid=None):
     """ create files
     """
-    items = create_items("File", request, uid=uid, endpoint="plone.jsonapi.routes.files")
+    items = create_items("File", uid=uid, endpoint="plone.jsonapi.routes.files")
     return {
         "url": url_for("plone.jsonapi.routes.files_create"),
         "count": len(items),
@@ -40,7 +40,7 @@ def create(context, request, uid=None):
 def update(context, request, uid=None):
     """ update files
     """
-    items = update_items("File", request, uid=uid, endpoint="plone.jsonapi.routes.files")
+    items = update_items("File", uid=uid, endpoint="plone.jsonapi.routes.files")
     return {
         "url": url_for("plone.jsonapi.routes.files_update"),
         "count": len(items),
@@ -54,7 +54,7 @@ def update(context, request, uid=None):
 def delete(context, request, uid=None):
     """ delete files
     """
-    items = delete_items("File", request, uid=uid, endpoint="plone.jsonapi.routes.files")
+    items = delete_items("File", uid=uid, endpoint="plone.jsonapi.routes.files")
     return {
         "url": url_for("plone.jsonapi.routes.files_delete"),
         "count": len(items),

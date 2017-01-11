@@ -36,37 +36,39 @@ def search(**kw):
     #
     # A keyword takes precedence over a request parameter to avoid searches like this:
     # http://localhost:8080/@@API/plone/api/1.0/folders?portal_type=Document&portal_type=Collection
-    portal_types = _.to_list(kw.get("portal_type")) or _.to_list(req.get("portal_type"))
+    portal_types = kw.get("portal_type") or req.get("portal_type")
 
-    # Handle portal_types
-    if len(portal_types) == 0:
-        catalog = get_tool("portal_catalog")
-        query = make_query(catalog, **kw)
-        return catalog(query)
+    # Fetch the catalog depending on the portal_type
+    # N.B. The conversion to list takes care of string representations of
+    #      lists, which might get returned from the batch navigation, e.g.
+    #      "['Document', 'Folder']"
+    catalog = get_catalog(_.first(_.to_list(portal_types)))
 
-    search_results = []
-    for portal_type in portal_types:
-        catalogs = get_catalogs(portal_type)
-        for catalog in _.to_list(catalogs):
-            # Make a catalog query suitable for the catalog
-            query = make_query(catalog, **kw)
-            for brain in catalog(query):
-                if brain not in search_results:
-                    search_results.append(brain)
+    # create catalog query
+    query = make_query(catalog, **kw)
 
-    return search_results
+    return catalog(query)
 
 
 # -----------------------------------------------------------------------------
 #   Query Builders
 # -----------------------------------------------------------------------------
 
-def get_catalogs(portal_type):
+def get_catalog(portal_type=None):
     """Get the right catalog for the portal_type.
     """
+
+    # Ask the archetype_tool if it knows the right catalog for this portal_type
     archetype_tool = get_tool("archetype_tool")
-    if archetype_tool is not None:
+    if portal_type and archetype_tool:
         return archetype_tool.getCatalogsByType(portal_type)
+
+    # Check if the user asked for a specific catalog to use
+    catalog = get_tool(req.get("catalog"))
+    if catalog is not None:
+        return catalog
+
+    # Return the portal_catalog tool by default
     return get_tool("portal_catalog")
 
 
@@ -91,12 +93,18 @@ def make_query(catalog, **kw):
 
 
 def get_request_query(catalog):
-    """ checks the request for known catalog indexes.
+    """Checks the request for known catalog indexes and converts the values
+    to fit the type of the catalog index.
+
+    :param catalog: The catalog to build the query for
+    :type catalog: ZCatalog
+    :returns: Catalog query
+    :rtype: dict
     """
     query = {}
 
     # only known indexes get observed
-    indexes = get_catalog_indexes(catalog)
+    indexes = catalog.indexes()
 
     # check what we can use from the reqeust
     request = req.get_request()
@@ -110,7 +118,19 @@ def get_request_query(catalog):
 
 
 def get_custom_query(catalog):
-    """ checks the request for custom query keys.
+    """Extracts custom query keys from the index.
+
+    Parameters which get extracted from the request:
+
+        `q`: Passes the value to the `SearchableText`
+        `path`: Creates a path query
+        `recent_created`: Creates a date query
+        `recent_modified`: Creates a date query
+
+    :param catalog: The catalog to build the query for
+    :type catalog: ZCatalog
+    :returns: Catalog query
+    :rtype: dict
     """
     query = {}
 
@@ -139,25 +159,28 @@ def get_custom_query(catalog):
 
 
 def get_keyword_query(catalog, **kw):
-    """ generates a query from the given keywords
+    """Generates a query from the given keywords. Only known indexes make it
+    into the generated query.
+
+    :param catalog: The catalog to build the query for
+    :type catalog: ZCatalog
+    :returns: Catalog query
+    :rtype: dict
     """
     query = dict()
 
-    # only known indexes get observed
-    indexes = get_catalog_indexes(catalog)
+    # Only known indexes get observed
+    indexes = catalog.indexes()
 
+    # Handle additional keyword parameters
     for k, v in kw.iteritems():
-        # handle uid
+        # handle uid in keywords
         if k.lower() == "uid":
-            if v:
-                query["UID"] = v
-            continue
-        # handle portal_type
+            k = "UID"
+        # handle portal_type in keywords
         if k.lower() == "portal_type":
             if v:
-                query["portal_type"] = _.to_list(v)
-            continue
-        # and the rest
+                v = _.to_list(v)
         if k not in indexes:
             logger.warn("Skipping unknown keyword parameter '%s=%s'" % (k, v))
             continue
@@ -175,6 +198,8 @@ def get_keyword_query(catalog, **kw):
 # -----------------------------------------------------------------------------
 
 def get_tool(name):
+    if name is None:
+        return None
     try:
         return ploneapi.portal.get_tool(name)
     except ploneapi.exc.InvalidParameterError:
@@ -198,11 +223,6 @@ def calculate_delta_date(literal):
 # -----------------------------------------------------------------------------
 #   Catalog Helpers
 # -----------------------------------------------------------------------------
-
-def get_catalog_indexes(catalog):
-    """ return the list of indexes of the portal catalog
-    """
-    return catalog.indexes()
 
 
 def get_index(catalog, name):
@@ -239,7 +259,7 @@ def to_index_value(catalog, value, index):
 def get_sort_spec(catalog):
     """Build sort specification
     """
-    all_indexes = get_catalog_indexes(catalog)
+    all_indexes = catalog.indexes()
     si = req.get_sort_on(allowed_indexes=all_indexes)
     so = req.get_sort_order()
     return si, so
