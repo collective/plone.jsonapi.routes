@@ -9,7 +9,7 @@ from plone.jsonapi.routes.interfaces import IBatch
 
 from plone.jsonapi.routes import request as req
 
-__author__ = 'Ramon Bartl <ramon.bartl@googlemail.com>'
+__author__ = 'Ramon Bartl <rb@ridingbytes.com>'
 __docformat__ = 'plaintext'
 
 logger = logging.getLogger("plone.jsonapi.routes.batching")

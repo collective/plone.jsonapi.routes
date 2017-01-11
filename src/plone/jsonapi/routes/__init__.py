@@ -6,7 +6,7 @@ import logging
 from plone.jsonapi.core.browser.router import add_route
 from plone.jsonapi.core.browser.router import DefaultRouter
 
-__author__ = 'Ramon Bartl <ramon.bartl@googlemail.com>'
+__author__ = 'Ramon Bartl <rb@ridingbytes.com>'
 __docformat__ = 'plaintext'
 
 

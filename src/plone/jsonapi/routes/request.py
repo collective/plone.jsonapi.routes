@@ -18,7 +18,7 @@ else:
 
 from plone.jsonapi.routes import underscore as _
 
-__author__ = 'Ramon Bartl <ramon.bartl@googlemail.com>'
+__author__ = 'Ramon Bartl <rb@ridingbytes.com>'
 __docformat__ = 'plaintext'
 
 

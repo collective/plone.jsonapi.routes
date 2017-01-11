@@ -36,7 +36,7 @@ except (pkg_resources.DistributionNotFound, ImportError):
 else:
     HAS_PLONE_APP_TEXTFIELD = True
 
-__author__ = 'Ramon Bartl <ramon.bartl@googlemail.com>'
+__author__ = 'Ramon Bartl <rb@ridingbytes.com>'
 __docformat__ = 'plaintext'
 
 _marker = object
