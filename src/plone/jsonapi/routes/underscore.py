@@ -348,6 +348,7 @@ def first(thing, n=0):
         return thing[0]
     return thing
 
+
 def to_json(thing):
     """ parse to JSON
 
