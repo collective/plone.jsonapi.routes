@@ -58,17 +58,17 @@ def get_catalog(portal_type=None):
     """Get the right catalog for the portal_type.
     """
 
+    # Check if the user asked for a specific catalog to use
+    catalog = get_tool(req.get("catalog"))
+    if catalog is not None:
+        return catalog
+
     # Ask the archetype_tool if it knows the right catalog for this portal_type
     archetype_tool = get_tool("archetype_tool")
     if portal_type and archetype_tool:
         # returns a list
         catalog = archetype_tool.getCatalogsByType(portal_type)
         return _.first(catalog)
-
-    # Check if the user asked for a specific catalog to use
-    catalog = get_tool(req.get("catalog"))
-    if catalog is not None:
-        return catalog
 
     # Return the portal_catalog tool by default
     return get_tool("portal_catalog")

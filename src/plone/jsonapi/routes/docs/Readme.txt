@@ -206,6 +206,18 @@ Make use of the `path` custom query with `depth`::
     ['document-0', 'document-1', 'document-2']
 
 
+Search for Portal::
+
+    >>> browser.open(api_url + "/search?portal_type=Plone Site")
+    >>> response = self.decode(browser.contents)
+    >>> response.get('count')
+    1
+    >>> response.get("items")[0]["uid"]
+    0
+    >>> response.get("items")[0]["id"]
+    'plone'
+
+
 Results data
 ============
 

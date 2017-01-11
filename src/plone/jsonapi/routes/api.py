@@ -45,7 +45,7 @@ logger = logging.getLogger("plone.jsonapi.routes")
 
 _marker = object()
 
-PORTAL_IDS = ["0", "portal", "site", "plone", "root"]
+PORTAL_IDS = ["0", "portal", "site", "plone", "root", "plone site"]
 
 
 # -----------------------------------------------------------------------------
@@ -348,17 +348,25 @@ def get_search_results(portal_type=None, uid=None, **kw):
     :rtype: list or Products.ZCatalog.Lazy.LazyMap
     """
 
-    # allow to search for the Plone site
-    if portal_type == "Plone Site" or uid in PORTAL_IDS:
-        return _.to_list(get_portal())
-
     # If we have an UID, return the object immediately
     if uid is not None:
         logger.info("UID '%s' found, returning the object immediately" % uid)
         return _.to_list(get_object_by_uid(uid))
 
+    # allow to search search for the Plone Site with portal_type
+    include_portal = False
+    if portal_type is not None and portal_type.lower() == "Plone Site":
+        include_portal = True
+    if _.first(_.to_list(req.get("portal_type"))) == "Plone Site":
+        include_portal = True
+
     # Build and execute a catalog query
-    return search(portal_type=portal_type, uid=uid, **kw)
+    results = search(portal_type=portal_type, uid=uid, **kw)
+
+    if include_portal:
+        results = list(results) + [get_portal()]
+
+    return results
 
 
 def make_items_for(brains_or_objects, endpoint=None, complete=False):
