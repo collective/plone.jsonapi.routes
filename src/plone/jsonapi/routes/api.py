@@ -256,6 +256,7 @@ def cut_items(portal_type=None, uid=None, endpoint=None, **kw):
 
     # cut the object
     obj = objects[0]
+    request = req.getRequest()
     obj.aq_parent.manage_cutObjects(obj.getId(), REQUEST=request)
     request.response.setHeader("Content-Type", "application/json")
     info = IInfo(obj)()
@@ -288,6 +289,7 @@ def copy_items(portal_type=None, uid=None, endpoint=None, **kw):
 
     # cut the object
     obj = objects[0]
+    request = req.getRequest()
     obj.aq_parent.manage_copyObjects(obj.getId(), REQUEST=request)
     request.response.setHeader("Content-Type", "application/json")
     info = IInfo(obj)()
