@@ -16,6 +16,7 @@ from AccessControl import getSecurityManager
 from Products.CMFCore import permissions
 from Products.Archetypes.utils import mapply
 
+from plone.jsonapi.routes.exceptions import APIError
 from plone.jsonapi.routes.interfaces import IDataManager
 from plone.jsonapi.routes import underscore as _
 
@@ -120,7 +121,10 @@ class ATDataManager(object):
     def get_schema(self):
         """ get the schema
         """
-        return self.context.Schema()
+        try:
+            return self.context.Schema()
+        except AttributeError:
+            raise APIError(400, "Can not get Schema of %r" % self.context)
 
     def is_file_field(self, field):
         """ checks if field is a file field

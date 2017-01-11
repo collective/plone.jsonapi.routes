@@ -929,11 +929,20 @@ def get_contents(brain_or_object, depth=1):
     :returns: List of contained contents
     :rtype: list/Products.ZCatalog.Lazy.LazyMap
     """
-    pc = get_portal_catalog()
-    contents = pc(path={
-        "query": get_path(brain_or_object),
-        "depth": depth})
-    return contents
+
+    # Nothing to do if the object is contentish
+    if not is_folderish(brain_or_object):
+        return []
+
+    if is_brain(brain_or_object):
+        # XXX: We have to gathere here the right catalogs as well
+        pc = get_portal_catalog()
+        contents = pc(path={
+            "query": get_path(brain_or_object),
+            "depth": depth})
+        return contents
+
+    return brain_or_object.listFolderContents()
 
 
 def get_endpoint(brain_or_object):
