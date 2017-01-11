@@ -42,7 +42,7 @@ def search(**kw):
     # N.B. The conversion to list takes care of string representations of
     #      lists, which might get returned from the batch navigation, e.g.
     #      "['Document', 'Folder']"
-    catalog = get_catalog(_.first(_.to_list(portal_types)))
+    catalog = get_catalog(_.first(portal_types))
 
     # create catalog query
     query = make_query(catalog, **kw)
@@ -66,6 +66,8 @@ def get_catalog(portal_type=None):
     # Ask the archetype_tool if it knows the right catalog for this portal_type
     archetype_tool = get_tool("archetype_tool")
     if portal_type and archetype_tool:
+        # make sure we don't have a list here
+        portal_type = _.first(portal_type)
         # returns a list
         catalog = archetype_tool.getCatalogsByType(portal_type)
         return _.first(catalog)
@@ -111,10 +113,19 @@ def get_request_query(catalog):
     # check what we can use from the reqeust
     request = req.get_request()
 
-    for idx in indexes:
-        val = request.form.get(idx)
-        if val:
-            query[idx] = to_index_value(catalog, val, idx)
+    for index in indexes:
+        # Check if the request contains a parameter named like the index
+        value = request.form.get(index)
+        # No value found, continue
+        if value is None:
+            continue
+        # Convert the found value to format understandable by the index
+        index_value = to_index_value(catalog, value, index)
+        # Conversion returned None, continue
+        if index_value is None:
+            continue
+        # Append the found value to the query
+        query[index] = index_value
 
     return query
 
@@ -247,7 +258,7 @@ def to_index_value(catalog, value, index):
         index = get_index(catalog, index)
 
     if index.id == "portal_type":
-        return _.to_list(value)
+        return filter(lambda x: x, _.to_list(value))
     if index.meta_type == "DateIndex":
         return DateTime(value)
     if index.meta_type == "BooleanIndex":

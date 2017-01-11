@@ -312,7 +312,7 @@ def alias(col, mapping):
     return map(_block, col)
 
 
-def first(thing, n=None):
+def first(thing, n=0):
     """ get the first element of a list
 
         >>> lst = [1, 2, 3, 4, 5]
@@ -324,18 +324,29 @@ def first(thing, n=None):
         [1, 2, 3, 4, 5]
         >>> first({"key": "value"})
         {'key': 'value'}
+        >>> first(("a", "b", "c"))
+        'a'
+        >>> first([''])
+        ''
+        >>> first([''], 5)
+        ['']
+        >>> first(['', ''])
+        ''
+        >>> first(False)
+        False
         >>> first("")
         ''
         >>> first(None)
-        >>> first(("a", "b", "c"))
-        'a'
+        >>> first([])
     """
-    if not is_list(thing) and not is_tuple(thing):
-        return thing
-    if len(thing) == 0:
-        return None
-    return n is None and thing[0] or thing[0:n]
-
+    n = to_int(n)
+    if is_list(thing) or is_tuple(thing):
+        if len(thing) == 0:
+            return None
+        if n > 0:
+            return thing[0:n]
+        return thing[0]
+    return thing
 
 def to_json(thing):
     """ parse to JSON
