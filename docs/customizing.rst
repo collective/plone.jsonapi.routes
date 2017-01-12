@@ -50,6 +50,22 @@ package.
 .. note:: The prior `get_items` function, which returns all items in an array,
           is still provided, but not recommended due to performance issues.
 
+.. versionadded:: 0.9.0
+    You can specify an own `query` and pass it to the `get_batched` or
+    `get_items` funciton of the api. This gives full control over the executed
+    query on the catalog. Please see the `docs/Readme.rst` doctest for more
+    details.
+
+.. example::
+
+    @add_route("/myquery", "myquery", methods=["GET"])
+    def myquery(context, request):
+        """ get all todos
+        """
+        return get_batched(query={"portal_type": "Document"})
+
+.. note:: Other keywords (except `uid`) are ignored, if the `query` keyword is
+          detected.
 
 The upper example registers a function named `get` with the `add_route`
 decorator. This ensures that this function gets called when the `/todos` route

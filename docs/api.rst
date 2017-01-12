@@ -179,6 +179,9 @@ All content resources accept to be filtered by request parameters.
 | sharing         | yes/y/1/True          | Flag to include the sharing rights. Only visible if complete flag is    |
 |                 |                       | true.                                                                   |
 +-----------------+-----------------------+-------------------------------------------------------------------------+
+| catalog         | The catalog to use,   | Explicitly set the catalog to query for the request.                    |
+|                 | e.g. `portal_catalog` |                                                                         |
++-----------------+-----------------------+-------------------------------------------------------------------------+
 
 
 Using Plone Indexes

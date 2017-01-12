@@ -28,9 +28,9 @@ http://localhost:8080/Plone/@@API/plone/api/1.0/version
 
     {
         url: "http://localhost:8080/Plone/@@API/plone/api/1.0/version",
-        date: "2014-12-21",
-        version: "0.4",
-        build: 200,
+        date: "2017-01-12",
+        version: "0.9.0",
+        build: 6600,
         _runtime: 0.0001528865814208984
     }
 
