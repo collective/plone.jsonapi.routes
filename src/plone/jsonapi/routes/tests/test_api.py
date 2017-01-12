@@ -262,9 +262,8 @@ class TestAPI(APITestCase):
         # see base.py - we have 50 documents in there
         self.assertEqual(len(contents), 50)
 
-        # Changed in 0.8.9 – return objects if the passed in object is not a brain
         # we return always brains
-        # self.assertTrue(api.is_brain(contents[0]))
+        self.assertTrue(api.is_brain(contents[0]))
 
     def test_get_endpoint(self):
         obj = self.portal.folder

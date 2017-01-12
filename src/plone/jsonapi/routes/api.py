@@ -934,15 +934,14 @@ def get_contents(brain_or_object, depth=1):
     if not is_folderish(brain_or_object):
         return []
 
-    if is_brain(brain_or_object):
-        # XXX: We have to gathere here the right catalogs as well
-        pc = get_portal_catalog()
-        contents = pc(path={
+    query = {
+        "path": {
             "query": get_path(brain_or_object),
-            "depth": depth})
-        return contents
+            "depth": depth,
+        }
+    }
 
-    return brain_or_object.listFolderContents()
+    return search(query=query)
 
 
 def get_endpoint(brain_or_object):

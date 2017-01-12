@@ -64,6 +64,74 @@ We expect **one** folder in our portal::
     True
 
 
+A custom route provider can be easily created with the `add_plone_route`
+decorator. In the next case, the route `hello/<string:name>` will be registered in the router
+for the key `hello` and will be accessible on the API url `/@@API/plone/api/1.0/hello/<string:name>`::
+
+    >>> from plone.jsonapi.routes import add_plone_route
+
+    >>> @add_plone_route("/hello", "hello", methods=["GET"])
+    ... @add_plone_route("/hello/<string:name>", "hello", methods=["GET"])
+    ... def hello(context, request, name="world"):
+    ...     return dict(hello=name)
+
+    >>> browser.open(api_url + "/hello")
+    >>> browser.contents
+    '{"_runtime": ..., "hello": "world"}'
+
+    >>> browser.open(api_url + "/hello/plone")
+    >>> browser.contents
+    '{"_runtime": ..., "hello": "plone"}'
+
+Routes can not be registered twice with the same endpoint name. So registering
+another route for the endpoint `hello` will fail::
+
+#    >>> @add_plone_route("/hello2", "hello", methods=["GET"])
+#    ... def hello(context, request, name="world"):
+#    ...     return dict(hello=name)
+#
+#    >>> browser.open(api_url + "/hello2")
+#    >>> browser.contents
+#    '{"_runtime": ..., "message": "404: Not Found", "success": false}'
+
+Route Providers can use the API of this package to search for contents in Plone::
+
+    >>> from plone.jsonapi.routes.api import get_batched
+
+    >>> @add_plone_route("/myroute", "myroute", methods=["GET"])
+    ... @add_plone_route("/myroute/<string:uid>", "myroute", methods=["GET"])
+    ... def myroute(context, request, uid=None):
+    ...     return get_batched("Document", uid=uid)
+
+    >>> browser.open(api_url + "/myroute")
+    >>> response = self.decode(browser.contents)
+    >>> response.get('count')
+    50
+
+The API even accepts custom catalog queries::
+
+    >>> @add_plone_route("/mycustom", "mycustom", methods=["GET"])
+    ... def mycustom(context, request):
+    ...     query = {"portal_type": "Document"}
+    ...     return get_batched(query=query)
+
+    >>> browser.open(api_url + "/mycustom")
+    >>> response = self.decode(browser.contents)
+    >>> response.get('count')
+    50
+
+Keywords are applied to catalog indexes (only if no complete `query` parameter sent)::
+
+    >>> @add_plone_route("/mycustom2", "mycustom2", methods=["GET"])
+    ... def mycustom(context, request):
+    ...     return get_batched(id="document-0")
+
+    >>> browser.open(api_url + "/mycustom2")
+    >>> response = self.decode(browser.contents)
+    >>> response.get('count')
+    1
+
+
 Query records
 =============
 

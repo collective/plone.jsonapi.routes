@@ -3,6 +3,19 @@
 Changelog
 =========
 
+0.9.0 - unreleased
+------------------
+
+**Changes**
+
+- API mthods `get_items` and `get_batched` accept now keyword paramters.
+  Keywords can be catalog indexes, e.g. `id=document-1` or a complete catalog
+  query objejt, e.g. `query={'portal_type': 'Document'}`.
+- Changed `get_contents` method to use the `search` functionality from the
+  `query` module.
+- More doctests added
+
+
 0.8.9 - 2017-01-11
 ------------------
 

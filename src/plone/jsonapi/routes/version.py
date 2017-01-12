@@ -12,5 +12,5 @@ def version():
 
 
 __version__ = version()
-__build__ = 600
+__build__ = 660
 __date__ = '2017-01-11'

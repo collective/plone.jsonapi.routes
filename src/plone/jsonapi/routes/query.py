@@ -32,19 +32,28 @@ def search(**kw):
     # Fetch the right catalogs
     catalogs = get_catalogs(**kw)
 
+    # The search query
+    query = {}
+
     # Only one catalog to search
     if len(catalogs) == 1:
         catalog = catalogs[0]
-        query = make_query(catalog, **kw)
+        query = kw.get("query") or make_query(catalog, **kw)
         return catalog(query)
 
     # Multiple catalogs need to be queried
-    results = []
+    results = dict()
     for catalog in catalogs:
-        query = make_query(catalog, **kw)
-        results.extend(catalog(query))
+        query = kw.get("query") or make_query(catalog, **kw)
+        for brain in catalog(query):
+            # Avoid duplicates
+            results[brain.UID] = brain
 
-    return _.to_list(set(results))
+    logger.debug("*** Current User: %s" % ploneapi.user.get_current())
+    logger.debug("*** Queried Catalogs: %r" % catalogs)
+    logger.debug("*** Combined Results: %r" % [v.getPath() for k, v in results.iteritems()])
+
+    return results.values()
 
 
 # -----------------------------------------------------------------------------
@@ -93,7 +102,7 @@ def make_query(catalog, **kw):
     sort_on, sort_order = get_sort_spec(catalog)
     query.update(dict(sort_order=sort_order, sort_on=sort_on))
 
-    logger.info("make_query:: query=%s --> catalog=%s" % (query, catalog.__name__))
+    logger.info("make_query:: query=%s | catalog=%s" % (query, catalog.__name__))
 
     return query
 
@@ -200,9 +209,9 @@ def get_keyword_query(catalog, **kw):
             logger.warn("Skipping unknown keyword parameter '%s=%s'" % (k, v))
             continue
         if v is None:
-            logger.warn("Skip value 'None' in kw parameter '%s=%s'" % (k, v))
+            logger.warn("Skip None value in kw parameter '%s=%s'" % (k, v))
             continue
-        logger.info("Adding '%s=%s' to query" % (k, v))
+        logger.debug("Adding '%s=%s' to query" % (k, v))
         query[k] = v
 
     return query
@@ -244,7 +253,7 @@ def get_index(catalog, name):
     """ get the index object by name
     """
     index = catalog._catalog.getIndex(name)
-    logger.info("get_index=%s of catalog '%s' --> %s" % (name, catalog.__name__, index))
+    logger.debug("get_index=%s of catalog '%s' --> %s" % (name, catalog.__name__, index))
     return index
 
 
