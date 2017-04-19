@@ -5,92 +5,83 @@
     xmlns:plone="http://namespaces.plone.org/plone"
     i18n_domain="plone.jsonapi.routes">
 
-    <!-- Zope2 initialization -->
-    <five:registerPackage package="." initialize=".initialize" />
+  <!-- Zope2 initialization -->
+  <five:registerPackage package="." initialize=".initialize" />
 
-    <!-- Include meta directives -->
-    <include file="meta.zcml"/>
+  <!-- Include meta directives -->
+  <include file="meta.zcml"/>
 
-    <!-- Enable/Disable Route Registration on Startup (default: True) -->
-    <!-- <plone:jsonapi -->
-    <!--     register_api_routes="False" -->
-    <!-- /> -->
+  <!-- Enable/Disable Route Registration on Startup (default: True) -->
+  <plone:jsonapi
+      register_api_routes="True"
+      />
 
-    <!-- BATCHING
+  <!-- BATCHING -->
 
-    split results into multiple batches
-    -->
+  <!-- Batch adapter for Plone 4.3 Batching -->
+  <adapter
+      for="*"
+      factory=".batch.Batch"
+      />
 
-    <!-- Adapter for Plone 4.3 Batching -->
-    <adapter
-        for="*"
-        factory=".batch.Batch"
-        />
-
-    <!-- Adapter for Plone 4.2 Batching -->
-    <adapter
-        for="ZTUtils.Batch.Batch"
-        factory=".batch.Batch42"
-        />
+  <!-- Batch adapter for Plone 4.2 Batching -->
+  <adapter
+      for="ZTUtils.Batch.Batch"
+      factory=".batch.Batch42"
+      />
 
 
-    <!-- DATA MANAGERS
+  <!-- DATA MANAGERS -->
 
-    get/set values from fields
-    -->
+  <!-- Default Data adapter (AT based content types) -->
+  <adapter
+      for="*"
+      factory=".datamanagers.ATDataManager"
+      />
 
-    <!-- Default Data adapter (AT based content types) -->
-    <adapter
-        for="*"
-        factory=".datamanagers.ATDataManager"
-        />
+  <!-- Data manager for the Plone site -->
+  <adapter
+      for="Products.CMFPlone.interfaces.siteroot.IPloneSiteRoot"
+      factory=".datamanagers.PortalDataManager"
+      />
 
-    <!-- Data adapter for Portal manipulation -->
-    <adapter
-        for="Products.CMFPlone.interfaces.siteroot.IPloneSiteRoot"
-        factory=".datamanagers.PortalDataManager"
-        />
+  <!-- Data manager for catalog brains -->
+  <adapter
+      for="Products.ZCatalog.interfaces.ICatalogBrain"
+      factory=".datamanagers.BrainDataManager"
+      />
 
-    <!-- Data adapter for Catalog brains -->
-    <adapter
-        for="Products.ZCatalog.interfaces.ICatalogBrain"
-        factory=".datamanagers.BrainDataManager"
-        />
-
-    <!-- Data adapter for Dexterity Field manipulation -->
-    <adapter
-        for="plone.dexterity.interfaces.IDexterityContent"
-        factory=".datamanagers.DexterityDataManager"
-        />
+  <!-- Data manager for Dexterity field manipulation -->
+  <adapter
+      for="plone.dexterity.interfaces.IDexterityContent"
+      factory=".datamanagers.DexterityDataManager"
+      />
 
 
-    <!-- DATA PROVIDERS
+  <!-- DATA PROVIDERS -->
 
-    extract fields from schema and return a dictionary
-    -->
+  <!-- Default data provider (AT based content types) -->
+  <adapter
+      for="*"
+      factory=".dataproviders.ATDataProvider"
+      />
 
-    <!-- Default data provider (AT based content types) -->
-    <adapter
-        for="*"
-        factory=".adapters.ATDataProvider"
-        />
+  <!-- Data provider for catalog brains -->
+  <adapter
+      for="Products.ZCatalog.interfaces.ICatalogBrain"
+      factory=".dataproviders.ZCDataProvider"
+      />
 
-    <!-- Adapter for Catalog Brains -->
-    <adapter
-        for="Products.ZCatalog.interfaces.ICatalogBrain"
-        factory=".adapters.ZCDataProvider"
-        />
+  <!-- Data provider for the Plone site -->
+  <adapter
+      for="Products.CMFCore.interfaces.ISiteRoot"
+      factory=".dataproviders.SiteRootDataProvider"
+      />
 
-    <!-- Adapter for the Plone Site -->
-    <adapter
-        for="Products.CMFCore.interfaces.ISiteRoot"
-        factory=".adapters.SiteRootDataProvider"
-        />
-
-    <!-- Adapter for Dexterity Content Types -->
-    <adapter
-        for="plone.dexterity.interfaces.IDexterityContent"
-        factory=".adapters.DexterityDataProvider"
-        />
+  <!-- Data provider for Dexterity content types -->
+  <adapter
+      for="plone.dexterity.interfaces.IDexterityContent"
+      factory=".dataproviders.DexterityDataProvider"
+      />
 
 </configure>

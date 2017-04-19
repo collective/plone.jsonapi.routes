@@ -7,7 +7,7 @@ from plone.app.testing import setRoles
 
 from plone.jsonapi.routes.tests.base import APITestCase
 from plone.jsonapi.routes import api
-from plone.jsonapi.routes import adapters
+from plone.jsonapi.routes import dataproviders
 from plone.jsonapi.routes.interfaces import IInfo
 from plone.jsonapi.routes.interfaces import IDataManager
 
@@ -24,7 +24,7 @@ def dummy_file():
     )
 
 
-class TestAdapters(APITestCase):
+class TestDataproviders(APITestCase):
     """ Test the Data Adapter
     """
 
@@ -48,7 +48,7 @@ class TestAdapters(APITestCase):
         self.doc = self.portal.get(_)
 
         # handle plone 5 dexterity based file content
-        if adapters.is_dexterity_content(self.doc):
+        if dataproviders.is_dexterity_content(self.doc):
             self.doc.file = dummy_file()
         else:
             self.doc.setFilename(FILENAME)
@@ -67,7 +67,7 @@ class TestAdapters(APITestCase):
         return results[0]
 
     # -----------------------------------------------------------------------------
-    #   Test Adapters
+    #   Test Dataproviders
     # -----------------------------------------------------------------------------
 
     def test_brain_adapter(self):
@@ -95,11 +95,11 @@ class TestAdapters(APITestCase):
     def test_extract_fields(self):
         # extract fields from content objects
         obj = self.get_document_obj()
-        data = adapters.extract_fields(obj, ["title"])
+        data = dataproviders.extract_fields(obj, ["title"])
         self.assertEqual(data.get("title"), obj.title)
         # extract fields from catalog brains
         brain = self.get_document_brain()
-        data = adapters.extract_fields(brain, ["UID"])
+        data = dataproviders.extract_fields(brain, ["UID"])
         self.assertEqual(data.get("UID"), brain.UID)
 
     def test_get_json_value(self):
@@ -107,56 +107,56 @@ class TestAdapters(APITestCase):
         obj = self.get_document_obj()
 
         # handles date objects
-        # value = adapters.get_json_value(obj, "creation_date")
+        # value = dataproviders.get_json_value(obj, "creation_date")
         # self.assertEqual(value, obj.created().ISO8601())
 
         # extracts the value by name if omitted
-        value = adapters.get_json_value(obj, "title")
+        value = dataproviders.get_json_value(obj, "title")
         self.assertEqual(value, obj.Title())
 
         # takes the given value
-        value = adapters.get_json_value(obj, "foo", 1)
+        value = dataproviders.get_json_value(obj, "foo", 1)
         self.assertEqual(type(value), int)
 
         # returns the default if the value is not JSON serializable
-        value = adapters.get_json_value(obj, "object", object(),
+        value = dataproviders.get_json_value(obj, "object", object(),
                                         default="Not JSON serializable")
         self.assertEqual(value, "Not JSON serializable")
 
     def test_get_file_info(self):
         obj = self.doc
         # extract the file info
-        info = adapters.get_file_info(obj, "file")
+        info = dataproviders.get_file_info(obj, "file")
         self.assertEqual(info.get("filename"), FILENAME)
 
     def test_get_download_url(self):
         obj = self.doc
         # extract the file info
-        info = adapters.get_download_url(obj, "file")
+        info = dataproviders.get_download_url(obj, "file")
         self.assertTrue(info.find("download") > -1)
 
     def test_get_content_type(self):
         obj = self.doc
         # extracts the content type of content objects
-        ct = adapters.get_content_type(obj)
+        ct = dataproviders.get_content_type(obj)
         self.assertNotEquals(ct, "binary")
         # it handles non known objects gracefully
-        ct = adapters.get_content_type(object(), "binary")
+        ct = dataproviders.get_content_type(object(), "binary")
         self.assertEqual(ct, "binary")
 
     def test_get_iso_date(self):
         obj = self.get_document_obj()
         created = obj.created()
-        date = adapters.get_iso_date(created)
+        date = dataproviders.get_iso_date(created)
         self.assertEqual(date, obj.created().ISO8601())
 
     def test_is_dexterity_content(self):
         obj = self.get_document_obj()
         if api.is_plone5():
             # std. content types are dexterity in plone 5
-            self.assertTrue(adapters.is_dexterity_content(obj))
+            self.assertTrue(dataproviders.is_dexterity_content(obj))
         else:
-            self.assertFalse(adapters.is_dexterity_content(obj))
+            self.assertFalse(dataproviders.is_dexterity_content(obj))
 
     def test_is_file_field(self):
         obj = self.doc
@@ -168,5 +168,5 @@ class TestAdapters(APITestCase):
 def test_suite():
     from unittest import TestSuite, makeSuite
     suite = TestSuite()
-    suite.addTest(makeSuite(TestAdapters))
+    suite.addTest(makeSuite(TestDataproviders))
     return suite
