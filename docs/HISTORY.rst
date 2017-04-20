@@ -3,6 +3,17 @@
 Changelog
 =========
 
+0.9.1 - 2017-04-20
+------------------
+
+**Changes**
+
+- Added generic route provider for all `portal_types`.
+  N.B. The old-style route providers, e.g. `folders`, `documents` etc., are now obsolete.
+       Please use the lower portal type name instead, e.g. `folder`, `docuememt` ...
+- UID of the plone site is now '0' instead of 0.
+
+
 0.9.0 - 2017-01-12
 ------------------
 
