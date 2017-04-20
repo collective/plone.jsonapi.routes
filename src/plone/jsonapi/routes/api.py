@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
 
+import json
 import logging
 import pkg_resources
+import datetime
 
 import transaction
 from zope import interface
+from zope.component import getMultiAdapter
 
 from plone import api as ploneapi
 from plone.jsonapi.core import router
@@ -622,8 +625,7 @@ def get_batch(sequence, size, start=0, endpoint=None, complete=False):
     """ create a batched result record out of a sequence (catalog brains)
     """
 
-    # we call an adapter here to allow backwards compatibility hooks
-    batch = IBatch(Batch(sequence, size, start))
+    batch = make_batch(sequence, size, start)
 
     return {
         "pagesize": batch.get_pagesize(),
@@ -635,6 +637,13 @@ def get_batch(sequence, size, start=0, endpoint=None, complete=False):
         "items": make_items_for([b for b in batch.get_batch()],
                                 endpoint, complete=complete),
     }
+
+
+def make_batch(sequence, size=25, start=0):
+    """Make a batch of the given size from the sequence
+    """
+    # we call an adapter here to allow backwards compatibility hooks
+    return IBatch(Batch(sequence, size, start))
 
 
 # -----------------------------------------------------------------------------
@@ -856,6 +865,57 @@ def is_uid(uid):
     if uid != "0" and len(uid) != 32:
         return False
     return True
+
+
+def is_date(thing):
+    """Checks if the given thing represents a date
+
+    :param thing: The object to check if it is a date
+    :type thing: arbitrary object
+    :returns: True if we have a date object
+    :rtype: bool
+    """
+    # known date types
+    date_types = (datetime.datetime,
+                  datetime.date,
+                  DateTime)
+    return isinstance(thing, date_types)
+
+
+def to_iso_date(date, default=None):
+    """ISO representation for the date object
+
+    :param date: A date object
+    :type field: datetime/DateTime
+    :returns: The ISO format of the date
+    :rtype: str
+    """
+
+    # not a date
+    if not is_date(date):
+        return default
+
+    # handle Zope DateTime objects
+    if isinstance(date, (DateTime)):
+        return date.ISO8601()
+
+    # handle python datetime objects
+    return date.isoformat()
+
+
+def is_json_serializable(thing):
+    """Checks if the given thing can be serialized to JSON
+
+    :param thing: The object to check if it can be serialized
+    :type thing: arbitrary object
+    :returns: True if it can be JSON serialized
+    :rtype: bool
+    """
+    try:
+        json.dumps(thing)
+        return True
+    except TypeError:
+        return False
 
 
 def url_for(endpoint, **values):
@@ -1327,6 +1387,15 @@ def delete_object(brain_or_object):
         fail(401, "Not allowed to delete object '%s'" % obj.getId())
 
 
+def is_anonymous():
+    """Check if the current user is authenticated or not
+
+    :returns: True if the current user is authenticated
+    :rtype: bool
+    """
+    return ploneapi.user.is_anonymous()
+
+
 def get_current_user():
     """Get the current logged in user
 
@@ -1334,6 +1403,68 @@ def get_current_user():
     :rtype: object
     """
     return ploneapi.user.get_current()
+
+
+def get_member_ids():
+    """Return all member ids of the portal.
+    """
+    pm = get_tool("portal_membership")
+    member_ids = pm.listMemberIds()
+    # How can it be possible to get member ids with None?
+    return filter(lambda x: x, member_ids)
+
+
+def get_user(user_or_username=None):
+    """Return Plone User
+
+    :param user_or_username: Plone user or user id
+    :type groupname:  PloneUser/MemberData/str
+    :returns: Plone MemberData
+    :rtype: object
+    """
+    if user_or_username is None:
+        return None
+    if hasattr(user_or_username, "getUserId"):
+        return ploneapi.user.get(user_or_username.getUserId())
+    return ploneapi.user.get(userid=_.to_string(user_or_username))
+
+
+def get_user_properties(user_or_username):
+    """Return User Properties
+
+    :param user_or_username: Plone group identifier
+    :type groupname:  PloneUser/MemberData/str
+    :returns: Plone MemberData
+    :rtype: object
+    """
+    user = get_user(user_or_username)
+    if user is None:
+        return {}
+    if not callable(user.getUser):
+        return {}
+    out = {}
+    plone_user = user.getUser()
+    for sheet in plone_user.listPropertysheets():
+        ps = plone_user.getPropertysheet(sheet)
+        out.update(dict(ps.propertyItems()))
+    return out
+
+
+def get_view(name, context=None, request=None):
+    """Get the view by name
+
+    :param name: The name of the view
+    :type name: str
+    :param context: The context to query the view
+    :type context: ATContentType/DexterityContentType/CatalogBrain
+    :param request: The request to query the view
+    :type request: HTTPRequest object
+    :returns: HTTP Request
+    :rtype: Products.Five.metaclass View object
+    """
+    context = context or get_portal()
+    request = request or req.get_request() or None
+    return getMultiAdapter((get_object(context), request), name=name)
 
 
 def create_object(container, portal_type, **data):

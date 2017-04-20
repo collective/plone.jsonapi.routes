@@ -1,66 +1,44 @@
 # -*- coding: utf-8 -*-
 
-import logging
 from plone import api as ploneapi
 
-from plone.jsonapi.routes.api import url_for
+from plone.jsonapi.routes import api
+from plone.jsonapi.routes import logger
+from plone.jsonapi.routes import request as req
 from plone.jsonapi.routes.exceptions import APIError
 from plone.jsonapi.routes import add_plone_route as route
 
-logger = logging.getLogger("plone.jsonapi.routes.users")
 
-
-def get_user_info(username=None, short=True):
-    """ return the user informations
+def get_user_info(user):
+    """Get the user information
     """
+    user = api.get_user(user)
+    current = api.get_current_user()
+    anon = api.is_anonymous()
 
-    # XXX: refactoring needed in this function
+    # nothing to do
+    if user is None:
+        logger.warn("No user found for {}".format(user))
+        return None
 
-    user = None
-    anon = ploneapi.user.is_anonymous()
-    current = ploneapi.user.get_current()
-
-    # no username, go and get the current user
-    if username is None:
-        user = current
-    else:
-        user = ploneapi.user.get(username)
-
-    if not user:
-        raise KeyError('User not found')
+    # plone user
+    pu = user.getUser()
 
     info = {
-        "id":       user.getId(),
-        "username": user.getUserName(),
-        "url":      url_for("plone.jsonapi.routes.users", username=user.getUserName())
+        "username": user.getId(),
+        "roles": user.getRoles(),
+        "groups": pu.getGroups(),
+        "authenticated": current == user and not anon,
+        "api_url": api.url_for("plone.jsonapi.routes.users", username=user.getId()),
     }
 
-    # return base info
-    if short or anon:
-        return info
-
-    # try to get extended infos
-    pu = user.getUser()
-    properties = {}
-    if "mutable_properties" in pu.listPropertysheets():
-        mp = pu.getPropertysheet("mutable_properties")
-        properties = dict(mp.propertyItems())
-
-    def to_iso8601(dt=None):
-        if dt is None:
-            return ""
-        return dt.ISO8601()
-
-    # include mutable properties if short==False
-    info.update({
-        "email":           properties.get("email"),
-        "fullname":        properties.get("fullname"),
-        "login_time":      to_iso8601(properties.get("login_time")),
-        "last_login_time": to_iso8601(properties.get("last_login_time")),
-        "roles":           user.getRoles(),
-        "groups":          pu.getGroups(),
-        "authenticated":   current == user and not anon,
-    })
+    for k, v in api.get_user_properties(user).items():
+        if api.is_date(v):
+            v = api.to_iso_date(v)
+        if not api.is_json_serializable(v):
+            logger.warn("User property '{}' is not JSON serializable".format(k))
+            continue
+        info[k] = v
 
     return info
 
@@ -72,35 +50,39 @@ def get_user_info(username=None, short=True):
 @route("/users", "plone.jsonapi.routes.users", methods=["GET"])
 @route("/users/<string:username>", "plone.jsonapi.routes.users", methods=["GET"])
 def get(context, request, username=None):
-    """ Plone users route
+    """Plone users route
     """
+    user_ids = []
 
-    items = []
-
-    # don't allow anonymous to see other accounts
-    if ploneapi.user.is_anonymous():
+    # Don't allow anonymous users to query a user other than themselves
+    if api.is_anonymous():
         username = "current"
 
-    # list all users if no username was given
+    # query all users if no username was given
     if username is None:
-        users = ploneapi.user.get_users()
-
-        for user in users:
-            items.append(get_user_info(user.getId()))
-
-    # special user 'current' which retrieves the current user infos
+        user_ids = api.get_member_ids()
     elif username == "current":
-        items.append(get_user_info(short=False))
-
-    # we have a username, go and get the infos for it
+        current_user = api.get_current_user()
+        user_ids = [current_user.getId()]
     else:
-        info = get_user_info(username, short=False)
-        items.append(info)
+        user_ids = [username]
+
+    # Prepare batch
+    size = req.get_batch_size()
+    start = req.get_batch_start()
+    batch = api.make_batch(user_ids, size, start)
+
+    # get the user info for the user ids in the current batch
+    users = map(get_user_info, batch.get_batch())
 
     return {
-        "url":   url_for("plone.jsonapi.routes.users"),
-        "count": len(items),
-        "items": items
+        "pagesize": batch.get_pagesize(),
+        "next": batch.make_next_url(),
+        "previous": batch.make_prev_url(),
+        "page": batch.get_pagenumber(),
+        "pages": batch.get_numpages(),
+        "count": batch.get_sequence_length(),
+        "items": users,
     }
 
 
