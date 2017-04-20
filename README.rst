@@ -1,8 +1,8 @@
 plone.jsonapi.routes
 ====================
 
-:Author: Ramon Bartl
-:Version: 1.0.0
+:Author: Ramon Bartl (RIDING BYTES - http://ridingbytes.com)
+:Version: 0.9.1
 
 
 .. contents:: Table of Contents
