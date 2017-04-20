@@ -30,9 +30,9 @@ def get(context, request, resource=None, uid=None):
 
 
 @route("/<string:action>", "plone.jsonapi.routes.action", methods=["POST"])
-@route("/<string:resource>/<string:action>", "plone.jsonapi.routes.action", methods=["POST"])
+@route("/<string:action>/<string:uid>", "plone.jsonapi.routes.action", methods=["POST"])
 @route("/<string:resource>/<string:uid>/<string:action>", "plone.jsonapi.routes.action", methods=["POST"])
-def action(context, request, resource=None, uid=None, action=None):
+def action(context, request, action=None, resource=None, uid=None):
     """Various HTTP POST actions
 
     Current supported actions:

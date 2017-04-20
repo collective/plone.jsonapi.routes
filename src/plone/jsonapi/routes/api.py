@@ -1150,8 +1150,8 @@ def get_object_by_request():
     :returns: Found Object or None
     :rtype: object
     """
-    form = req.get_form()
-    return get_object_by_record(form)
+    data = req.get_form() or req.get_query_string()
+    return get_object_by_record(data)
 
 
 def get_object_by_record(record):

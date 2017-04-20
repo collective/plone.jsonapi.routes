@@ -2,6 +2,7 @@
 
 import json
 import logging
+import urlparse
 import pkg_resources
 
 from zope import interface
@@ -54,10 +55,18 @@ def get_form():
     return get_request().form
 
 
+def get_query_string():
+    """ return the parsed query string
+    """
+    qs = get_request().get("QUERY_STRING")
+    return dict(urlparse.parse_qsl(qs))
+
+
 def get(key, default=None):
     """ return the key from the request
     """
-    return get_form().get(key, default)
+    data = get_form() or get_query_string()
+    return data.get(key, default)
 
 
 def is_true(key, default=False):
