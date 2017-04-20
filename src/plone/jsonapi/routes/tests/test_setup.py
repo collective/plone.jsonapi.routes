@@ -8,13 +8,8 @@ NAMESPACE = "plone.jsonapi.routes"
 
 
 class TestSetup(APITestCase):
-    """ Test URL registration machinery
+    """Test URL registration machinery
     """
-
-    def testCRUDEndpoint(self):
-        namespace_endpoint = ".".join([NAMESPACE, "create"])
-        self.assertEqual(router.url_for(namespace_endpoint, resource="folder"),
-                         "/plone/@@API/plone/api/1.0/folder/create")
 
     def testSearchEndpoint(self):
         endpoint = "search"
