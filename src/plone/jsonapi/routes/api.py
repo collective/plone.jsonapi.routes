@@ -750,7 +750,7 @@ def resource_to_portal_type(resource):
         return None
 
     resource_mapping = get_resource_mapping()
-    portal_type = resource_mapping.get(resource)
+    portal_type = resource_mapping.get(resource.lower())
 
     # BBB: Handle pre 0.9.1 resource routes, e.g. folders, collections...
     if portal_type is None and resource.endswith("s"):
