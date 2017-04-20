@@ -163,16 +163,6 @@ class TestAPI(APITestCase):
             api.get_portal_catalog(),
             getToolByName(self.portal, "portal_catalog"))
 
-    def test_get_portal_reference_catalog(self):
-        try:
-            rc = getToolByName(self.portal, "reference_catalog")
-        except AttributeError:
-            rc = None
-
-        self.assertEqual(
-            api.get_portal_reference_catalog(),
-            rc)
-
     def test_get_portal_workflow(self):
         self.assertEqual(
             api.get_portal_workflow(),
@@ -192,11 +182,10 @@ class TestAPI(APITestCase):
         self.assertFalse(api.is_folderish(self.get_document_brain()))
 
     def test_url_for(self):
-        endpoint = "plone.jsonapi.routes.plonesites"
-        uid = "0"
+        endpoint = api.get_endpoint(api.get_portal())
         self.assertEqual(
-            api.url_for(endpoint, uid=uid),
-            "http://foo/plone/api/1.0/plonesites/0")
+            api.url_for(endpoint, resource="plonesite", uid="0"),
+            "http://foo/plone/api/1.0/plonesite/0")
 
     def test_get_url(self):
         self.assertEqual(
@@ -267,8 +256,8 @@ class TestAPI(APITestCase):
 
     def test_get_endpoint(self):
         obj = self.portal.folder
-        # we should get the namespaced endpoint now by this function
-        self.assertEqual(api.get_endpoint(obj), "plone.jsonapi.routes.folders")
+        self.assertEqual(api.get_endpoint(obj),
+                         "plone.jsonapi.routes.get")
 
     def test_find_objects(self):
         obj = self.portal.folder
@@ -299,7 +288,7 @@ class TestAPI(APITestCase):
         obj = self.get_document_obj()
         uid = obj.UID()
         self.assertEqual(api.get_object_by_uid(uid), obj)
-        # specail case: UID 0 is the portal
+        # special case: UID 0 is the portal
         self.assertEqual(api.get_object_by_uid(0), self.portal)
 
     def test_get_object_by_path(self):

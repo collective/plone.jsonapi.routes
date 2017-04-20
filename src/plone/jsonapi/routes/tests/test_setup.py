@@ -12,67 +12,12 @@ class TestSetup(APITestCase):
     """
 
     def testCRUDEndpoint(self):
-        endpoint = "get"
-        namespace_endpoint = ".".join([NAMESPACE, endpoint])
-        self.assertEqual(router.url_for(namespace_endpoint),
-                         "/plone/@@API/plone/api/1.0/%s" % endpoint)
-
-    def testCollectionsEndpoint(self):
-        endpoint = "collections"
-        namespace_endpoint = ".".join([NAMESPACE, endpoint])
-        self.assertEqual(router.url_for(namespace_endpoint),
-                         "/plone/@@API/plone/api/1.0/%s" % endpoint)
-
-    def testDocumentsEndpoint(self):
-        endpoint = "documents"
-        namespace_endpoint = ".".join([NAMESPACE, endpoint])
-        self.assertEqual(router.url_for(namespace_endpoint),
-                         "/plone/@@API/plone/api/1.0/%s" % endpoint)
-
-    def testEventsEndpoint(self):
-        endpoint = "events"
-        namespace_endpoint = ".".join([NAMESPACE, endpoint])
-        self.assertEqual(router.url_for(namespace_endpoint),
-                         "/plone/@@API/plone/api/1.0/%s" % endpoint)
-
-    def testFilesEndpoint(self):
-        endpoint = "files"
-        namespace_endpoint = ".".join([NAMESPACE, endpoint])
-        self.assertEqual(router.url_for(namespace_endpoint),
-                         "/plone/@@API/plone/api/1.0/%s" % endpoint)
-
-    def testFoldersEndpoint(self):
-        endpoint = "folders"
-        namespace_endpoint = ".".join([NAMESPACE, endpoint])
-        self.assertEqual(router.url_for(namespace_endpoint),
-                         "/plone/@@API/plone/api/1.0/%s" % endpoint)
-
-    def testImagesEndpoint(self):
-        endpoint = "images"
-        namespace_endpoint = ".".join([NAMESPACE, endpoint])
-        self.assertEqual(router.url_for(namespace_endpoint),
-                         "/plone/@@API/plone/api/1.0/%s" % endpoint)
-
-    def testLinksEndpoint(self):
-        endpoint = "links"
-        namespace_endpoint = ".".join([NAMESPACE, endpoint])
-        self.assertEqual(router.url_for(namespace_endpoint),
-                         "/plone/@@API/plone/api/1.0/%s" % endpoint)
-
-    def testNewsItemsEndpoint(self):
-        endpoint = "newsitems"
-        namespace_endpoint = ".".join([NAMESPACE, endpoint])
-        self.assertEqual(router.url_for(namespace_endpoint),
-                         "/plone/@@API/plone/api/1.0/%s" % endpoint)
+        namespace_endpoint = ".".join([NAMESPACE, "create"])
+        self.assertEqual(router.url_for(namespace_endpoint, resource="folder"),
+                         "/plone/@@API/plone/api/1.0/folder/create")
 
     def testSearchEndpoint(self):
         endpoint = "search"
-        namespace_endpoint = ".".join([NAMESPACE, endpoint])
-        self.assertEqual(router.url_for(namespace_endpoint),
-                         "/plone/@@API/plone/api/1.0/%s" % endpoint)
-
-    def testTopicEndpoint(self):
-        endpoint = "topics"
         namespace_endpoint = ".".join([NAMESPACE, endpoint])
         self.assertEqual(router.url_for(namespace_endpoint),
                          "/plone/@@API/plone/api/1.0/%s" % endpoint)

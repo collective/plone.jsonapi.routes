@@ -10,7 +10,7 @@ from plone.app.testing import SITE_OWNER_NAME
 from plone.app.testing import SITE_OWNER_PASSWORD
 from plone.testing.z2 import Browser
 
-from plone.jsonapi.routes import adapters
+from plone.jsonapi.routes import dataproviders
 from plone.jsonapi.routes.tests.base import APITestCase
 
 API_BASE_URL = "/@@API/plone/api/1.0"
@@ -84,7 +84,7 @@ class TestFilesAPI(APITestCase):
         obj = self.portal.get(_)
 
         # handle plone 5 dexterity based file content
-        if adapters.is_dexterity_content(obj):
+        if dataproviders.is_dexterity_content(obj):
             obj.file = dummy_file()
             transaction.commit()
 
