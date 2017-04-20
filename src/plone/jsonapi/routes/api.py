@@ -1113,14 +1113,6 @@ def get_object_by_uid(uid, default=_marker):
     if str(uid).lower() in PORTAL_IDS:
         return get_portal()
 
-    uc = get_tool("uid_catalog", default=None)
-    # try to find the object with the uid_catalog
-    if uc is not None:
-        # try to find the object with the reference catalog first
-        brains = uc(UID=uid)
-        if brains:
-            return get_object(brains[0])
-
     # try to find the object with the portal_catalog
     pc = get_portal_catalog()
     res = pc(UID=uid)
@@ -1128,6 +1120,12 @@ def get_object_by_uid(uid, default=_marker):
         if default is not _marker:
             return default
         fail(404, "No object found for UID {}".format(uid))
+
+    # Catalog should be reindexed if this happens
+    if len(res) > 1:
+        fail(500, "Found more than one object for UID={}: {}."
+             "Please rebuild the catalog or delete the object."
+             .format(uid, [r.getPath() for r in res]))
 
     return get_object(res[0])
 
