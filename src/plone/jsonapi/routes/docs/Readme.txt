@@ -40,11 +40,12 @@ The next tests will go through each resource to show the basic usage.
 Folders
 -------
 
-The resource for folders is called `folders`.
+The resource for folders is called `folder`.
 
-We need to import the module for our test, so that the route gets registered::
+We need to import the route providers for our test, so that the routes gets
+registered::
 
-    >>> from plone.jsonapi.routes.providers import folders
+    >>> from plone.jsonapi.routes.providers import *
 
 Lets check if we have some folders in our portal::
 
