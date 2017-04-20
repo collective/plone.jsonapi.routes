@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import json
-import logging
 import pkg_resources
 import datetime
 
@@ -36,6 +35,7 @@ from query import search
 from plone.jsonapi.routes import request as req
 from plone.jsonapi.routes.exceptions import APIError
 
+from plone.jsonapi.routes import logger
 from plone.jsonapi.routes.interfaces import IInfo
 from plone.jsonapi.routes.interfaces import IBatch
 from plone.jsonapi.routes.interfaces import IDataManager
@@ -43,8 +43,6 @@ from plone.jsonapi.routes import underscore as _
 
 __author__ = 'Ramon Bartl <rb@ridingbytes.com>'
 __docformat__ = 'plaintext'
-
-logger = logging.getLogger("plone.jsonapi.routes")
 
 _marker = object()
 
