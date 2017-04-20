@@ -86,7 +86,7 @@ class TestDataproviders(APITestCase):
         obj = self.portal
         adapter = IInfo(obj)
         data = adapter()
-        self.assertEqual(data.get("uid"), 0)
+        self.assertEqual(data.get("uid"), '0')
 
     # -----------------------------------------------------------------------------
     #   Test Functional Helpers

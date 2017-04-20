@@ -282,7 +282,7 @@ Search for Portal::
     >>> response.get('count')
     1
     >>> response.get("items")[0]["uid"]
-    0
+    '0'
     >>> response.get("items")[0]["id"]
     'plone'
 
