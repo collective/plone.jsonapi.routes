@@ -90,9 +90,9 @@ class CatalogQuery(object):
         query.update(self.get_keyword_query(**kw))
 
         sort_on, sort_order = self.get_sort_spec()
-        if sort_on:
+        if sort_on and "sort_on" not in query:
             query.update({"sort_on": sort_on})
-        if sort_order:
+        if sort_order and "sort_order" not in query:
             query.update({"sort_order": sort_order})
 
         logger.info("make_query:: query={} | catalog={}".format(
