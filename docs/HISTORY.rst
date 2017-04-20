@@ -8,10 +8,16 @@ Changelog
 
 **Changes**
 
+- Added `ICatalog` and `ICatalogQuery` adapter for full search control. See docs for usage.
+- Removed `query` module in favor of the new adapters.
+- Removed multiple catalog query functionality. Please define a custom `ICatalog` adapter if you need it.
 - Added generic route provider for all `portal_types`.
   N.B. The old-style route providers, e.g. `folders`, `documents` etc., are now obsolete.
        Please use the lower portal type name instead, e.g. `folder`, `docuememt` ...
+- The `users` route shows now more details of the users and results are now batched.
+- Removed default `getObjPositionInParent` sorting. Please specify explicitly via `sort_on`.
 - UID of the plone site is now '0' instead of 0.
+- Huge code refactoring and cleanup.
 
 
 0.9.0 - 2017-01-12
