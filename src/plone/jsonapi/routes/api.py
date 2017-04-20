@@ -746,6 +746,9 @@ def resource_to_portal_type(resource):
     :returns: Portal type name
     :rtype: string
     """
+    if resource is None:
+        return None
+
     resource_mapping = get_resource_mapping()
     portal_type = resource_mapping.get(resource)
 
@@ -758,7 +761,7 @@ def resource_to_portal_type(resource):
                         "Please use '{}' instead of '{}'".format(new_resource, resource))
 
     if portal_type is None:
-        logger.warn("Could not map the resource '{}'"
+        logger.warn("Could not map the resource '{}' "
                     "to any known portal type".format(resource))
 
     return portal_type
@@ -838,6 +841,21 @@ def is_folderish(brain_or_object):
             return brain_or_object.is_folderish()
         return brain_or_object.is_folderish
     return IFolderish.providedBy(get_object(brain_or_object))
+
+
+def is_uid(uid):
+    """Checks if the passed in uid is a valid UID
+
+    :param uid: The uid to check
+    :type uid: string
+    :return: True if the uid is a valid 32 alphanumeric uid or '0'
+    :rtype: bool
+    """
+    if not isinstance(uid, basestring):
+        return False
+    if uid != "0" and len(uid) != 32:
+        return False
+    return True
 
 
 def url_for(endpoint, **values):
@@ -1045,7 +1063,7 @@ def find_objects(uid=None):
 
     # get the object by the given uid or try to find it by the request
     # parameters
-    obj = get_object_by_uid(uid) or get_object_by_request()
+    obj = get_object_by_uid(uid, None) or get_object_by_request()
 
     if obj:
         objects.append(obj)
