@@ -64,7 +64,7 @@ def get_record(uid=None):
         form = req.get_form()
         obj = get_object_by_record(form)
     if obj is None:
-        raise APIError(404, "No object found")
+        fail(404, "No object found")
     complete = req.get_complete(default=_marker)
     if complete is _marker:
         complete = True
@@ -148,7 +148,7 @@ def create_items(portal_type=None, uid=None, endpoint=None, **kw):
         results.append(obj)
 
     if not results:
-        raise APIError(400, "No Objects could be created")
+        fail(400, "No Objects could be created")
 
     return make_items_for(results, endpoint=endpoint)
 
@@ -190,7 +190,7 @@ def update_items(portal_type=None, uid=None, endpoint=None, **kw):
         results.append(obj)
 
     if not results:
-        raise APIError(400, "No Objects could be updated")
+        fail(400, "No Objects could be updated")
 
     return make_items_for(results, endpoint=endpoint)
 
@@ -217,7 +217,7 @@ def delete_items(portal_type=None, uid=None, endpoint=None, **kw):
 
     # We don't want to delete the portal object
     if filter(lambda o: is_root(o), objects):
-        raise APIError(400, "Can not delete the portal object")
+        fail(400, "Can not delete the portal object")
 
     results = []
     for obj in objects:
@@ -226,7 +226,7 @@ def delete_items(portal_type=None, uid=None, endpoint=None, **kw):
         results.append(info)
 
     if not results:
-        raise APIError(404, "No Objects could be found")
+        fail(404, "No Objects could be found")
 
     return results
 
@@ -244,15 +244,15 @@ def cut_items(portal_type=None, uid=None, endpoint=None, **kw):
 
     # No objects could be found, bail out
     if not objects:
-        raise APIError(404, "No Objects could be found")
+        fail(404, "No Objects could be found")
 
     # We support only to cut a single object
     if len(objects) > 1:
-        raise APIError(400, "Can only cut one object at a time")
+        fail(400, "Can only cut one object at a time")
 
     # We don't want to cut the portal object
     if filter(lambda o: is_root(o), objects):
-        raise APIError(400, "Can not cut the portal object")
+        fail(400, "Can not cut the portal object")
 
     # cut the object
     obj = objects[0]
@@ -277,15 +277,15 @@ def copy_items(portal_type=None, uid=None, endpoint=None, **kw):
 
     # No objects could be found, bail out
     if not objects:
-        raise APIError(404, "No Objects could be found")
+        fail(404, "No Objects could be found")
 
     # We support only to copy a single object
     if len(objects) > 1:
-        raise APIError(400, "Can only copy one object at a time")
+        fail(400, "Can only copy one object at a time")
 
     # We don't want to copy the portal object
     if filter(lambda o: is_root(o), objects):
-        raise APIError(400, "Can not copy the portal object")
+        fail(400, "Can not copy the portal object")
 
     # cut the object
     obj = objects[0]
@@ -310,16 +310,16 @@ def paste_items(portal_type=None, uid=None, endpoint=None, **kw):
 
     # No objects could be found, bail out
     if not objects:
-        raise APIError(404, "No Objects could be found")
+        fail(404, "No Objects could be found")
 
     # check if the cookie is there
     cookie = req.get_cookie("__cp")
     if cookie is None:
-        raise APIError(400, "No data found to paste")
+        fail(400, "No data found to paste")
 
     # We support only to copy a single object
     if len(objects) > 1:
-        raise APIError(400, "Can only paste to one location")
+        fail(400, "Can only paste to one location")
 
     # cut the object
     obj = objects[0]
@@ -637,6 +637,14 @@ def get_batch(sequence, size, start=0, endpoint=None, complete=False):
 # -----------------------------------------------------------------------------
 #   Functional Helpers
 # -----------------------------------------------------------------------------
+
+def fail(status, msg):
+    """API Error
+    """
+    if msg is None:
+        msg = "Reason not given."
+    raise APIError(status, "{}".format(msg))
+
 
 def get_plone_version():
     """Get the Plone version
@@ -1101,7 +1109,7 @@ def get_object_by_path(path):
     portal_path = get_path(portal)
 
     if not path.startswith(portal_path):
-        raise APIError(404, "Not a physical path inside the portal")
+        fail(404, "Not a physical path inside the portal")
 
     if path == portal_path:
         return portal
@@ -1139,7 +1147,7 @@ def mkdir(path):
             continue
 
         if not is_folderish(container):
-            raise APIError(400, "Object at %s is not a folder" % curpath)
+            fail(400, "Object at %s is not a folder" % curpath)
 
         # create the folder on the go
         container = ploneapi.content.create(
@@ -1170,10 +1178,10 @@ def find_target_container(record):
         if target is None:
             target = mkdir(parent_path)
     else:
-        raise APIError(404, "No target UID/PATH information found")
+        fail(404, "No target UID/PATH information found")
 
     if not target:
-        raise APIError(404, "No target container found")
+        fail(404, "No target container found")
 
     return target
 
@@ -1255,11 +1263,11 @@ def delete_object(brain_or_object):
     obj = get_object(brain_or_object)
     # we do not want to delete the site root!
     if is_root(obj):
-        raise APIError(401, "Removing the Portal is not allowed")
+        fail(401, "Removing the Portal is not allowed")
     try:
         return ploneapi.content.delete(obj) is None and True or False
     except Unauthorized:
-        raise APIError(401, "Not allowed to delete object '%s'" % obj.getId())
+        fail(401, "Not allowed to delete object '%s'" % obj.getId())
 
 
 def get_current_user():
@@ -1285,7 +1293,7 @@ def create_object(container, portal_type, **data):
         # create the new object (with security checks enabled)
         obj_id = container.invokeFactory(portal_type, tmp_id)
     except Unauthorized:
-        raise APIError(401, "You are not allowed to create this content")
+        fail(401, "You are not allowed to create this content")
 
     # get the object by its object ID
     obj = container[obj_id]
@@ -1338,7 +1346,7 @@ def update_object_with_data(content, record):
     dm = IDataManager(content)
 
     if dm is None:
-        raise APIError(400, "Update for this object is not allowed")
+        fail(400, "Update for this object is not allowed")
 
     # https://github.com/collective/plone.jsonapi.routes/issues/77
     # filter out bogus keywords
@@ -1349,9 +1357,9 @@ def update_object_with_data(content, record):
         try:
             success = dm.set(k, v, **field_kwargs)
         except Unauthorized:
-            raise APIError(401, "Not allowed to set the field '%s'" % k)
+            fail(401, "Not allowed to set the field '%s'" % k)
         except ValueError, exc:
-            raise APIError(400, str(exc))
+            fail(400, str(exc))
 
         if not success:
             logger.warn("update_object_with_data::skipping key=%r", k)
@@ -1362,7 +1370,7 @@ def update_object_with_data(content, record):
     # Validate the entire content object
     invalid = validate_object(content, record)
     if invalid:
-        raise APIError(400, _.to_json(invalid))
+        fail(400, _.to_json(invalid))
 
     # do a wf transition
     if record.get("transition", None):
