@@ -140,9 +140,16 @@ def create_items(portal_type=None, uid=None, endpoint=None, **kw):
         if container is None:
             # find the container for content creation
             container = find_target_container(record)
+
         if portal_type is None:
-            portal_type = record.get("portal_type", None)
-        # create the object
+            # try to fetch the portal type out of the request data
+            portal_type = record.pop("portal_type", None)
+
+        # Check if we have a container and a portal_type
+        if not all([container, portal_type]):
+            fail(400, "Please provide a container path/uid and portal_type")
+
+        # create the object and pass in the record data
         obj = create_object(container, portal_type, **record)
         results.append(obj)
 
@@ -1198,8 +1205,8 @@ def find_target_container(record):
     :returns: folder which contains the object
     :rtype: object
     """
-    parent_uid = record.get("parent_uid")
-    parent_path = record.get("parent_path")
+    parent_uid = record.pop("parent_uid", None)
+    parent_path = record.pop("parent_path", None)
 
     target = None
 
