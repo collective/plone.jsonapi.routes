@@ -144,6 +144,6 @@ def logout(context, request):
     acl_users.logout(request)
 
     return {
-        "url":     url_for("plone.jsonapi.routes.users"),
+        "url": api.url_for("plone.jsonapi.routes.users"),
         "success": True
     }

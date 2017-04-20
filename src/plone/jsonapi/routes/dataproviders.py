@@ -57,16 +57,16 @@ class Base(object):
         # Mapped attributes to extract from the object besides the schema keys.
         # These keys are always included
         self.attributes = {
-            "id":          "getId",
-            "uid":         "UID",
-            "title":       "Title",
+            "id": "getId",
+            "uid": "UID",
+            "title": "Title",
             "description": "Description",
-            "created":     "created",
-            "modified":    "modified",
-            "effective":   "effective",
+            "created": "created",
+            "modified": "modified",
+            "effective": "effective",
             "portal_type": "portal_type",
-            "tags":        "Subject",
-            "author":      "Creator",
+            "tags": "Subject",
+            "author": "Creator",
         }
 
     def to_dict(self):
