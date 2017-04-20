@@ -71,6 +71,11 @@ http://localhost:8080/Plone/@@API/plone/api/1.0/get?parent_path=/Plone&id=folder
 .. versionadded:: 0.4
     Adding 0 or the string `portal` as UID returns the portal Object.
 
+.. versionadded:: 0.9.1
+    The `get` route is now obsolete. Please use the base url to retrieve a content by uid, e.g.:
+    http://localhost:8080/Plone/@@API/plone/api/1.0/<uid>
+
+
 
 CREATE
 ------

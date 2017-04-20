@@ -67,6 +67,14 @@ request.
 | DELETE    | <BASE URL>/<RESOURCE>/delete/<uid:optional> | POST   |
 +-----------+---------------------------------------------+--------+
 
+.. versionadded:: 0.9.1
+
+The API is now fully aware of all registered portal types in Plone.
+Each resource is now equivalent to the portal type name.
+
+It is also possible now to get all contents by UID directly from the base url,
+e.g.: http://localhost:8080/Plone/@@API/plone/api/1.0/<uid>
+
 
 .. _Resources:
 
@@ -104,6 +112,21 @@ of *Folders*.
 
 .. note:: Please see the section `Parameters` on how to refine the returned
           results
+
+
+.. versionadded:: 0.9.1
+    A resource is now equivalent with the portal type name in Plone.
+    While the resources listed above still remain functional, they
+    will be removed in 1.0.0.
+
+    This means that all portal types are fully supported by the API
+    simply by adding the portal type to the end of the base url, e.g.:
+
+        http://localhost:8080/Plone/@@API/plone/api/1.0/Folder
+        http://localhost:8080/Plone/@@API/plone/api/1.0/Image
+        http://localhost:8080/Plone/@@API/plone/api/1.0/File
+
+.. note:: Lower case portal type names are also supported.
 
 
 Special Resources
