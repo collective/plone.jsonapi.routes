@@ -245,3 +245,144 @@ Register the adapter in your `configure.zcml` file for your special interface:
             />
 
     </configure>
+
+
+.. _CATALOG:
+
+Adding a custom catalog tool
+----------------------------
+
+.. versionadded:: 0.9.1
+    You can specify an own `catalog` tool which performs your custom query.
+
+All search is done through a catalog adapter. This adapter has to provide at
+least a `search` method. The others are optional, but recommended.
+
+.. code-block:: python
+
+    class ICatalog(interface.Interface):
+        """ Plone catalog interface
+        """
+
+        def search(query):
+            """ search the catalog and return the results
+            """
+
+        def get_catalog():
+            """ get the used catalog tool
+            """
+
+        def get_indexes():
+            """ get all indexes managed by this catalog
+            """
+
+        def get_index(name):
+            """ get an index by name
+            """
+
+        def to_index_value(value, index):
+            """ Convert the value for a given index
+            """
+
+To customize the catalog tool to get full control of the search, you have to
+register an catalog adapter for a more specific interface on the portal. This
+adapter has to implement the `ICatalog` interface.
+
+
+.. code-block:: python
+
+    from zope import interface
+    from plone.jsonapi.routes.interfaces import ICatalog
+    from plone.jsonapi.routes import api
+
+    class Catalog(object):
+        """Plone catalog adapter
+        """
+        interface.implements(ICatalog)
+
+        def __init__(self, context):
+            self._catalog = api.get_tool("portal_catalog")
+
+        def search(self, query):
+            """search the catalog
+            """
+            catalog = self.get_catalog()
+            return catalog(query)
+
+Register the adapter in your `configure.zcml` file for your special interface:
+
+.. code-block:: xml
+
+    <configure
+        xmlns="http://namespaces.zope.org/zope">
+
+        <!-- Adapter for a custom catalog adapter -->
+        <adapter
+            for=".interfaces.ICustomPortalMarkerInterface"
+            factory=".catalog.Catalog"
+            />
+
+    </configure>
+
+
+.. _CATALOG_QUERY:
+
+Adding a custom catalog query adapter
+-------------------------------------
+
+.. versionadded:: 0.9.1
+    You can specify an own `query` adapter, which builds a query for the catalog adapter.
+
+All search is done through a catalog adapter. The `ICatalogQuery` adapter
+provides a suitable query usable for the `ICatalog` adapter. It should at least
+provide a `make_query` method.
+
+.. code-block:: python
+
+    class ICatalogQuery(interface.Interface):
+        """ Plone catalog query interface
+        """
+
+        def make_query(**kw):
+            """ create a new query or augment an given query
+            """
+
+To customize a custom catalog tool to perform a search, you have to
+register an catalog adapter for a more specific interface on the portal.
+This adapter has to implement the `ICatalog` interface.
+
+
+.. code-block:: python
+
+    from zope import interface
+    from plone.jsonapi.routes.interfaces import ICatalogQuery
+
+    class CatalogQuery(object):
+        """Catalog query adapter
+        """
+        interface.implements(ICatalogQuery)
+
+        def __init__(self, catalog):
+            self.catalog = catalog
+
+        def make_query(self, **kw):
+            """create a query suitable for the catalog
+            """
+            query = {"sort_on": "created", "sort_order": "descending"}
+            query.update(kw)
+            return query
+
+Register the adapter in your `configure.zcml` file for your special interface:
+
+.. code-block:: xml
+
+    <configure
+        xmlns="http://namespaces.zope.org/zope">
+
+        <!-- Adapter for a custom query adapter -->
+        <adapter
+            for=".interface.ICustomCatalogInterface"
+            factory=".catalog.CatalogQuery"
+            />
+
+    </configure>
