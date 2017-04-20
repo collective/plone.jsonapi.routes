@@ -49,9 +49,8 @@ PORTAL_IDS = ["0", "portal", "site", "plone", "root", "plone site"]
 
 
 # -----------------------------------------------------------------------------
-#   Json API (CRUD) Functions
+#   JSON API (CRUD) Functions
 # -----------------------------------------------------------------------------
-
 
 # GET RECORD
 def get_record(uid=None):
@@ -519,19 +518,19 @@ def get_workflow_info(brain_or_object, endpoint=None):
         """ return the transition information
         """
         return {
-            "value":   transition["id"],
+            "value": transition["id"],
             "display": transition["description"],
-            "url":     transition["url"],
+            "url": transition["url"],
         }
 
     # get the transition informations
     transitions = map(to_transition_info, wf_tool.getTransitionsFor(obj))
 
     return {
-        "workflow":     workflow.getId(),
-        "status":       current_state_title,
+        "workflow": workflow.getId(),
+        "status": current_state_title,
         "review_state": current_state_id,
-        "transitions":  transitions
+        "transitions": transitions
     }
 
 
@@ -621,13 +620,13 @@ def get_batch(sequence, size, start=0, endpoint=None, complete=False):
 
     return {
         "pagesize": batch.get_pagesize(),
-        "next":     batch.make_next_url(),
+        "next": batch.make_next_url(),
         "previous": batch.make_prev_url(),
-        "page":     batch.get_pagenumber(),
-        "pages":    batch.get_numpages(),
-        "count":    batch.get_sequence_length(),
-        "items":    make_items_for([b for b in batch.get_batch()],
-                                   endpoint, complete=complete),
+        "page": batch.get_pagenumber(),
+        "pages": batch.get_numpages(),
+        "count": batch.get_sequence_length(),
+        "items": make_items_for([b for b in batch.get_batch()],
+                                endpoint, complete=complete),
     }
 
 
@@ -849,7 +848,7 @@ def url_for(endpoint, **values):
         # XXX plone.jsonapi.core should catch the BuildError of Werkzeug and
         #     throw another error which can be handled here.
         logger.warn("Could not build API URL for endpoint '%s'. "
-                     "No route provider registered?" % endpoint)
+                    "No route provider registered?" % endpoint)
         return None
 
 
