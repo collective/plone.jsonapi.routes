@@ -462,10 +462,13 @@ def get_url_info(brain_or_object, endpoint=None):
         endpoint = get_endpoint(brain_or_object)
 
     uid = get_uid(brain_or_object)
+    portal_type = get_portal_type(brain_or_object)
+    resource = portal_type_to_resource(portal_type)
+
     return {
         "uid": uid,
         "url": get_url(brain_or_object),
-        "api_url": url_for(endpoint, uid=uid),
+        "api_url": url_for(endpoint, resource=resource, uid=uid),
     }
 
 
@@ -549,23 +552,17 @@ def get_parent_info(brain_or_object, endpoint=None):
 
     # get the parent object
     parent = get_parent(brain_or_object)
+    portal_type = get_portal_type(parent)
+    resource = portal_type_to_resource(portal_type)
 
     # fall back if no endpoint specified
     if endpoint is None:
         endpoint = get_endpoint(parent)
 
-    # return portal information
-    if is_root(parent):
-        return {
-            "parent_id": get_id(parent),
-            "parent_uid": 0,
-            "parent_url": url_for("plonesites", uid=0),
-        }
-
     return {
         "parent_id": get_id(parent),
         "parent_uid": get_uid(parent),
-        "parent_url": url_for(endpoint, uid=get_uid(parent))
+        "parent_url": url_for(endpoint, resource=resource, uid=get_uid(parent))
     }
 
 
@@ -685,7 +682,7 @@ def get_portal():
     return ploneapi.portal.getSite()
 
 
-def get_tool(name):
+def get_tool(name, default=_marker):
     """Get a portal tool by name
 
     :param name: The name of the tool, e.g. `portal_catalog`
@@ -693,7 +690,72 @@ def get_tool(name):
     :returns: Portal Tool
     :rtype: object
     """
-    return ploneapi.portal.get_tool(name)
+    try:
+        return ploneapi.portal.get_tool(name)
+    except InvalidParameterError:
+        if default is not _marker:
+            return default
+        fail(500, "No tool named '%s' found." % name)
+
+
+def get_portal_types():
+    """Get a list of all portal types
+
+    :retruns: List of portal type names
+    :rtype: list
+    """
+    types_tool = get_tool("portal_types")
+    return types_tool.listContentTypes()
+
+
+def get_resource_mapping():
+    """Map resources used in the routes to portal types
+
+    :returns: Mapping of resource->portal_type
+    :rtype: dict
+    """
+    portal_types = get_portal_types()
+    resources = map(portal_type_to_resource, portal_types)
+    return dict(zip(resources, portal_types))
+
+
+def portal_type_to_resource(portal_type):
+    """Converts a portal type name to a resource name
+
+    :param portal_type: Portal type name
+    :type name: string
+    :returns: Resource name as it is used in the content route
+    :rtype: string
+    """
+    resource = portal_type.lower()
+    resource = resource.replace(" ", "")
+    return resource
+
+
+def resource_to_portal_type(resource):
+    """Converts a resource to a portal type
+
+    :param resource: Resource name as it is used in the content route
+    :type name: string
+    :returns: Portal type name
+    :rtype: string
+    """
+    resource_mapping = get_resource_mapping()
+    portal_type = resource_mapping.get(resource)
+
+    # BBB: Handle pre 0.9.1 resource routes, e.g. folders, collections...
+    if portal_type is None and resource.endswith("s"):
+        new_resource = resource.rstrip("s")
+        portal_type = resource_mapping.get(new_resource)
+        if portal_type:
+            logger.warn("Old style resources will be removed in 1.0. "
+                        "Please use '{}' instead of '{}'".format(new_resource, resource))
+
+    if portal_type is None:
+        logger.warn("Could not map the resource '{}'"
+                    "to any known portal type".format(resource))
+
+    return portal_type
 
 
 def get_portal_catalog():
@@ -703,18 +765,6 @@ def get_portal_catalog():
     :rtype: object
     """
     return get_tool("portal_catalog")
-
-
-def get_portal_reference_catalog():
-    """Get the portal reference catalog tool
-
-    :returns: Portal Reference Catalog Tool
-    :rtype: object | None
-    """
-    try:
-        return get_tool("reference_catalog")
-    except InvalidParameterError:
-        return None
 
 
 def get_portal_workflow():
@@ -784,10 +834,10 @@ def is_folderish(brain_or_object):
     return IFolderish.providedBy(get_object(brain_or_object))
 
 
-def url_for(endpoint, default="plone.jsonapi.routes.get", **values):
+def url_for(endpoint, **values):
     """Looks up the API URL for the given endpoint
 
-    :param endpoint: The name of the registered route (aka endpoint)
+    :param endpoint: The name of the registered route
     :type endpoint: string
     :returns: External URL for this endpoint
     :rtype: string/None
@@ -798,12 +848,9 @@ def url_for(endpoint, default="plone.jsonapi.routes.get", **values):
     except Exception:
         # XXX plone.jsonapi.core should catch the BuildError of Werkzeug and
         #     throw another error which can be handled here.
-        logger.debug("Could not build API URL for endpoint '%s'. "
+        logger.warn("Could not build API URL for endpoint '%s'. "
                      "No route provider registered?" % endpoint)
-
-        # build generic API URL
-        # https://github.com/collective/plone.jsonapi.routes/issues/59
-        return router.url_for(default, force_external=True, values=values)
+        return None
 
 
 def get_url(brain_or_object):
@@ -952,32 +999,27 @@ def get_contents(brain_or_object, depth=1):
     return search(query=query)
 
 
-def get_endpoint(brain_or_object):
+def get_endpoint(brain_or_object, default="plone.jsonapi.routes.get"):
     """Calculate the endpoint for this object
 
     :param brain_or_object: A single catalog brain or content object
     :type brain_or_object: ATContentType/DexterityContentType/CatalogBrain
-    :returns: Endpoint for this object (pluralized portal type)
+    :returns: Endpoint for this object
     :rtype: string
     """
     portal_type = get_portal_type(brain_or_object)
-    # handle portal types with dots
-    portal_type = portal_type.split(".").pop()
-    # remove whitespaces
-    portal_type = portal_type.replace(" ", "")
-    # lower and pluralize
-    portal_type = portal_type.lower() + "s"
+    resource = portal_type_to_resource(portal_type)
 
-    # XXX Hack to get the right namespaced endpoint
+    # Try to get the right namespaced endpoint
     endpoints = router.DefaultRouter.view_functions.keys()
-    if portal_type in endpoints:
-        return portal_type  # exact match
-    endpoint_candidates = filter(lambda e: e.endswith(portal_type), endpoints)
+    if resource in endpoints:
+        return resource  # exact match
+    endpoint_candidates = filter(lambda e: e.endswith(resource), endpoints)
     if len(endpoint_candidates) == 1:
         # only return the namespaced endpoint, if we have an exact match
         return endpoint_candidates[0]
-    # default
-    return None
+
+    return default
 
 
 def find_objects(uid=None):
@@ -1055,38 +1097,31 @@ def get_object_by_record(record):
     return None
 
 
-def get_object_by_uid(uid):
+def get_object_by_uid(uid, default=_marker):
     """Find an object by a given UID
 
     :param uid: The UID of the object to find
     :type uid: string
     :returns: Found Object or None
-    :rtype: object
     """
-
-    # nothing to do here
-    if uid is None:
-        return None
-
-    # define uid 0 as the portal object
     if str(uid).lower() in PORTAL_IDS:
         return get_portal()
 
-    # we try to find the object with both catalogs
+    uc = get_tool("uid_catalog", default=None)
+    # try to find the object with the uid_catalog
+    if uc is not None:
+        # try to find the object with the reference catalog first
+        brains = uc(UID=uid)
+        if brains:
+            return get_object(brains[0])
+
+    # try to find the object with the portal_catalog
     pc = get_portal_catalog()
-    rc = get_portal_reference_catalog()
-
-    # try to find the object with the reference catalog first
-    obj = rc and rc.lookupObject(uid)
-    if obj:
-        return obj
-
-    # try to find the object with the portal catalog
-    res = pc(dict(UID=uid))
-    if len(res) > 1:
-        raise APIError(400, "More than one object found for UID %s" % uid)
+    res = pc(UID=uid)
     if not res:
-        return None
+        if default is not _marker:
+            return default
+        fail(404, "No object found for UID {}".format(uid))
 
     return get_object(res[0])
 
@@ -1350,6 +1385,7 @@ def update_object_with_data(content, record):
 
     # https://github.com/collective/plone.jsonapi.routes/issues/77
     # filter out bogus keywords
+    # XXX Maybe we should pass only values where we have identical field names?
     field_kwargs = _.omit(record, "file")
 
     # Iterate through record items
