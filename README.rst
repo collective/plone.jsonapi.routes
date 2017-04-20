@@ -1,5 +1,5 @@
-plone.jsonapi.routes
-====================
+Plone JSON API Routes
+=====================
 
 :Author: Ramon Bartl (RIDING BYTES - http://ridingbytes.com)
 :Version: 0.9.1
