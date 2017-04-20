@@ -14,7 +14,14 @@ def get_user_info(user):
     """
     user = api.get_user(user)
     current = api.get_current_user()
-    anon = api.is_anonymous()
+
+    if api.is_anonymous():
+        return {
+            "username": current.getUserName(),
+            "authenticated": False,
+            "roles": current.getRoles(),
+            "api_url": api.url_for("plone.jsonapi.routes.users", username="current"),
+        }
 
     # nothing to do
     if user is None:
@@ -25,10 +32,10 @@ def get_user_info(user):
     pu = user.getUser()
 
     info = {
-        "username": user.getId(),
+        "username": user.getUserName(),
         "roles": user.getRoles(),
         "groups": pu.getGroups(),
-        "authenticated": current == user and not anon,
+        "authenticated": current == user,
         "api_url": api.url_for("plone.jsonapi.routes.users", username=user.getId()),
     }
 
