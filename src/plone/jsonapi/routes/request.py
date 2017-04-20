@@ -142,23 +142,22 @@ def get_batch_start():
 def get_sort_on(allowed_indexes=None):
     """ returns the 'sort_on' from the request
     """
-    sort_on = get("sort_on", "getObjPositionInParent")
+    sort_on = get("sort_on")
     if allowed_indexes and sort_on not in allowed_indexes:
-        logger.warn("Index '%s' is not in allowed_indexes" % sort_on)
-        return "id"
+        logger.warn("Index '{}' is not in allowed_indexes".format(sort_on))
+        return None
     return sort_on
 
 
 def get_sort_order():
     """ returns the 'sort_order' from the request
     """
-    sort_order = get("sort_order")
+    sort_order = get("sort_order", "ascending")
     if sort_order in ["ASC", "ascending", "a", "asc", "up", "high"]:
         return "ascending"
     if sort_order in ["DESC", "descending", "d", "desc", "down", "low"]:
         return "descending"
-    # https://github.com/collective/plone.jsonapi.routes/issues/31
-    return "ascending"
+    return sort_order
 
 
 def get_query():

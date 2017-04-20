@@ -16,6 +16,21 @@
       register_api_routes="True"
       />
 
+  <!-- CATALOG -->
+
+  <!-- Default catalog adapter -->
+  <adapter
+      for="*"
+      factory=".catalog.Catalog"
+      />
+
+  <!-- Default catalog query adapter -->
+  <adapter
+      for=".interfaces.ICatalog"
+      factory=".catalog.CatalogQuery"
+      />
+
+
   <!-- BATCHING -->
 
   <!-- Batch adapter for Plone 4.3 Batching -->

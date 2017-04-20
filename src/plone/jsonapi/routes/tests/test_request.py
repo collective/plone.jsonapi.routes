@@ -39,7 +39,7 @@ class TestRequest(APITestCase):
         self.assertEqual(req.get_batch_start(), 1)
 
     def test_sort_on_parameter(self):
-        self.assertEqual(req.get_sort_on(), "getObjPositionInParent")
+        self.assertEqual(req.get_sort_on(), None)
         request = req.get_request()
         request.form["sort_on"] = "Title"
         self.assertEqual(req.get_sort_on(), "Title")

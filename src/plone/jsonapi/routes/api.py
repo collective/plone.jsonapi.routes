@@ -28,9 +28,6 @@ except pkg_resources.DistributionNotFound:
 else:
     from Products.Archetypes.interfaces.base import IBaseObject
 
-# search helpers
-from query import search
-
 # request helpers
 from plone.jsonapi.routes import request as req
 from plone.jsonapi.routes.exceptions import APIError
@@ -38,6 +35,8 @@ from plone.jsonapi.routes.exceptions import APIError
 from plone.jsonapi.routes import logger
 from plone.jsonapi.routes.interfaces import IInfo
 from plone.jsonapi.routes.interfaces import IBatch
+from plone.jsonapi.routes.interfaces import ICatalog
+from plone.jsonapi.routes.interfaces import ICatalogQuery
 from plone.jsonapi.routes.interfaces import IDataManager
 from plone.jsonapi.routes import underscore as _
 
@@ -347,6 +346,16 @@ def paste_items(portal_type=None, uid=None, endpoint=None, **kw):
 # -----------------------------------------------------------------------------
 #   Data Functions
 # -----------------------------------------------------------------------------
+
+def search(**kw):
+    """Search the catalog
+    """
+    portal = get_portal()
+    catalog = ICatalog(portal)
+    catalog_query = ICatalogQuery(catalog)
+    query = catalog_query.make_query(**kw)
+    return catalog(query)
+
 
 def get_search_results(portal_type=None, uid=None, **kw):
     """Search the catalog and return the results
@@ -899,6 +908,25 @@ def to_iso_date(date, default=None):
 
     # handle python datetime objects
     return date.isoformat()
+
+
+def calculate_delta_date(literal):
+    """Calculate the date in the past from the given literal
+
+    :param literal: A date literal, e.g. "today"
+    :type literal: str
+    :returns: Date between the literal and today
+    :rtype: DateTime
+    """
+    mapping = {
+        "today": 0,
+        "yesterday": 1,
+        "this-week": 7,
+        "this-month": 30,
+        "this-year": 365,
+    }
+    today = DateTime(DateTime().Date())  # current date without the time
+    return today - mapping.get(literal, 0)
 
 
 def is_json_serializable(thing):

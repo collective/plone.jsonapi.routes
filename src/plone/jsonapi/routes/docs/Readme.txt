@@ -170,17 +170,17 @@ Sorting queries
 Queries accept standard `sort_order` and `sort_on` params.
 Like the portal_catalog default, the default is ascending order.
 
-    >>> browser.open(api_url + "/search?sort_on=sortable_title")
+    >>> browser.open(api_url + "/search?portal_type=Document&sort_on=sortable_title")
     >>> response = self.decode(browser.contents)
     >>> [x['id'] for x in response.get('items')][:3]
     ['document-0', 'document-1', 'document-2']
 
 We can also use 'descending' sort::
 
-    >>> browser.open(api_url + "/search?sort_on=sortable_title&sort_order=descending")
+    >>> browser.open(api_url + "/search?portal_type=Document&sort_on=sortable_title&sort_order=descending")
     >>> response = self.decode(browser.contents)
     >>> [x['id'] for x in response.get('items')][:3]
-    ['folder', 'document-49', 'document-48']
+    ['document-49', 'document-48', 'document-47']
 
 
 Search
@@ -221,7 +221,7 @@ Try to find a Document with a specific title::
 
 Try to search for `Document` and `Folder` content types::
 
-    >>> browser.open(api_url + "/search?portal_type=Document&portal_type=Folder")
+    >>> browser.open(api_url + "/search?portal_type=Document&portal_type=Folder&sort_on=getObjPositionInParent")
     >>> response = self.decode(browser.contents)
     >>> response.get('count')
     51
@@ -240,7 +240,7 @@ Change to descending sort order, so the folder should appear first::
 
 Make use of the `SearchableText` via the `q` request parameter::
 
-    >>> browser.open(api_url + "/search?q=Test Document")
+    >>> browser.open(api_url + "/search?q=Test Document&sort_on=getObjPositionInParent")
     >>> response = self.decode(browser.contents)
     >>> response.get('count')
     50
@@ -260,7 +260,7 @@ Make use of the `SearchableText` via the `q` request parameter::
 
 Make use of the  `recent_created` custom query::
 
-    >>> browser.open(api_url + "/search?recent_created=today")
+    >>> browser.open(api_url + "/search?recent_created=today&sort_on=getObjPositionInParent")
     >>> response = self.decode(browser.contents)
     >>> response.get('count')
     51
