@@ -85,7 +85,7 @@ class PortalDataManager(object):
         # XXX no really nice, but we want the portal to behave like an ordinary
         # content type. Therefore we need to inject the neccessary data.
         if name == "uid":
-            return 0
+            return "0"
         if name == "path":
             return "/%s" % self.context.getId()
         return attr

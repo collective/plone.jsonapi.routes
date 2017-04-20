@@ -889,7 +889,7 @@ def get_uid(brain_or_object):
     if is_brain(brain_or_object):
         return brain_or_object.UID
     if is_root(brain_or_object):
-        return 0
+        return "0"
     return brain_or_object.UID()
 
 
