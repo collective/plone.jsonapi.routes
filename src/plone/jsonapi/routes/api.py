@@ -1039,22 +1039,7 @@ def get_parent(brain_or_object):
 
     if is_brain(brain_or_object):
         parent_path = get_parent_path(brain_or_object)
-
-        # parent is the portal object
-        if parent_path == get_path(get_portal()):
-            return get_portal()
-
-        # query for the parent path
-        pc = get_portal_catalog()
-        results = pc(path={
-            "query": parent_path,
-            "depth": 0})
-
-        # fallback to the object
-        if not results:
-            return get_object(brain_or_object).aq_parent
-        # return the brain
-        return results[0]
+        return get_object_by_path(parent_path)
 
     return brain_or_object.aq_parent
 
@@ -1247,7 +1232,6 @@ def get_object_by_path(path):
     if not path:
         return None
 
-    pc = get_portal_catalog()
     portal = get_portal()
     portal_path = get_path(portal)
 
@@ -1257,10 +1241,7 @@ def get_object_by_path(path):
     if path == portal_path:
         return portal
 
-    res = pc(path=dict(query=path, depth=0))
-    if not res:
-        return None
-    return get_object(res[0])
+    return portal.restrictedTraverse(path)
 
 
 def mkdir(path):
