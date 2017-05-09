@@ -1241,7 +1241,10 @@ def get_object_by_path(path):
     if path == portal_path:
         return portal
 
-    return portal.restrictedTraverse(path)
+    try:
+        return portal.restrictedTraverse(path)
+    except KeyError:
+        return None
 
 
 def mkdir(path):

@@ -219,7 +219,7 @@ class TestAPI(APITestCase):
         # works for catalog brains
         brain = self.get_document_brain()
         parent = api.get_parent(brain)
-        self.assertEqual(parent.UID, folder.UID())
+        self.assertEqual(parent.UID(), folder.UID())
 
         # works for content objects
         obj = self.get_document_obj()
@@ -298,10 +298,9 @@ class TestAPI(APITestCase):
 
     def test_mkdir(self):
         obj = self.portal.folder
-        path = "/".join(obj.getPhysicalPath())
-        api.mkdir(path + "/subfolder"),
-        subfolder = obj.get("subfolder")
-        new_path = "/".join(subfolder.getPhysicalPath())
+        path = api.get_path(obj)
+        subfolder = api.mkdir(path + "/subfolder")
+        new_path = api.get_path(subfolder)
         self.assertEqual(path + "/subfolder", new_path)
 
     def test_find_target_container(self):
