@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import types
-import logging
-
 from zope import interface
 from zope.schema import getFields
 from zope.schema.interfaces import IObject
@@ -14,11 +11,11 @@ from AccessControl import Unauthorized
 from AccessControl import getSecurityManager
 
 from Products.CMFCore import permissions
-from Products.Archetypes.utils import mapply
 
-from plone.jsonapi.routes.exceptions import APIError
-from plone.jsonapi.routes.interfaces import IDataManager
+from plone.jsonapi.routes import logger
 from plone.jsonapi.routes import underscore as _
+from plone.jsonapi.routes.interfaces import IDataManager
+from plone.jsonapi.routes.interfaces import IFieldManager
 
 import pkg_resources
 try:
@@ -32,8 +29,6 @@ else:
 
 __author__ = 'Ramon Bartl <rb@ridingbytes.com>'
 __docformat__ = 'plaintext'
-
-logger = logging.getLogger("plone.jsonapi.routes.datamanagers")
 
 
 class BrainDataManager(object):
@@ -118,27 +113,6 @@ class ATDataManager(object):
     def __init__(self, context):
         self.context = context
 
-    def get_schema(self):
-        """ get the schema
-        """
-        try:
-            return self.context.Schema()
-        except AttributeError:
-            raise APIError(400, "Can not get Schema of %r" % self.context)
-
-    def is_file_field(self, field):
-        """ checks if field is a file field
-        """
-        # XXX find a better way to distinguish file/image fields
-        if getattr(field, "type", None) in ["file", "image", "blob"]:
-            return True
-        return False
-
-    def is_reference_field(sekf, field):
-        """ checks if the field is a reference field
-        """
-        return hasattr(field, "relationship")
-
     def get_field(self, name):
         """ return the field by name
         """
@@ -158,53 +132,9 @@ class ATDataManager(object):
         if not field:
             return False
 
-        # check the field permission
-        if not field.checkPermission("write", self.context):
-            raise Unauthorized("Not allowed to write the field %s" % name)
-
-        # set the field value
-        if self.is_file_field(field):
-            logger.debug("ATDataManager::set:File field detected ('%r'), "
-                         "base64 decoding value", field)
-            value = str(value).decode("base64")
-            # handle the filename
-            if "filename" not in kw:
-                logger.debug("ATDataManager::set: No Filename detected "
-                             "-> using title or id")
-                kw["filename"] = kw.get("id") or kw.get("title")
-
-        # Handle Reference Fields
-        if self.is_reference_field(field):
-            logger.debug("ATDataManager::set:Reference Field detected -> ('%r')", field)
-            if not isinstance(value, types.DictType):
-                logger.warn("Value for reference fields must be a dictionary")
-                return False
-            reference = field.get(self.context)
-            if reference is None:
-                logger.warn("Skipping empty Reference Field")
-                return False
-            # update the reference
-            from plone.jsonapi.routes.api import update_object_with_data
-            value = update_object_with_data(reference, value)
-
-        # id fields take only strings
-        if name == "id":
-            value = str(value)
-
-        # set the value to the field
-        self._set(field, value, **kw)
-
-        return True
-
-    def _set(self, field, value, **kw):
-        """ set the raw value of the field
-        """
-        logger.debug("ATDataManager::set: field=%r, value=%r", field, value)
-        # get the field mutator
-        mutator = field.getMutator(self.context)
-        # Inspect function and apply positional and keyword arguments if
-        # possible.
-        return mapply(mutator, value, **kw)
+        # call the field adapter and set the value
+        fieldmanager = IFieldManager(field)
+        return fieldmanager.set(self.context, value, **kw)
 
     def get(self, name):
         """ get the value of the field by name
@@ -217,12 +147,9 @@ class ATDataManager(object):
         if not field:
             return None
 
-        # check the field permission
-        if not field.checkPermission("read", self.context):
-            raise Unauthorized("Not allowed to read the field %s" % name)
-
-        # return the field value
-        return field.get(self.context)
+        # call the field adapter and set the value
+        fieldmanager = IFieldManager(field)
+        return fieldmanager.get(self.context)
 
 
 class DexterityDataManager(object):

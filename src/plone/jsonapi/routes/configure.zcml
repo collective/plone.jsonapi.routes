@@ -73,6 +73,39 @@
       />
 
 
+  <!-- FIELD MANAGERS -->
+
+  <!-- Adapter for AT Fields -->
+  <adapter
+      for="Products.Archetypes.interfaces.field.IField"
+      factory=".fieldmanagers.ATFieldManager"
+      />
+
+  <!-- Adapter for Text Fields -->
+  <adapter
+      for="Products.Archetypes.interfaces.field.ITextField"
+      factory=".fieldmanagers.TextFieldManager"
+      />
+
+  <!-- Adapter for DateTime Field -->
+  <adapter
+      for="Products.Archetypes.interfaces.field.IDateTimeField"
+      factory=".fieldmanagers.DateTimeFieldManager"
+      />
+
+  <!-- Adapter for File Field -->
+  <adapter
+      for="Products.Archetypes.interfaces.field.IFileField"
+      factory=".fieldmanagers.FileFieldManager"
+      />
+
+  <!-- Adapter for Reference Field -->
+  <adapter
+      for="Products.Archetypes.interfaces.field.IReferenceField"
+      factory=".fieldmanagers.ReferenceFieldManager"
+      />
+
+
   <!-- DATA PROVIDERS -->
 
   <!-- Default data provider (AT based content types) -->

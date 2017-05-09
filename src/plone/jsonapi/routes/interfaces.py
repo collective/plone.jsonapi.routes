@@ -40,6 +40,19 @@ class ICatalogQuery(interface.Interface):
         """
 
 
+class IFieldManager(interface.Interface):
+    """A Field Manager is able to set/get the values of a single field.
+    """
+
+    def get(instance, **kwargs):
+        """Get the value of the field
+        """
+
+    def set(instance, value, **kwargs):
+        """Set the value of the field
+        """
+
+
 class IInfo(interface.Interface):
     """ JSON Info Interface
     """
