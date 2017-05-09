@@ -120,7 +120,7 @@ class TestDataproviders(APITestCase):
 
         # returns the default if the value is not JSON serializable
         value = dataproviders.get_json_value(obj, "object", object(),
-                                        default="Not JSON serializable")
+                                             default="Not JSON serializable")
         self.assertEqual(value, "Not JSON serializable")
 
     def test_get_file_info(self):
