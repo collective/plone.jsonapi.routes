@@ -5,7 +5,6 @@ from plone import api as ploneapi
 from plone.jsonapi.routes import api
 from plone.jsonapi.routes import logger
 from plone.jsonapi.routes import request as req
-from plone.jsonapi.routes.exceptions import APIError
 from plone.jsonapi.routes import add_plone_route as route
 
 
@@ -120,9 +119,9 @@ def login(context, request):
     logger.info("*** LOGIN %s ***" % __ac_name)
 
     if __ac_name is None:
-        raise APIError(400, "__ac_name is missing")
+        api.fail(400, "__ac_name is missing")
     if __ac_password is None:
-        raise APIError(400, "__ac_password is missing")
+        api.fail(400, "__ac_password is missing")
 
     acl_users = ploneapi.portal.get_tool("acl_users")
 
@@ -135,7 +134,7 @@ def login(context, request):
     # acl_users.updateCredentials(request, response, __ac_name, __ac_password)
 
     if ploneapi.user.is_anonymous():
-        raise APIError(401, "Invalid Credentials")
+        api.fail(401, "Invalid Credentials")
 
     # return the JSON in the same format like the user route
     return get(context, request, username=__ac_name)
