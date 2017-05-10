@@ -1294,7 +1294,7 @@ def get_object_by_path(path):
 
     try:
         return portal.restrictedTraverse(path)
-    except KeyError:
+    except KeyError, AttributeError:
         return None
 
 

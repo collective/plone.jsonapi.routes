@@ -10,6 +10,7 @@ from plone.jsonapi.routes import api
 from plone.jsonapi.routes import dataproviders
 from plone.jsonapi.routes.interfaces import IInfo
 from plone.jsonapi.routes.interfaces import IDataManager
+from plone.jsonapi.routes.interfaces import IFieldManager
 
 
 FILENAME = u"TestDoc.docx"
@@ -162,7 +163,8 @@ class TestDataproviders(APITestCase):
         obj = self.doc
         dm = IDataManager(obj)
         field = dm.get_field("file")
-        self.assertTrue(dm.is_file_field(field))
+        fm = IFieldManager(field)
+        self.assertTrue(fm.is_file_field(field))
 
 
 def test_suite():
