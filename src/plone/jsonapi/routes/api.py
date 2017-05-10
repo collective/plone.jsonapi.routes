@@ -4,7 +4,6 @@ import json
 import pkg_resources
 import datetime
 
-import transaction
 from zope import interface
 from zope.component import getMultiAdapter
 
@@ -1484,35 +1483,21 @@ def create_object(container, portal_type, **data):
     :rtype: object
     """
 
-    # temporary object ID for the new content type
-    obj_id = tmp_id = "{}-{}".format(portal_type, DateTime().strftime("%s"))
+    id = data.pop("id", None)
+    title = data.pop("title", None)
 
     try:
-        # create the new object (with security checks enabled)
-        obj_id = container.invokeFactory(portal_type, tmp_id)
+        # create the new object
+        obj = ploneapi.content.create(
+            container=container,
+            type=portal_type,
+            id=id,
+            title=title)
     except Unauthorized:
         fail(401, "You are not allowed to create this content")
 
-    # get the object by its object ID
-    obj = container[obj_id]
-
-    if is_atct(obj):
-        # Will finish Archetypes content item creation process,
-        # rename-after-creation and such
-        obj.processForm()
-
-    # Allow manual override of the id only if the object was not renamed
-    # after creation by a custom user function (obj.id != obj_id)
-    if obj.id == tmp_id and data.get("id"):
-        id = data.get("id")
-        # do a partial commit, else the renaming fails because
-        # the object isn't in the zodb yet.
-        transaction.savepoint(optimistic=True)
-        ploneapi.content.rename(obj=obj, new_id=id, safe_id=True)
-
-    # Update the object with the given data, but omit the id
+    # Update the object with the given data
     try:
-        data = _.omit(data, "id")
         update_object_with_data(obj, data)
     except APIError:
         # Failure in creation process, delete the invalid object
