@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from plone.jsonapi.routes import request as req
+from plone.jsonapi.routes import messageFactory as _
 
 __author__ = 'Ramon Bartl <rb@ridingbytes.com>'
 __docformat__ = 'plaintext'
@@ -11,6 +12,8 @@ class APIError(Exception):
     """
 
     def __init__(self, status, message):
+        if isinstance(message, basestring):
+            message = _(message)
         self.message = message
         self.status = status
         self.setStatus(status)

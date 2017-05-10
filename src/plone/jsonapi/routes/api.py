@@ -38,7 +38,6 @@ from plone.jsonapi.routes.interfaces import ICatalog
 from plone.jsonapi.routes.interfaces import ICatalogQuery
 from plone.jsonapi.routes.interfaces import IDataManager
 from plone.jsonapi.routes import underscore as u
-from plone.jsonapi.routes import messageFactory as _
 
 __author__ = 'Ramon Bartl <rb@ridingbytes.com>'
 __docformat__ = 'plaintext'
