@@ -134,7 +134,7 @@ class ReferenceFieldManager(ATFieldManager):
     def is_multi_valued(self):
         return self.multi_valued
 
-    def set(self, instance, value, **kw):
+    def set(self, instance, value, **kw):  # noqa
         """Set the value of the refernce field
         """
         ref = []
