@@ -22,8 +22,6 @@ from Products.ATContentTypes.interfaces import IATContentType
 
 from plone.jsonapi.routes.interfaces import IInfo
 from plone.jsonapi.routes.interfaces import IDataManager
-from plone.jsonapi.routes.datamanagers import ATDataManager
-from plone.jsonapi.routes.datamanagers import DexterityDataManager
 from plone.jsonapi.routes import api
 from plone.jsonapi.routes import request as req
 
@@ -146,10 +144,8 @@ class DexterityDataProvider(Base):
         super(DexterityDataProvider, self).__init__(context)
 
         # get the behavior and schema fields from the data manager
-        dm = DexterityDataManager(context)
-        schema = dm.get_schema()
-        behaviors = dm.get_behaviors()
-
+        schema = api.get_schema(context)
+        behaviors = api.get_behaviors(context)
         self.keys = schema.names() + behaviors.keys()
 
 
@@ -163,8 +159,7 @@ class ATDataProvider(Base):
         super(ATDataProvider, self).__init__(context)
 
         # get the schema fields from the data manager
-        dm = ATDataManager(context)
-        schema = dm.get_schema()
+        schema = api.get_schema(context)
         self.keys = schema.keys()
 
 

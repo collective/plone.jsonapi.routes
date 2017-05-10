@@ -5,10 +5,13 @@ import pkg_resources
 import datetime
 
 from zope import interface
+from zope.schema import getFields
 from zope.component import getMultiAdapter
 
 from plone import api as ploneapi
 from plone.jsonapi.core import router
+from plone.dexterity.interfaces import IDexterityContent
+from plone.behavior.interfaces import IBehaviorAssignable
 
 from DateTime import DateTime
 from AccessControl import Unauthorized
@@ -831,7 +834,7 @@ def is_root(brain_or_object):
     return ISiteRoot.providedBy(brain_or_object)
 
 
-def is_atct(brain_or_object):
+def is_at_content(brain_or_object):
     """Checks if the passed in object is an Archetype Content Type
 
     :param brain_or_object: A single catalog brain or content object
@@ -841,6 +844,18 @@ def is_atct(brain_or_object):
     """
     obj = get_object(brain_or_object)
     return IBaseObject.providedBy(obj)
+
+
+def is_dexterity_content(brain_or_object):
+    """Checks if the given object is Dexterity based
+
+    :param obj: The content object to check
+    :type thing: ATContentType/DexterityContentType
+    :returns: True if the content object is Dexterity based
+    :rtype: bool
+    """
+    obj = get_object(brain_or_object)
+    return IDexterityContent.providedBy(obj)
 
 
 def is_folderish(brain_or_object):
@@ -1025,6 +1040,43 @@ def get_object(brain_or_object):
     if is_brain(brain_or_object):
         return brain_or_object.getObject()
     return brain_or_object
+
+
+def get_schema(brain_or_object):
+    """Get the schema of the content object
+
+    :param brain_or_object: A single catalog brain or content object
+    :type brain_or_object: ATContentType/DexterityContentType/CatalogBrain
+    :returns: Schema
+    :rtype: list
+    """
+    obj = get_object(brain_or_object)
+    if is_dexterity_content(obj):
+        pt = get_tool("portal_types")
+        fti = pt.getTypeInfo(get_portal_type(obj))
+        return fti.lookupSchema()
+    return obj.Schema()
+
+
+def get_behaviors(brain_or_object):
+    """Iterate over all behaviors that are assigned to the object
+
+    :param brain_or_object: A single catalog brain or content object
+    :type brain_or_object: ATContentType/DexterityContentType/CatalogBrain
+    :returns: Behaviors
+    :rtype: list
+    """
+    obj = get_object(brain_or_object)
+    if not is_dexterity_content(obj):
+        fail(400, "Only Dexterity contents can have assigned behaviors")
+    assignable = IBehaviorAssignable(obj, None)
+    if not assignable:
+        return {}
+    out = {}
+    for behavior in assignable.enumerateBehaviors():
+        for name, field in getFields(behavior.interface).items():
+            out[name] = field
+    return out
 
 
 def get_parent(brain_or_object):
@@ -1372,7 +1424,7 @@ def validate_object(brain_or_object, data):
     obj = get_object(brain_or_object)
 
     # Call the validator of AT Content Types
-    if is_atct(obj):
+    if is_at_content(obj):
         return obj.validate(data=data)
 
     return {}
