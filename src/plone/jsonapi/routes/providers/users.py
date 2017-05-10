@@ -58,25 +58,22 @@ def get_user_info(user):
 def get(context, request, username=None):
     """Plone users route
     """
-    user_ids = []
-
     # Don't allow anonymous users to query a user other than themselves
     if api.is_anonymous():
         username = "current"
 
     # query all users if no username was given
     if username is None:
-        user_ids = api.get_member_ids()
+        users = api.get_users()
     elif username == "current":
-        current_user = api.get_current_user()
-        user_ids = [current_user.getId()]
+        users = [api.get_current_user()]
     else:
-        user_ids = [username]
+        users = [api.get_user(username)]
 
     # Prepare batch
     size = req.get_batch_size()
     start = req.get_batch_start()
-    batch = api.make_batch(user_ids, size, start)
+    batch = api.make_batch(users, size, start)
 
     # get the user info for the user ids in the current batch
     users = map(get_user_info, batch.get_batch())

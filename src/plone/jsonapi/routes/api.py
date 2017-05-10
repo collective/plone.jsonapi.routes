@@ -1414,13 +1414,14 @@ def get_current_user():
     return ploneapi.user.get_current()
 
 
-def get_member_ids():
-    """Return all member ids of the portal.
+def get_users():
+    """Return all users of the portal.
+
+    :returns: List of Plone Users
+    :rtype: object
     """
-    pm = get_tool("portal_membership")
-    member_ids = pm.listMemberIds()
-    # How can it be possible to get member ids with None?
-    return filter(lambda x: x, member_ids)
+    acl_users = get_tool("acl_users")
+    return acl_users.getUsers()
 
 
 def get_user(user_or_username=None):
