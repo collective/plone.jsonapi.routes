@@ -1,14 +1,12 @@
 # -*- coding: utf-8 -*-
 
-import logging
 from plone import api as ploneapi
 
+from plone.jsonapi.routes import logger
+from plone.jsonapi.routes.api import fail
 from plone.jsonapi.routes.api import url_for
-from plone.jsonapi.routes.exceptions import APIError
 from plone.jsonapi.routes import add_plone_route as route
 from plone.jsonapi.routes.providers.users import get as get_user
-
-logger = logging.getLogger("plone.jsonapi.routes.users")
 
 
 @route("/auth", "plone.jsonapi.routes.auth", methods=["GET"])
@@ -38,9 +36,9 @@ def login(context, request):
     logger.info("*** LOGIN %s ***" % __ac_name)
 
     if __ac_name is None:
-        raise APIError(400, "Username is missing")
+        fail(400, "Username is missing")
     if __ac_password is None:
-        raise APIError(400, "Password is missing")
+        fail(400, "Password is missing")
 
     acl_users = ploneapi.portal.get_tool("acl_users")
 
@@ -53,7 +51,7 @@ def login(context, request):
     # acl_users.updateCredentials(request, response, __ac_name, __ac_password)
 
     if ploneapi.user.is_anonymous():
-        raise APIError(401, "Invalid Credentials")
+        fail(401, "Invalid Credentials")
 
     # return the JSON in the same format like the user route
     return get_user(context, request, username=__ac_name)
@@ -69,6 +67,6 @@ def logout(context, request):
     acl_users.logout(request)
 
     return {
-        "url":     url_for("plone.jsonapi.routes.users"),
+        "url": url_for("plone.jsonapi.routes.users"),
         "success": True
     }
