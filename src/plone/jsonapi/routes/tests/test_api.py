@@ -326,7 +326,7 @@ class TestAPI(APITestCase):
 
     def test_create_object(self):
         folder = self.portal.folder
-        doc = api.create_object(folder, "Document")
+        doc = api.create_object(folder, "Document", title="My Document")
         self.assertEqual(doc.UID(), folder.get(doc.id).UID())
 
     def test_update_object_with_data(self):
