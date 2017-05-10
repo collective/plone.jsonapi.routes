@@ -3,6 +3,8 @@
 import re
 import logging
 
+from zope.i18nmessageid import MessageFactory
+
 from plone.jsonapi.core.browser.router import add_route
 from plone.jsonapi.core.browser.router import DefaultRouter
 
@@ -14,6 +16,7 @@ BASE_URL = "/plone/api/1.0"
 REGISTER_API_ROUTES = True
 
 logger = logging.getLogger("plone.jsonapi.routes")
+messageFactory = MessageFactory('plone.jsonapi.routes')
 
 
 def add_plone_route(rule, endpoint=None, **kw):
