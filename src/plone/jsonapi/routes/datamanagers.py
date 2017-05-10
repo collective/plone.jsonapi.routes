@@ -13,7 +13,7 @@ from AccessControl import getSecurityManager
 from Products.CMFCore import permissions
 
 from plone.jsonapi.routes import logger
-from plone.jsonapi.routes import underscore as _
+from plone.jsonapi.routes import underscore as u
 from plone.jsonapi.routes.interfaces import IDataManager
 from plone.jsonapi.routes.interfaces import IFieldManager
 
@@ -189,7 +189,7 @@ class DexterityDataManager(object):
     def is_file_field(self, field):
         """ checks if field is a file field
         """
-        if _.is_string(field):
+        if u.is_string(field):
             field = self.get_field(field)
         if self.is_richtext_field(field):
             return False
@@ -198,7 +198,7 @@ class DexterityDataManager(object):
     def is_richtext_field(self, field):
         """ checks if field is a rich-text field
         """
-        if _.is_string(field):
+        if u.is_string(field):
             field = self.get_field(field)
         if HAS_PLONE_APP_TEXTFIELD:
             return IRichText.providedBy(field)

@@ -37,7 +37,8 @@ from plone.jsonapi.routes.interfaces import IBatch
 from plone.jsonapi.routes.interfaces import ICatalog
 from plone.jsonapi.routes.interfaces import ICatalogQuery
 from plone.jsonapi.routes.interfaces import IDataManager
-from plone.jsonapi.routes import underscore as _
+from plone.jsonapi.routes import underscore as u
+from plone.jsonapi.routes import messageFactory as _
 
 __author__ = 'Ramon Bartl <rb@ridingbytes.com>'
 __docformat__ = 'plaintext'
@@ -67,7 +68,7 @@ def get_record(uid=None):
     if complete is _marker:
         complete = True
     items = make_items_for([obj], complete=complete)
-    return _.first(items)
+    return u.first(items)
 
 
 # GET
@@ -366,23 +367,23 @@ def get_search_results(portal_type=None, uid=None, **kw):
     # If we have an UID, return the object immediately
     if uid is not None:
         logger.info("UID '%s' found, returning the object immediately" % uid)
-        return _.to_list(get_object_by_uid(uid))
+        return u.to_list(get_object_by_uid(uid))
 
     # allow to search search for the Plone Site with portal_type
     include_portal = False
-    if _.to_string(portal_type) == "Plone Site":
+    if u.to_string(portal_type) == "Plone Site":
         include_portal = True
 
     # The request may contain a list of portal_types, e.g.
     # `?portal_type=Document&portal_type=Plone Site`
-    if "Plone Site" in _.to_list(req.get("portal_type")):
+    if "Plone Site" in u.to_list(req.get("portal_type")):
         include_portal = True
 
     # Build and execute a catalog query
     results = search(portal_type=portal_type, uid=uid, **kw)
 
     if include_portal:
-        results = list(results) + _.to_list(get_portal())
+        results = list(results) + u.to_list(get_portal())
 
     return results
 
@@ -1435,7 +1436,7 @@ def get_user(user_or_username=None):
         return None
     if hasattr(user_or_username, "getUserId"):
         return ploneapi.user.get(user_or_username.getUserId())
-    return ploneapi.user.get(userid=_.to_string(user_or_username))
+    return ploneapi.user.get(userid=u.to_string(user_or_username))
 
 
 def get_user_properties(user_or_username):
@@ -1534,7 +1535,7 @@ def update_object_with_data(content, record):
     # https://github.com/collective/plone.jsonapi.routes/issues/77
     # filter out bogus keywords
     # XXX Maybe we should pass only values where we have identical field names?
-    field_kwargs = _.omit(record, "file")
+    field_kwargs = u.omit(record, "file")
 
     # Iterate through record items
     for k, v in record.items():
@@ -1554,7 +1555,7 @@ def update_object_with_data(content, record):
     # Validate the entire content object
     invalid = validate_object(content, record)
     if invalid:
-        fail(400, _.to_json(invalid))
+        fail(400, u.to_json(invalid))
 
     # do a wf transition
     if record.get("transition", None):

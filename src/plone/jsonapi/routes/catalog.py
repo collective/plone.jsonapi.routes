@@ -8,7 +8,7 @@ from ZPublisher import HTTPRequest
 from plone.jsonapi.routes import api
 from plone.jsonapi.routes import logger
 from plone.jsonapi.routes import request as req
-from plone.jsonapi.routes import underscore as _
+from plone.jsonapi.routes import underscore as u
 from plone.jsonapi.routes.interfaces import ICatalog
 from plone.jsonapi.routes.interfaces import ICatalogQuery
 
@@ -61,7 +61,7 @@ class Catalog(object):
             index = self.get_index(index)
 
         if index.id == "portal_type":
-            return filter(lambda x: x, _.to_list(value))
+            return filter(lambda x: x, u.to_list(value))
         if index.meta_type == "DateIndex":
             return DateTime(value)
         if index.meta_type == "BooleanIndex":
@@ -190,7 +190,7 @@ class CatalogQuery(object):
             # handle portal_type in keywords
             if k.lower() == "portal_type":
                 if v:
-                    v = _.to_list(v)
+                    v = u.to_list(v)
             if k not in indexes:
                 logger.warn("Skipping unknown keyword parameter '%s=%s'" % (k, v))
                 continue

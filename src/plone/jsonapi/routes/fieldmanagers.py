@@ -8,7 +8,7 @@ from Products.Archetypes.utils import mapply
 
 from plone.jsonapi.routes import logger
 from plone.jsonapi.routes import api
-from plone.jsonapi.routes import underscore as _
+from plone.jsonapi.routes import underscore as u
 from plone.jsonapi.routes.interfaces import IFieldManager
 
 
@@ -149,12 +149,12 @@ class ReferenceFieldManager(ATFieldManager):
 
         # The value is a dictionary
         # -> handle it like a catalog query
-        if _.is_dict(value):
+        if u.is_dict(value):
             results = api.search(portal_type=self.allowed_types, **value)
             ref = map(api.get_object, results)
 
         # The value is a list
-        if _.is_list(value):
+        if u.is_list(value):
             for item in value:
                 # uid
                 if api.is_uid(item):
@@ -172,7 +172,7 @@ class ReferenceFieldManager(ATFieldManager):
                     continue
 
                 # dict (catalog query)
-                if _.is_dict(item):
+                if u.is_dict(item):
                     results = api.search(portal_type=self.allowed_types, **item)
                     objs = map(api.get_object, results)
                     ref.extend(objs)

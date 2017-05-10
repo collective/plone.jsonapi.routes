@@ -17,7 +17,7 @@ except (pkg_resources.DistributionNotFound, ImportError):
 else:
     HAS_PLONE_PROTECT = True
 
-from plone.jsonapi.routes import underscore as _
+from plone.jsonapi.routes import underscore as u
 
 __author__ = 'Ramon Bartl <rb@ridingbytes.com>'
 __docformat__ = 'plaintext'
@@ -121,7 +121,7 @@ def get_sharing(default=None):
 def get_sort_limit():
     """ returns the 'sort_limit' from the request
     """
-    limit = _.convert(get("sort_limit"), _.to_int)
+    limit = u.convert(get("sort_limit"), u.to_int)
     if (limit < 1):
         limit = None  # catalog raises IndexError if limit < 1
     return limit
@@ -130,13 +130,13 @@ def get_sort_limit():
 def get_batch_size():
     """ returns the 'limit' from the request
     """
-    return _.convert(get("limit"), _.to_int) or 25
+    return u.convert(get("limit"), u.to_int) or 25
 
 
 def get_batch_start():
     """ returns the 'start' from the request
     """
-    return _.convert(get("b_start"), _.to_int) or 0
+    return u.convert(get("b_start"), u.to_int) or 0
 
 
 def get_sort_on(allowed_indexes=None):
@@ -180,7 +180,7 @@ def get_path():
 def get_depth():
     """ returns the 'depth' from the request
     """
-    return _.convert(get("depth", 0), _.to_int)
+    return u.convert(get("depth", 0), u.to_int)
 
 
 def get_recent_created():
@@ -205,7 +205,7 @@ def get_request_data():
     if not is_json_deserializable(data):
         from plone.jsonapi.routes.exceptions import APIError
         raise APIError(400, "Request Data is not JSON deserializable – Check JSON Syntax!")
-    return _.convert(json.loads(data), _.to_list)
+    return u.convert(json.loads(data), u.to_list)
 
 
 def get_json():
