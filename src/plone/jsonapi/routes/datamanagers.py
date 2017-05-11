@@ -2,13 +2,13 @@
 
 from zope import interface
 from zope.schema import getFields
-from zope.schema.interfaces import IObject
 
 from plone import api as ploneapi
 from plone.behavior.interfaces import IBehaviorAssignable
 
 from AccessControl import Unauthorized
 from AccessControl import getSecurityManager
+from Products.Archetypes.Field import FileField
 
 from Products.CMFCore import permissions
 
@@ -189,11 +189,9 @@ class DexterityDataManager(object):
     def is_file_field(self, field):
         """ checks if field is a file field
         """
-        if u.is_string(field):
-            field = self.get_field(field)
-        if self.is_richtext_field(field):
+        if not isinstance(field, FileField):
             return False
-        return IObject.providedBy(field)
+        return field.type == "file"
 
     def is_richtext_field(self, field):
         """ checks if field is a rich-text field
