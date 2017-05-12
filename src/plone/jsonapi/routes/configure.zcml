@@ -73,7 +73,7 @@
       />
 
 
-  <!-- FIELD MANAGERS -->
+  <!-- AT FIELD MANAGERS -->
 
   <!-- Adapter for AT Fields -->
   <adapter
@@ -81,28 +81,55 @@
       factory=".fieldmanagers.ATFieldManager"
       />
 
-  <!-- Adapter for Text Fields -->
+  <!-- Adapter for AT Text Fields -->
   <adapter
       for="Products.Archetypes.interfaces.field.ITextField"
       factory=".fieldmanagers.TextFieldManager"
       />
 
-  <!-- Adapter for DateTime Field -->
+  <!-- Adapter for AT DateTime Field -->
   <adapter
       for="Products.Archetypes.interfaces.field.IDateTimeField"
       factory=".fieldmanagers.DateTimeFieldManager"
       />
 
-  <!-- Adapter for File Field -->
+  <!-- Adapter for AT File Field -->
   <adapter
       for="Products.Archetypes.interfaces.field.IFileField"
       factory=".fieldmanagers.FileFieldManager"
       />
 
-  <!-- Adapter for Reference Field -->
+  <!-- Adapter for AT Reference Field -->
   <adapter
       for="Products.Archetypes.interfaces.field.IReferenceField"
       factory=".fieldmanagers.ReferenceFieldManager"
+      />
+
+
+  <!-- ZOPE SCHEMA FIELD MANAGERS -->
+
+  <!-- Adapter for Zope Schema Fields -->
+  <adapter
+      for="zope.schema.interfaces.IField"
+      factory=".fieldmanagers.ZopeSchemaFieldManager"
+      />
+
+  <!-- Adapter for Rich Text Fields Fields -->
+  <adapter
+      for="plone.app.textfield.interfaces.IRichText"
+      factory=".fieldmanagers.RichTextFieldManager"
+      />
+
+  <!-- Adapter for Named File Fields -->
+  <adapter
+      for="plone.namedfile.interfaces.INamedFileField"
+      factory=".fieldmanagers.NamedFileFieldManager"
+      />
+
+  <!-- Adapter for Named Image Fields -->
+  <adapter
+      for="plone.namedfile.interfaces.INamedImageField"
+      factory=".fieldmanagers.NamedImageFieldManager"
       />
 
 

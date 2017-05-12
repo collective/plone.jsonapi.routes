@@ -3,13 +3,120 @@
 from zope import interface
 
 from DateTime import DateTime
+
 from AccessControl import Unauthorized
+
 from Products.Archetypes.utils import mapply
 
 from plone.jsonapi.routes import logger
 from plone.jsonapi.routes import api
 from plone.jsonapi.routes import underscore as u
 from plone.jsonapi.routes.interfaces import IFieldManager
+
+
+class ZopeSchemaFieldManager(object):
+    """Adapter to get/set the value of Zope Schema Fields
+    """
+    interface.implements(IFieldManager)
+
+    def __init__(self, field):
+        self.field = field
+
+    def get(self, instance, **kw):
+        """Get the value of the field
+        """
+        return self._get(instance, **kw)
+
+    def set(self, instance, value, **kw):
+        """Set the value of the field
+        """
+        return self._set(instance, value, **kw)
+
+    def _set(self, instance, value, **kw):
+        """Set the value of the field
+        """
+        logger.debug("DexterityFieldManager::set: value=%r" % value)
+
+        # Check if the field is read only
+        if self.field.readonly:
+            raise Unauthorized("Field is read only")
+
+        # Validate
+        self.field.validate(value)
+
+        # TODO: Check security on the field level
+        return self.field.set(instance, value)
+
+    def _get(self, instance, **kw):
+        """Get the value of the field
+        """
+        logger.debug("DexterityFieldManager::get: instance={} field={}"
+                     .format(instance, self.field))
+
+        # TODO: Check security on the field level
+        return self.field.get(instance)
+
+
+class RichTextFieldManager(ZopeSchemaFieldManager):
+    """Adapter to get/set the value of Rich Text Fields
+    """
+    interface.implements(IFieldManager)
+
+    def set(self, instance, value, **kw):
+        from plone.app.textfield.value import RichTextValue
+        value = RichTextValue(raw=value,
+                              outputMimeType=self.field.output_mime_type)
+        return self._set(instance, value, **kw)
+
+
+class NamedFileFieldManager(ZopeSchemaFieldManager):
+    """Adapter to get/set the value of Named File Fields
+    """
+    interface.implements(IFieldManager)
+
+    def set(self, instance, value, **kw):
+        logger.debug("NamedFileFieldManager::set:File field"
+                     "detected ('%r'), base64 decoding value", self.field)
+        data = str(value).decode("base64")
+        filename = self.get_filename(**kw)
+        contentType = self.get_content_type(**kw)
+
+        if contentType:
+            # create NamedFile with content type information
+            value = self.field._type(data=data,
+                                     contentType=contentType,
+                                     filename=filename)
+        else:
+            # create NamedFile w/o content type information
+            # -> will be guessed by the extension of the filename
+            value = self.field._type(data=data, filename=filename)
+
+        return self.field.set(instance, value)
+
+    def get_filename(self, **kw):
+        """Extract the filename from the keywords
+        """
+        if "filename" not in kw:
+            logger.debug("NamedFileFieldManager::get_filename:No Filename detected"
+                         "-- using title or id")
+            kw["filename"] = kw.get("id") or kw.get("title")
+        return kw.get("filename")
+
+    def get_content_type(self, **kw):
+        """Extract the mimetype from the keywords
+        """
+        if "mimetype" in kw:
+            return kw.get("mimetype")
+        if "content_type" in kw:
+            # same key as in JSON response
+            return kw.get("content_type")
+        return None
+
+
+class NamedImageFieldManager(NamedFileFieldManager):
+    """Adapter to get/set the value of Named Image Fields
+    """
+    interface.implements(IFieldManager)
 
 
 class ATFieldManager(object):
