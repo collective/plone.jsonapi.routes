@@ -35,6 +35,8 @@ def get(context, request, resource=None, uid=None):
 
 # http://werkzeug.pocoo.org/docs/0.11/routing/#builtin-converters
 # http://werkzeug.pocoo.org/docs/0.11/routing/#custom-converters
+@route("/<any(" + ACTIONS + "):action>",
+       "plone.jsonapi.routes.action", methods=["POST"])
 @route("/<any(" + ACTIONS + "):action>/<string(maxlength=32):uid>",
        "plone.jsonapi.routes.action", methods=["POST"])
 @route("/<string:resource>/<any(" + ACTIONS + "):action>",
