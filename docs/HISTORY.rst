@@ -1,6 +1,19 @@
 Changelog
 =========
 
+0.9.2 - 2017-05-12
+------------------
+
+**Changes**
+
+- Added `IFieldManager` adapter to `get` and `set` the value on field level.
+- Removed `build` number from version route JSON response.
+- Content route improved.
+- API refactored.
+- Improved `users` route.
+- Updated documentation
+
+
 0.9.1 - 2017-04-20
 ------------------
 
