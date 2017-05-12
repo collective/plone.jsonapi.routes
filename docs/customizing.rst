@@ -91,43 +91,50 @@ a Python `<list>` instead of a complete mapping as above.
 
 .. code-block:: python
 
-    # CREATE
-    @add_route("/todos/create", "todos_create", methods=["POST"])
-    @add_route("/todos/create/<string:uid>", "todos_create", methods=["POST"])
-    def create(context, request, uid=None):
-        """ create todos
-        """
-        items = create_items("Todo", uid=uid, endpoint="todos")
-        return {
-            "url": url_for("todos_create"),
-            "count": len(items),
-            "items": items,
-        }
+    ACTIONS = "create,update,delete,cut,copy,paste"
 
-    # UPDATE
-    @add_route("/todos/update", "todos_update", methods=["POST"])
-    @add_route("/todos/update/<string:uid>", "todos_update", methods=["POST"])
-    def update(context, request, uid=None):
-        """ update todos
-        """
-        items = update_items("Todo", uid=uid, endpoint="todos")
-        return {
-            "url": url_for("todos_update"),
-            "count": len(items),
-            "items": items,
-        }
+    # http://werkzeug.pocoo.org/docs/0.11/routing/#builtin-converters
+    # http://werkzeug.pocoo.org/docs/0.11/routing/#custom-converters
+    @route("/<any(" + ACTIONS + "):action>/<string(maxlength=32):uid>",
+          "plone.jsonapi.routes.action", methods=["POST"])
+    @route("/<string:resource>/<any(" + ACTIONS + "):action>",
+          "plone.jsonapi.routes.action", methods=["POST"])
+    @route("/<string:resource>/<any(" + ACTIONS + "):action>/<string(maxlength=32):uid>",
+          "plone.jsonapi.routes.action", methods=["POST"])
+    def action(context, request, action=None, resource=None, uid=None):
+        """Various HTTP POST actions
 
-    # DELETE
-    @add_route("/todos/delete", "todos_delete", methods=["POST"])
-    @add_route("/todos/delete/<string:uid>", "todos_delete", methods=["POST"])
-    def delete(context, request, uid=None):
-        """ delete todos
+        Case 1: <action>/<uid>
+        -> The actions (cut, copy, update, delete) will performed on the object identified by <uid>
+        -> The actions (create, paste) will use the <uid> as the parent folder
+        <Plonesite>/@@API/plone/api/1.0/<action>/<uid>
+
+        Case 2: <resource>/<action>
+        -> The "target" object will be located by a location given in the request body (uid, path, parent_path + id)
+        -> The actions (cut, copy, update, delete) will performed on the target object
+        -> The actions (create) will use the target object as the container
+        <Plonesite>/@@API/plone/api/1.0/<resource>/<action>
+
+        Case 3: <resource>/<action>/<uid>
+        -> The actions (cut, copy, update, delete) will performed on the object identified by <uid>
+        -> The actions (create) will use the <uid> as the parent folder
+        <Plonesite>/@@API/plone/api/1.0/<resource>/<action>
+
         """
-        items = delete_items("Todo", uid=uid, endpoint="todos")
+
+        # Fetch and call the action function of the API
+        func_name = "{}_items".format(action)
+        action_func = getattr(api, func_name, None)
+        if action_func is None:
+            api.fail(500, "API has no member named '{}'".format(func_name))
+
+        portal_type = api.resource_to_portal_type(resource)
+        items = action_func(portal_type=portal_type, uid=uid)
+
         return {
-            "url": url_for("todos_delete"),
             "count": len(items),
             "items": items,
+            "url": api.url_for("plone.jsonapi.routes.action", action=action),
         }
 
 
@@ -179,10 +186,10 @@ Register the adapter in your `configure.zcml` file for your special interface:
 
 .. _DATA_MANAGER:
 
-Adding a custom  data manager
------------------------------
+Adding a custom data manager
+----------------------------
 
-The data sent by the API for each content type is set by the `IDataManager`
+The data sent by the API for **each content type** is set by the `IDataManager`
 Adapter. This Adapter has a simple interface:
 
 .. code-block:: python
@@ -191,7 +198,8 @@ Adapter. This Adapter has a simple interface:
         """ Field Interface
         """
 
-        def get(name): """ Get the value of the named field with
+        def get(name):
+            """ Get the value of the named field with
             """
 
         def set(name, value):
@@ -243,6 +251,78 @@ Register the adapter in your `configure.zcml` file for your special interface:
             for="plone.todo.interfaces.ITodo"
             factory=".adapters.TodoDataManager"
             />
+
+    </configure>
+
+
+.. _FIELD_MANAGER:
+
+Adding a custom field manager
+-----------------------------
+
+The default data managers (`IDataManager`) defined in this package know how to
+`set` and `get` the values from fields. But sometimes it might be useful to be
+more granular and know how to `set` and `get` a value for a **specific field**.
+
+Therefore, `plone.jsonapi.routes` introduces Field Managers (`IFieldManager`),
+which adapt a field.
+
+This Adapter has a simple interface:
+
+.. code-block:: python
+
+    class IFieldManager(interface.Interface):
+        """A Field Manager is able to set/get the values of a single field.
+        """
+
+        def get(instance, **kwargs):
+            """Get the value of the field
+            """
+
+        def set(instance, value, **kwargs):
+            """Set the value of the field
+            """
+
+To customize how the data is set to each field of the content, you have to
+register a more specific adapter to a field.
+
+This adapter has to implement then the `IFieldManager` interface.
+
+.. important:: Please be aware that you have to implement security for field
+               level access on your own.
+
+.. code-block:: python
+
+    class DateTimeFieldManager(ATFieldManager):
+        """Adapter to get/set the value of DateTime Fields
+        """
+        interface.implements(IFieldManager)
+
+        def set(self, instance, value, **kw):
+            """Converts the value into a DateTime object before setting.
+            """
+            try:
+                value = DateTime(value)
+            except SyntaxError:
+                logger.warn("Value '{}' is not a valid DateTime string"
+                            .format(value))
+                return False
+
+            self._set(instance, value, **kw)
+
+
+Register the adapter in your `configure.zcml` file for your special interface:
+
+.. code-block:: xml
+
+    <configure
+        xmlns="http://namespaces.zope.org/zope">
+
+      <!-- Adapter for AT DateTime Field -->
+      <adapter
+          for="Products.Archetypes.interfaces.field.IDateTimeField"
+          factory=".fieldmanagers.DateTimeFieldManager"
+          />
 
     </configure>
 

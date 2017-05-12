@@ -9,7 +9,7 @@ Get content by uid
 
 Getting an object by its **UID**:
 
-http://localhost:8080/Plone/@@API/plone/api/1.0/get/3762908a5d2c4917b9d2dbaf2a9be1cc
+http://localhost:8080/Plone/@@API/plone/api/1.0/3762908a5d2c4917b9d2dbaf2a9be1cc
 
 
 Get content by path
@@ -115,21 +115,9 @@ data in a list within the POST body. See :doc:`crud` for mode details.
 Get the portal object
 ---------------------
 
-To fetch the portal object you can use the `plonesites` route. Despite the
-pluralized name, there can be only one responsible plone site for the API at a
-time.
+To fetch the portal object you can use the `plonesite` route:
 
-There are two ways to fetch the portal, either as a single record or in the default
-response format specified by :ref:`Response_Format`.
-
-To get a single result record, you have to use the `portal` route:
-
-http://localhost:8080/Plone/@@API/plone/api/1.0/portal
-
-To get the known `items` response format as specified in :ref:`Response_Format`, you
-have to use the `plonesites` route:
-
-http://localhost:8080/Plone/@@API/plone/api/1.0/plonesites
+http://localhost:8080/Plone/@@API/plone/api/1.0/plonesite
 
 
 Get folder contents
@@ -138,7 +126,7 @@ Get folder contents
 If you are interested in the contents of a folderish content type, you can
 append the `children=yes` request parameter to the url:
 
-http://localhost:8080/Plone/@@API/plone/api/1.0/plonesites?children=yes
+http://localhost:8080/Plone/@@API/plone/api/1.0/plonesite?children=yes
 
 this will add a `children` list to the response which includes all contents of
 the requested object. This can actually be done with any route provider.

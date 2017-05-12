@@ -59,5 +59,4 @@ https://chrome.google.com/webstore/detail/advanced-rest-client/hgmloofddffdnphfg
 .. _plone.api: https://pypi.python.org/pypi/plone.api
 .. _Plone: http://plone.org
 .. _RESTful: http://en.wikipedia.org/wiki/Representational_state_transfer
-
-.. vim: set ft=rst ts=4 sw=4 expandtab tw=78 :
+.. _Advanced Rest Clinet: http://en.wikipedia.org/wiki/Representational_state_transfer

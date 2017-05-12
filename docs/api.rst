@@ -2,7 +2,7 @@ API
 ===
 
 This part of the documentation covers all resources (routes) provided by
-plone.jsonapi.routes. It also covers all the request parameters that can be
+`plone.jsonapi.routes`_. It also covers all the request parameters that can be
 applied to these resources to refine the results.
 
 
@@ -11,15 +11,16 @@ applied to these resources to refine the results.
 Concept
 -------
 
-The API aims to be **as fast as possible**. So the concept of the API is to
-postpone *expensive operations* until the user really requests it. To do so,
-the API was built with a **two step architecture**.
+The Plone JSON API aims to be **as fast as possible**. So the concept of the API
+is to postpone **expensive operations** until the user really requests it. To do
+so, the API was built with a **two step architecture**.
 
-An *expensive operation* is basically given, when the API needs to wake up an
-object to retrieve all its field values.
+An **expensive operation** is basically given, when the API needs to "wake up"
+an object to retrieve all its field values. This means the full object has to be
+loaded from the Database (ZODB) into the memory (RAM).
 
-The *two step architecture* retrieves only the fields of the catalog results
-in the first step. Only if the user requests the API URL of a specific object,
+The **two step architecture** retrieves only the fields of the catalog results
+in the *first step*. Only if the user requests the API URL of a specific object,
 the object will be loaded and all the fields of the object will be returned.
 
 
@@ -43,6 +44,25 @@ Example: ``http://localhost:8080/Plone/@@API/plone/api/1.0/api.json``
 There is also an overview of the registered routes, e.g.
 
 ``http://localhost:8080/Plone/@@API/plone/api/1.0/api.json``
+
+
+.. _Resources:
+
+Resources
+---------
+
+:URL Schema: ``<BASE URL>/<RESOURCE>/<OPERATION>/<uid:optional>``
+
+A resource is equivalent with the portal type name in Plone.
+
+This means that all portal types are fully supported by the API simply by adding
+the portal type to the end of the base url, e.g.:
+
+    - http://localhost:8080/Plone/@@API/plone/api/1.0/Folder
+    - http://localhost:8080/Plone/@@API/plone/api/1.0/Image
+    - http://localhost:8080/Plone/@@API/plone/api/1.0/File
+
+.. note:: Lower case portal type names are also supported.
 
 
 .. _Operations:
@@ -76,78 +96,98 @@ It is also possible now to get all contents by UID directly from the base url,
 e.g.: http://localhost:8080/Plone/@@API/plone/api/1.0/<uid>
 
 
-.. _Resources:
+Search Resource
+---------------
 
-Resources
----------
+The search route omits the portal type and is therefore capable to search for
+**any** content type within the portal.
 
-:URL Schema: ``<BASE URL>/<RESOURCE>/<OPERATION>/<uid:optional>``
+The search route accepts all available indexes which are defined in the portal
+catalog tool, e.g.:
 
-The API registers the routes to the resources during the Plone startup
-process. Each of the following resources is bound to a distinct *portal type*
-within Plone. So the *folders* resource will only return content informations
-of *Folders*.
+    - http://localhost:8080/Plone/@@API/plone/api/1.0/search
 
-+-------------+--------------------------------------------------+
-| Resource    | Description                                      |
-+=============+==================================================+
-| folders     | Resource for all Folder contents                 |
-+-------------+--------------------------------------------------+
-| documents   | Resource for all Page contents                   |
-+-------------+--------------------------------------------------+
-| events      | Resource for all Event contents                  |
-+-------------+--------------------------------------------------+
-| files       | Resource for all File contents                   |
-+-------------+--------------------------------------------------+
-| images      | Resource for all Image contents                  |
-+-------------+--------------------------------------------------+
-| links       | Resource for all Link contents                   |
-+-------------+--------------------------------------------------+
-| newsitems   | Resource for all News Item contents              |
-+-------------+--------------------------------------------------+
-| topics      | Resource for all Collection (old style) contents |
-+-------------+--------------------------------------------------+
-| collections | Resource for all Collection contents             |
-+-------------+--------------------------------------------------+
+Returns **all** contents, which were indexed by the catalog.
 
-.. note:: Please see the section `Parameters` on how to refine the returned
-          results
+    - http://localhost:8080/Plone/@@API/plone/api/1.0/search?id=test
+
+Returns contents which match the given value of the `id` parameter.
 
 
-.. versionadded:: 0.9.1
-    A resource is now equivalent with the portal type name in Plone.
-    While the resources listed above still remain functional, they
-    will be removed in 1.0.0.
+User Resource
+-------------
 
-    This means that all portal types are fully supported by the API
-    simply by adding the portal type to the end of the base url, e.g.:
+The API is capable to find Plone users, e.g.:
 
-        http://localhost:8080/Plone/@@API/plone/api/1.0/Folder
-        http://localhost:8080/Plone/@@API/plone/api/1.0/Image
-        http://localhost:8080/Plone/@@API/plone/api/1.0/File
+    - http://localhost:8080/Plone/@@API/plone/api/1.0/users
+    - http://localhost:8080/Plone/@@API/plone/api/1.0/users/current
+    - http://localhost:8080/Plone/@@API/plone/api/1.0/users/<username>
 
-.. note:: Lower case portal type names are also supported.
+.. code-block:: javascript
 
+    {
+        "count": 1,
+        "pagesize": 25,
+        "items": [
+            {
+                "username": "ramon",
+                "visible_ids": false,
+                "authenticated": false,
+                "api_url": "http://localhost:8080/Plone/@@API/plone/api/1.0/users/ramon",
+                "roles": [
+                    "Member",
+                    "Authenticated"
+                ],
+                "home_page": "",
+                "description": "",
+                "wysiwyg_editor": "",
+                "location": "",
+                "error_log_update": 0,
+                "language": "",
+                "listed": true,
+                "groups": [
+                    "AuthenticatedUsers"
+                ],
+                "portal_skin": "",
+                "fullname": "Ramon Bartl",
+                "login_time": "2000-01-01T00:00:00",
+                "email": "rb@ridingbytes.com",
+                "ext_editor": false,
+                "last_login_time": "2000-01-01T00:00:00"
+            }
+        ],
+        "page": 1,
+        "_runtime": 0.008383989334106445,
+        "next": null,
+        "pages": 1,
+        "previous": null
+    }
 
-Special Resources
------------------
+The results come as well as batches of 25 items per default. It is also possible
+to get a higher or lower number of users per batch with the `?limit=n` request
+parameter, e.g.:
 
-:URL Schema: ``<BASE URL>/<RESOURCE>/<ACTION:optional>``
+http://localhost:8080/Plone/@@API/plone/api/1.0/users?limit=1
 
-Beside the *content resources*, there are some special resources available.
+.. note:: This route lists all users for **authenticated** users only.
+
+The username `current` is reserved to fech the current logged in user:
+
+http://localhost:8080/Plone/@@API/plone/api/1.0/users/current
+
+Overview
+~~~~~~~~
 
 +----------+--------------------+----------------------------------------+
 | Resource | Action             | Description                            |
 +==========+====================+========================================+
 | users    | <username>,current | Resource for Plone Users               |
 +----------+--------------------+----------------------------------------+
-| search   |                    | Search over all standard content types |
-+----------+--------------------+----------------------------------------+
-| version  |                    | Get the current Version                |
-+----------+--------------------+----------------------------------------+
 | auth     |                    | Basic Authentication                   |
 +----------+--------------------+----------------------------------------+
 | login    |                    | Login with __ac_name and __ac_password |
++----------+--------------------+----------------------------------------+
+| logout   |                    | Deauthenticate                         |
 +----------+--------------------+----------------------------------------+
 
 
@@ -201,9 +241,6 @@ All content resources accept to be filtered by request parameters.
 +-----------------+-----------------------+-------------------------------------------------------------------------+
 | sharing         | yes/y/1/True          | Flag to include the sharing rights. Only visible if complete flag is    |
 |                 |                       | true.                                                                   |
-+-----------------+-----------------------+-------------------------------------------------------------------------+
-| catalog         | The catalog to use,   | Explicitly set the catalog to query for the request.                    |
-|                 | e.g. `portal_catalog` |                                                                         |
 +-----------------+-----------------------+-------------------------------------------------------------------------+
 
 
@@ -368,6 +405,8 @@ The API Module
    :undoc-members:
 
 
+.. Links
 
 .. _`Plone docs`: http://docs.plone.org/develop/plone/searching_and_indexing/query.html#query-by-path
 .. _`Query by path`: http://docs.plone.org/develop/plone/searching_and_indexing/query.html#query-by-path
+.. _plone.jsonapi.routes: https://pypi.python.org/pypi/plone.jsonapi.routes
