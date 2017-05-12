@@ -2,7 +2,7 @@ Plone JSON API Routes
 =====================
 
 :Author: Ramon Bartl (RIDING BYTES - http://ridingbytes.com)
-:Version: 0.9.1
+:Version: 0.9.2
 
 
 .. contents:: Table of Contents
