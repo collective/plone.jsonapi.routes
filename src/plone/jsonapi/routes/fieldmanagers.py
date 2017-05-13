@@ -83,7 +83,9 @@ class RichTextFieldManager(ZopeSchemaFieldManager):
         """Get a JSON compatible value
         """
         value = self.get(instance)
-        return value.output or default
+        if value:
+            return value.output
+        return value
 
 
 class NamedFileFieldManager(ZopeSchemaFieldManager):
