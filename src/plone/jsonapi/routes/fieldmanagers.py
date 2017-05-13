@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import mimetypes
+
 from zope import interface
 
 from DateTime import DateTime
@@ -22,6 +24,9 @@ class ZopeSchemaFieldManager(object):
     def __init__(self, field):
         self.field = field
 
+    def get_field_name(self):
+        return self.field.getName()
+
     def get(self, instance, **kw):
         """Get the value of the field
         """
@@ -31,6 +36,12 @@ class ZopeSchemaFieldManager(object):
         """Set the value of the field
         """
         return self._set(instance, value, **kw)
+
+    def get_info(self, instance, default=None):
+        """Get a JSON compatible value
+        """
+        value = self.get(instance)
+        return value or default
 
     def _set(self, instance, value, **kw):
         """Set the value of the field
@@ -68,18 +79,61 @@ class RichTextFieldManager(ZopeSchemaFieldManager):
                               outputMimeType=self.field.output_mime_type)
         return self._set(instance, value, **kw)
 
+    def get_info(self, instance, default=None):
+        """Get a JSON compatible value
+        """
+        value = self.get(instance)
+        return value.output or default
+
 
 class NamedFileFieldManager(ZopeSchemaFieldManager):
     """Adapter to get/set the value of Named File Fields
     """
     interface.implements(IFieldManager)
 
+    def get_size(self, instance):
+        """Return the file size of the file
+        """
+        value = self.get(instance)
+        return getattr(value, "size", 0)
+
+    def get_data(self, instance):
+        """Return the file data
+        """
+        value = self.get(instance)
+        return getattr(value, "data", "")
+
+    def get_filename(self, instance):
+        """Get the filename
+        """
+        value = self.get(instance)
+        return getattr(value, "filename", "")
+
+    def get_content_type(self, instance):
+        """Get the content type of the file object
+        """
+        value = self.get(instance)
+        return getattr(value, "contentType", "")
+
+    def get_download_url(self, instance, default=None):
+        """Calculate the download url
+        """
+        download = default
+        # calculate the download url
+        download = "{url}/@@download/{fieldname}/{filename}".format(
+            url=api.get_url(instance),
+            fieldname=self.get_field_name(),
+            filename=self.get_filename(instance),
+        )
+        return download
+
     def set(self, instance, value, **kw):
         logger.debug("NamedFileFieldManager::set:File field"
                      "detected ('%r'), base64 decoding value", self.field)
+
         data = str(value).decode("base64")
-        filename = self.get_filename(**kw)
-        contentType = self.get_content_type(**kw)
+        filename = kw.get("filename") or kw.get("id") or kw.get("title")
+        contentType = kw.get("mimetype") or kw.get("content_type")
 
         if contentType:
             # create NamedFile with content type information
@@ -93,30 +147,36 @@ class NamedFileFieldManager(ZopeSchemaFieldManager):
 
         return self.field.set(instance, value)
 
-    def get_filename(self, **kw):
-        """Extract the filename from the keywords
+    def get_info(self, instance, default=None):
+        """Get a JSON compatible value
         """
-        if "filename" not in kw:
-            logger.debug("NamedFileFieldManager::get_filename:No Filename detected"
-                         "-- using title or id")
-            kw["filename"] = kw.get("id") or kw.get("title")
-        return kw.get("filename")
-
-    def get_content_type(self, **kw):
-        """Extract the mimetype from the keywords
-        """
-        if "mimetype" in kw:
-            return kw.get("mimetype")
-        if "content_type" in kw:
-            # same key as in JSON response
-            return kw.get("content_type")
-        return None
+        return api.get_file_info(instance, self.get_field_name())
 
 
 class NamedImageFieldManager(NamedFileFieldManager):
     """Adapter to get/set the value of Named Image Fields
     """
     interface.implements(IFieldManager)
+
+
+class RelationListFieldManager(ZopeSchemaFieldManager):
+    """Adapter to get/set the value of Z3C Relation Lists
+    """
+    interface.implements(IFieldManager)
+
+    def get_info(self, instance, default=None):
+        """Get a JSON compatible value
+        """
+        value = self.get(instance)
+
+        out = []
+        for rel in value:
+            if rel.isBroken():
+                logger.warn("Skipping broken relation {}".format(repr(rel)))
+                continue
+            obj = rel.to_object
+            out.append(api.get_url_info(obj))
+        return out
 
 
 class ATFieldManager(object):
@@ -126,12 +186,17 @@ class ATFieldManager(object):
 
     def __init__(self, field):
         self.field = field
-        self.name = field.getName()
+        self.name = self.get_field_name()
 
     def get_field(self):
         """Get the adapted field
         """
         return self.field
+
+    def get_field_name(self):
+        """Get the field name
+        """
+        return self.field.getName()
 
     def get(self, instance, **kw):
         """Get the value of the field
@@ -213,6 +278,44 @@ class FileFieldManager(ATFieldManager):
     """Adapter to get/set the value of File Fields
     """
     interface.implements(IFieldManager)
+
+    def get_size(self, instance):
+        """Return the file size of the file
+        """
+        return self.field.get_size(instance)
+
+    def get_data(self, instance):
+        """Return the file data
+        """
+        value = self.get(instance)
+        return getattr(value, "data", "")
+
+    def get_filename(self, instance):
+        """Get the filename
+        """
+        filename = self.field.getFilename(instance)
+        if filename:
+            return filename
+
+        fieldname = self.get_field_name()
+        content_type = self.get_content_type(instance)
+        extension = mimetypes.guess_extension(content_type)
+
+        return fieldname + extension
+
+    def get_content_type(self, instance):
+        """Get the content type of the file object
+        """
+        return self.field.getContentType(instance)
+
+    def get_download_url(self, instance, default=None):
+        """Calculate the download url
+        """
+        download = default
+        # calculate the download url
+        download = "{url}/at_download/{fieldname}".format(
+            url=instance.absolute_url(), fieldname=self.get_field_name())
+        return download
 
     def set(self, instance, value, **kw):
         """Decodes base64 value and set the file object

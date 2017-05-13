@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import json
-import pkg_resources
 import datetime
+import pkg_resources
 
 from zope import interface
 from zope.schema import getFields
@@ -15,6 +15,7 @@ from plone.behavior.interfaces import IBehaviorAssignable
 
 from DateTime import DateTime
 from AccessControl import Unauthorized
+from Acquisition import ImplicitAcquisitionWrapper
 
 from Products.CMFCore.interfaces import ISiteRoot
 from Products.CMFCore.interfaces import IFolderish
@@ -30,6 +31,7 @@ except pkg_resources.DistributionNotFound:
 else:
     from Products.Archetypes.interfaces.base import IBaseObject
 
+
 # request helpers
 from plone.jsonapi.routes import request as req
 from plone.jsonapi.routes.exceptions import APIError
@@ -40,6 +42,7 @@ from plone.jsonapi.routes.interfaces import IBatch
 from plone.jsonapi.routes.interfaces import ICatalog
 from plone.jsonapi.routes.interfaces import ICatalogQuery
 from plone.jsonapi.routes.interfaces import IDataManager
+from plone.jsonapi.routes.interfaces import IFieldManager
 from plone.jsonapi.routes import underscore as u
 
 __author__ = 'Ramon Bartl <rb@ridingbytes.com>'
@@ -626,6 +629,42 @@ def get_sharing_info(brain_or_object):
     }
 
 
+def get_file_info(obj, fieldname, default=None):
+    """Extract file data from a file field
+
+    :param obj: Content object
+    :type obj: ATContentType/DexterityContentType
+    :param fieldname: Schema name of the field
+    :type fieldname: str/unicode
+    :returns: File data mapping
+    :rtype: dict
+    """
+
+    # extract the file field from the object if omitted
+    field = get_field(obj, fieldname)
+
+    # get the value with the fieldmanager
+    fm = IFieldManager(field)
+
+    # return None if we have no file data
+    if fm.get_size(obj) == 0:
+        return None
+
+    out = {
+        "content_type": fm.get_content_type(obj),
+        "filename": fm.get_filename(obj),
+        "download": fm.get_download_url(obj),
+        "size": fm.get_size(obj),
+    }
+
+    # only return file data only if requested (?filedata=yes)
+    if req.get_filedata(False):
+        data = fm.get_data(obj)
+        out["data"] = data.encode("base64")
+
+    return out
+
+
 # -----------------------------------------------------------------------------
 #   Batching Helpers
 # -----------------------------------------------------------------------------
@@ -958,6 +997,46 @@ def is_json_serializable(thing):
         return False
 
 
+def to_json_value(obj, fieldname, value=_marker, default=None):
+    """JSON save value encoding
+
+    :param obj: Content object
+    :type obj: ATContentType/DexterityContentType
+    :param fieldname: Schema name of the field
+    :type fieldname: str/unicode
+    :param value: The field value
+    :type value: depends on the field type
+    :returns: JSON encoded field value
+    :rtype: field dependent
+    """
+
+    # This function bridges the value of the field to a probably more complex
+    # JSON structure to return to the client.
+
+    # extract the value from the object if omitted
+    if value is _marker:
+        value = IDataManager(obj).get(fieldname)
+
+    # check if the value is callable
+    if callable(value):
+        value = value()
+
+    # convert objects
+    if isinstance(value, ImplicitAcquisitionWrapper):
+        return get_url_info(value)
+
+    # convert dates
+    if is_date(value):
+        return to_iso_date(value)
+
+    # check if the value is JSON serializable
+    if not is_json_serializable(value):
+        logger.warn("Output {} is not JSON serializable".format(repr(value)))
+        return default
+
+    return value
+
+
 def url_for(endpoint, **values):
     """Looks up the API URL for the given endpoint
 
@@ -1043,19 +1122,52 @@ def get_object(brain_or_object):
 
 
 def get_schema(brain_or_object):
-    """Get the schema of the content object
+    """Get the schema of the content
 
     :param brain_or_object: A single catalog brain or content object
     :type brain_or_object: ATContentType/DexterityContentType/CatalogBrain
-    :returns: Schema
+    :returns: Schema object
+    """
+    obj = get_object(brain_or_object)
+    if is_root(obj):
+        return None
+    if is_dexterity_content(obj):
+        pt = get_tool("portal_types")
+        fti = pt.getTypeInfo(obj.portal_type)
+        return fti.lookupSchema()
+    if is_at_content(obj):
+        return obj.Schema()
+    fail(400, "{} has no Schema.".format(repr(brain_or_object)))
+
+
+def get_fields(brain_or_object):
+    """Get the list of fields from the object
+
+    :param brain_or_object: A single catalog brain or content object
+    :type brain_or_object: ATContentType/DexterityContentType/CatalogBrain
+    :returns: List of fields
     :rtype: list
     """
     obj = get_object(brain_or_object)
+    # The portal object has no schema
+    if is_root(obj):
+        return {}
+    schema = get_schema(obj)
     if is_dexterity_content(obj):
-        pt = get_tool("portal_types")
-        fti = pt.getTypeInfo(get_portal_type(obj))
-        return fti.lookupSchema()
-    return obj.Schema()
+        names = schema.names()
+        fields = map(lambda name: schema.get(name), names)
+        schema_fields = dict(zip(names, fields))
+        # update with behavior fields
+        schema_fields.update(get_behaviors(obj))
+        return schema_fields
+    return dict(zip(schema.keys(), schema.fields()))
+
+
+def get_field(brain_or_object, name, default=None):
+    """Return the named field
+    """
+    fields = get_fields(brain_or_object)
+    return fields.get(name, default)
 
 
 def get_behaviors(brain_or_object):

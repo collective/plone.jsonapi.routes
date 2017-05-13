@@ -47,7 +47,7 @@ class TestDataproviders(APITestCase):
         self.doc = self.portal.get(_)
 
         # handle plone 5 dexterity based file content
-        if dataproviders.is_dexterity_content(self.doc):
+        if api.is_dexterity_content(self.doc):
             self.doc.file = dummy_file()
         else:
             self.doc.setFilename(FILENAME)
@@ -86,76 +86,6 @@ class TestDataproviders(APITestCase):
         adapter = IInfo(obj)
         data = adapter()
         self.assertEqual(data.get("uid"), '0')
-
-    # -----------------------------------------------------------------------------
-    #   Test Functional Helpers
-    # -----------------------------------------------------------------------------
-
-    def test_extract_fields(self):
-        # extract fields from content objects
-        obj = self.get_document_obj()
-        data = dataproviders.extract_fields(obj, ["title"])
-        self.assertEqual(data.get("title"), obj.title)
-        # extract fields from catalog brains
-        brain = self.get_document_brain()
-        data = dataproviders.extract_fields(brain, ["UID"])
-        self.assertEqual(data.get("UID"), brain.UID)
-
-    def test_get_json_value(self):
-        # Ensure JSON serializable handling of a Schema field value
-        obj = self.get_document_obj()
-
-        # handles date objects
-        # value = dataproviders.get_json_value(obj, "creation_date")
-        # self.assertEqual(value, obj.created().ISO8601())
-
-        # extracts the value by name if omitted
-        value = dataproviders.get_json_value(obj, "title")
-        self.assertEqual(value, obj.Title())
-
-        # takes the given value
-        value = dataproviders.get_json_value(obj, "foo", 1)
-        self.assertEqual(type(value), int)
-
-        # returns the default if the value is not JSON serializable
-        value = dataproviders.get_json_value(obj, "object", object(),
-                                             default="Not JSON serializable")
-        self.assertEqual(value, "Not JSON serializable")
-
-    def test_get_file_info(self):
-        obj = self.doc
-        # extract the file info
-        info = dataproviders.get_file_info(obj, "file")
-        self.assertEqual(info.get("filename"), FILENAME)
-
-    def test_get_download_url(self):
-        obj = self.doc
-        # extract the file info
-        info = dataproviders.get_download_url(obj, "file")
-        self.assertTrue(info.find("download") > -1)
-
-    def test_get_content_type(self):
-        obj = self.doc
-        # extracts the content type of content objects
-        ct = dataproviders.get_content_type(obj)
-        self.assertNotEquals(ct, "binary")
-        # it handles non known objects gracefully
-        ct = dataproviders.get_content_type(object(), "binary")
-        self.assertEqual(ct, "binary")
-
-    def test_get_iso_date(self):
-        obj = self.get_document_obj()
-        created = obj.created()
-        date = dataproviders.get_iso_date(created)
-        self.assertEqual(date, obj.created().ISO8601())
-
-    def test_is_dexterity_content(self):
-        obj = self.get_document_obj()
-        if api.is_plone5():
-            # std. content types are dexterity in plone 5
-            self.assertTrue(dataproviders.is_dexterity_content(obj))
-        else:
-            self.assertFalse(dataproviders.is_dexterity_content(obj))
 
 
 def test_suite():

@@ -114,10 +114,16 @@
       factory=".fieldmanagers.ZopeSchemaFieldManager"
       />
 
-  <!-- Adapter for Rich Text Fields Fields -->
+  <!-- Adapter for Rich Text Fields -->
   <adapter
       for="plone.app.textfield.interfaces.IRichText"
       factory=".fieldmanagers.RichTextFieldManager"
+      />
+
+  <!-- Adapter for Relation Fields -->
+  <adapter
+      for="z3c.relationfield.interfaces.IRelationList"
+      factory=".fieldmanagers.RelationListFieldManager"
       />
 
   <!-- Adapter for Named File Fields -->

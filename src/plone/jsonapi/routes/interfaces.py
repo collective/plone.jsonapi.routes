@@ -6,6 +6,53 @@ __author__ = 'Ramon Bartl <ramon.bartl@googlemail.de>'
 __docformat__ = 'plaintext'
 
 
+class IInfo(interface.Interface):
+    """ JSON Info Interface
+    """
+
+    def to_dict():
+        """ return the dictionary representation of the object
+        """
+
+    def __call__():
+        """ return the dictionary representation of the object
+        """
+
+
+class IDataManager(interface.Interface):
+    """ Field Interface
+    """
+
+    def get(name):
+        """ Get the value of the named field with
+        """
+
+    def set(name, value):
+        """ Set the value of the named field
+        """
+
+    def get_info(name, default=None):
+        """ Get a JSON compatible structure from the value
+        """
+
+
+class IFieldManager(interface.Interface):
+    """A Field Manager is able to set/get the values of a single field.
+    """
+
+    def get(instance, **kwargs):
+        """Get the value of the field
+        """
+
+    def set(instance, value, **kwargs):
+        """Set the value of the field
+        """
+
+    def get_info(instance, default=None):
+        """Get a JSON compatible structure from the value
+        """
+
+
 class ICatalog(interface.Interface):
     """ Plone catalog interface
     """
@@ -40,32 +87,6 @@ class ICatalogQuery(interface.Interface):
         """
 
 
-class IFieldManager(interface.Interface):
-    """A Field Manager is able to set/get the values of a single field.
-    """
-
-    def get(instance, **kwargs):
-        """Get the value of the field
-        """
-
-    def set(instance, value, **kwargs):
-        """Set the value of the field
-        """
-
-
-class IInfo(interface.Interface):
-    """ JSON Info Interface
-    """
-
-    def to_dict():
-        """ return the dictionary representation of the object
-        """
-
-    def __call__():
-        """ return the dictionary representation of the object
-        """
-
-
 class IBatch(interface.Interface):
     """ Batch Interface
     """
@@ -96,17 +117,4 @@ class IBatch(interface.Interface):
 
     def make_prev_url():
         """ build and return the previous url
-        """
-
-
-class IDataManager(interface.Interface):
-    """ Field Interface
-    """
-
-    def get(name):
-        """ Get the value of the named field with
-        """
-
-    def set(name, value):
-        """ Set the value of the named field
         """
