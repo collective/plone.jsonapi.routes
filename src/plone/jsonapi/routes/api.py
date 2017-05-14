@@ -1015,7 +1015,7 @@ def to_json_value(obj, fieldname, value=_marker, default=None):
 
     # extract the value from the object if omitted
     if value is _marker:
-        value = IDataManager(obj).get(fieldname)
+        value = IDataManager(obj).json_data(fieldname)
 
     # convert objects
     if isinstance(value, ImplicitAcquisitionWrapper):
