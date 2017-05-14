@@ -36,7 +36,7 @@ class BaseDataManager(object):
         """
         raise NotImplemented("Setter must be implemented by subclass")
 
-    def to_dict(self, name, default=None):
+    def json_data(self, name, default=None):
         """Get a JSON compatible value of the field
         """
         raise NotImplemented("Get Info must be implemented by subclass")
@@ -60,7 +60,7 @@ class BrainDataManager(BaseDataManager):
         """
         logger.warn("Setting is not allowed on catalog brains")
 
-    def to_dict(self, name, default=None):
+    def json_data(self, name, default=None):
         """Get a JSON compatible value of the field
         """
         value = self.get(name)
@@ -115,7 +115,7 @@ class PortalDataManager(BaseDataManager):
         self.context[name] = value
         return True
 
-    def to_dict(self, name, default=None):
+    def json_data(self, name, default=None):
         """Get a JSON compatible structure for the named attribute
         """
         value = self.get(name)
@@ -159,7 +159,7 @@ class ATDataManager(BaseDataManager):
         fieldmanager = IFieldManager(field)
         return fieldmanager.set(self.context, value, **kw)
 
-    def to_dict(self, name):
+    def json_data(self, name):
         """Get a JSON compatible structure for the named attribute
         """
 
@@ -171,7 +171,7 @@ class ATDataManager(BaseDataManager):
             return None
 
         fieldmanager = IFieldManager(field)
-        return fieldmanager.to_dict(self.context)
+        return fieldmanager.json_data(self.context)
 
 
 class DexterityDataManager(BaseDataManager):
@@ -221,7 +221,7 @@ class DexterityDataManager(BaseDataManager):
         fieldmanager = IFieldManager(field)
         return fieldmanager.set(self.context, value, **kw)
 
-    def to_dict(self, name):
+    def json_data(self, name):
         """Get a JSON compatible structure for the named attribute
         """
 
@@ -238,7 +238,7 @@ class DexterityDataManager(BaseDataManager):
             return None
 
         fieldmanager = IFieldManager(field)
-        return fieldmanager.to_dict(self.context)
+        return fieldmanager.json_data(self.context)
 
     def can_write(self):
         """Check if the field is writeable

@@ -92,7 +92,7 @@ class Base(object):
         for fieldname in fieldnames:
             try:
                 # get the field value with the data manager
-                fieldvalue = dm.to_dict(fieldname)
+                fieldvalue = dm.json_data(fieldname)
             # https://github.com/collective/plone.jsonapi.routes/issues/52
             # -> skip restricted fields
             except Unauthorized:

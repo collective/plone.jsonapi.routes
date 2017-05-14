@@ -95,6 +95,8 @@ a Python `<list>` instead of a complete mapping as above.
 
     # http://werkzeug.pocoo.org/docs/0.11/routing/#builtin-converters
     # http://werkzeug.pocoo.org/docs/0.11/routing/#custom-converters
+    @route("/<any(" + ACTIONS + "):action>",
+          "plone.jsonapi.routes.action", methods=["POST"])
     @route("/<any(" + ACTIONS + "):action>/<string(maxlength=32):uid>",
           "plone.jsonapi.routes.action", methods=["POST"])
     @route("/<string:resource>/<any(" + ACTIONS + "):action>",
@@ -104,22 +106,24 @@ a Python `<list>` instead of a complete mapping as above.
     def action(context, request, action=None, resource=None, uid=None):
         """Various HTTP POST actions
 
-        Case 1: <action>/<uid>
+        Case 1: <action>
+        <Plonesite>/@@API/plone/api/1.0/<action>
+
+        Case 2: <action>/<uid>
         -> The actions (cut, copy, update, delete) will performed on the object identified by <uid>
         -> The actions (create, paste) will use the <uid> as the parent folder
         <Plonesite>/@@API/plone/api/1.0/<action>/<uid>
 
-        Case 2: <resource>/<action>
+        Case 3: <resource>/<action>
         -> The "target" object will be located by a location given in the request body (uid, path, parent_path + id)
         -> The actions (cut, copy, update, delete) will performed on the target object
         -> The actions (create) will use the target object as the container
         <Plonesite>/@@API/plone/api/1.0/<resource>/<action>
 
-        Case 3: <resource>/<action>/<uid>
+        Case 4: <resource>/<action>/<uid>
         -> The actions (cut, copy, update, delete) will performed on the object identified by <uid>
         -> The actions (create) will use the <uid> as the parent folder
         <Plonesite>/@@API/plone/api/1.0/<resource>/<action>
-
         """
 
         # Fetch and call the action function of the API

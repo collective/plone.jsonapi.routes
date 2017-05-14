@@ -37,7 +37,7 @@ class ZopeSchemaFieldManager(object):
         """
         return self._set(instance, value, **kw)
 
-    def to_dict(self, instance, default=None):
+    def json_data(self, instance, default=None):
         """Get a JSON compatible value
         """
         value = self.get(instance)
@@ -79,7 +79,7 @@ class RichTextFieldManager(ZopeSchemaFieldManager):
                               outputMimeType=self.field.output_mime_type)
         return self._set(instance, value, **kw)
 
-    def to_dict(self, instance, default=None):
+    def json_data(self, instance, default=None):
         """Get a JSON compatible value
         """
         value = self.get(instance)
@@ -149,7 +149,7 @@ class NamedFileFieldManager(ZopeSchemaFieldManager):
 
         return self.field.set(instance, value)
 
-    def to_dict(self, instance, default=None):
+    def json_data(self, instance, default=None):
         """Get a JSON compatible value
         """
         return api.get_file_info(instance, self.get_field_name())
@@ -166,7 +166,7 @@ class RelationListFieldManager(ZopeSchemaFieldManager):
     """
     interface.implements(IFieldManager)
 
-    def to_dict(self, instance, default=None):
+    def json_data(self, instance, default=None):
         """Get a JSON compatible value
         """
         value = self.get(instance)
@@ -251,7 +251,7 @@ class ATFieldManager(object):
         # return the field value
         return self.field.get(instance)
 
-    def to_dict(self, instance, default=None):
+    def json_data(self, instance, default=None):
         """Get a JSON compatible value
         """
         value = self.get(instance)
@@ -280,6 +280,12 @@ class DateTimeFieldManager(ATFieldManager):
             return False
 
         self._set(instance, value, **kw)
+
+    def json_data(self, instance, default=None):
+        """Get a JSON compatible value
+        """
+        value = self.get(instance)
+        return api.to_iso_date(value) or default
 
 
 class FileFieldManager(ATFieldManager):
@@ -338,7 +344,7 @@ class FileFieldManager(ATFieldManager):
 
         self._set(instance, value, **kw)
 
-    def to_dict(self, instance, default=None):
+    def json_data(self, instance, default=None):
         """Get a JSON compatible value
         """
         return api.get_file_info(instance, self.get_field_name())
@@ -419,3 +425,8 @@ class ReferenceFieldManager(ATFieldManager):
                              .format(self.field))
 
         return self._set(instance, ref, **kw)
+
+    def json_data(self, instance, default=None):
+        """Get a JSON compatible value
+        """
+        return api.get_url_info(instance)
