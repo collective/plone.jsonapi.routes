@@ -17,7 +17,9 @@
       register_api_routes="True"
       />
 
-  <!-- CATALOG -->
+  <!-- CATALOG
+       Unified interface to one or more Portal Catalog tools.
+  -->
 
   <!-- Default catalog adapter -->
   <adapter
@@ -32,22 +34,34 @@
       />
 
 
-  <!-- BATCHING -->
+  <!-- DATA PROVIDERS
+       Introspect the Schema/Attributes of Contents and return a JSON compatible
+       dictionary with the help of the Data Managers (see below).
+  -->
 
-  <!-- Batch adapter for Plone 4.3 Batching -->
+  <!-- Default data provider (AT based content types) -->
   <adapter
       for="*"
-      factory=".batch.Batch"
+      factory=".dataproviders.ATDataProvider"
       />
 
-  <!-- Batch adapter for Plone 4.2 Batching -->
+  <!-- Adapter for Catalog Brains -->
   <adapter
-      for="ZTUtils.Batch.Batch"
-      factory=".batch.Batch42"
+      for="Products.ZCatalog.interfaces.ICatalogBrain"
+      factory=".dataproviders.ZCDataProvider"
+      />
+
+  <!-- Adapter for the Plone Site -->
+  <adapter
+      for="Products.CMFCore.interfaces.ISiteRoot"
+      factory=".dataproviders.SiteRootDataProvider"
       />
 
 
-  <!-- DATA MANAGERS -->
+  <!-- DATA MANAGERS
+       Context level interface to get and set values (by name) and get a JSON compatible
+       structure of the value with the help of the Field Managers (see below).
+  -->
 
   <!-- Default Data adapter (AT based content types) -->
   <adapter
@@ -55,16 +69,16 @@
       factory=".datamanagers.ATDataManager"
       />
 
-  <!-- Data manager for the Plone site -->
-  <adapter
-      for="Products.CMFPlone.interfaces.siteroot.IPloneSiteRoot"
-      factory=".datamanagers.PortalDataManager"
-      />
-
-  <!-- Data manager for catalog brains -->
+  <!-- Data adapter for Catalog brains -->
   <adapter
       for="Products.ZCatalog.interfaces.ICatalogBrain"
       factory=".datamanagers.BrainDataManager"
+      />
+
+  <!-- Data adapter for the Portal object -->
+  <adapter
+      for="Products.CMFPlone.interfaces.siteroot.IPloneSiteRoot"
+      factory=".datamanagers.PortalDataManager"
       />
 
   <!-- Data manager for Dexterity field manipulation -->
@@ -74,7 +88,10 @@
       />
 
 
-  <!-- AT FIELD MANAGERS -->
+  <!-- AT FIELD MANAGERS
+       Field level interface to get and set values and get a JSON compatible
+       structure of the value.
+  -->
 
   <!-- Adapter for AT Fields -->
   <adapter
@@ -82,19 +99,19 @@
       factory=".fieldmanagers.ATFieldManager"
       />
 
-  <!-- Adapter for AT Text Fields -->
+  <!-- Adapter for Text Fields -->
   <adapter
       for="Products.Archetypes.interfaces.field.ITextField"
       factory=".fieldmanagers.TextFieldManager"
       />
 
-  <!-- Adapter for AT DateTime Field -->
+  <!-- Adapter for DateTime Field -->
   <adapter
       for="Products.Archetypes.interfaces.field.IDateTimeField"
       factory=".fieldmanagers.DateTimeFieldManager"
       />
 
-  <!-- Adapter for AT File Field -->
+  <!-- Adapter for File Field -->
   <adapter
       for="Products.Archetypes.interfaces.field.IFileField"
       factory=".fieldmanagers.FileFieldManager"
@@ -106,74 +123,27 @@
       factory=".fieldmanagers.FileFieldManager"
       />
 
-  <!-- Adapter for AT Reference Field -->
+  <!-- Adapter for Reference Field -->
   <adapter
       for="Products.Archetypes.interfaces.field.IReferenceField"
       factory=".fieldmanagers.ReferenceFieldManager"
       />
 
 
-  <!-- ZOPE SCHEMA FIELD MANAGERS -->
+  <!-- BATCHING
+       Provides a unified interface to the Plone Batching Machinery.
+  -->
 
-  <!-- Adapter for Zope Schema Fields -->
-  <adapter
-      for="zope.schema.interfaces.IField"
-      factory=".fieldmanagers.ZopeSchemaFieldManager"
-      />
-
-  <!-- Adapter for Rich Text Fields -->
-  <configure zcml:condition="installed plone.app.textfield">
-    <adapter
-        for="plone.app.textfield.interfaces.IRichText"
-        factory=".fieldmanagers.RichTextFieldManager"
-        />
-  </configure>
-
-  <!-- Adapter for Relation Fields -->
-  <configure zcml:condition="installed z3c.relationfield">
-    <adapter
-        for="z3c.relationfield.interfaces.IRelationList"
-        factory=".fieldmanagers.RelationListFieldManager"
-        />
-  </configure>
-
-  <!-- Adapter for Named File Fields -->
-  <adapter
-      for="plone.namedfile.interfaces.INamedFileField"
-      factory=".fieldmanagers.NamedFileFieldManager"
-      />
-
-  <!-- Adapter for Named Image Fields -->
-  <adapter
-      for="plone.namedfile.interfaces.INamedImageField"
-      factory=".fieldmanagers.NamedImageFieldManager"
-      />
-
-
-  <!-- DATA PROVIDERS -->
-
-  <!-- Default data provider (AT based content types) -->
+  <!-- Adapter for Plone Batching -->
   <adapter
       for="*"
-      factory=".dataproviders.ATDataProvider"
+      factory=".batch.Batch"
       />
 
-  <!-- Data provider for catalog brains -->
+  <!-- Adapter for Plone 4.2 Batching -->
   <adapter
-      for="Products.ZCatalog.interfaces.ICatalogBrain"
-      factory=".dataproviders.ZCDataProvider"
-      />
-
-  <!-- Data provider for the Plone site -->
-  <adapter
-      for="Products.CMFCore.interfaces.ISiteRoot"
-      factory=".dataproviders.SiteRootDataProvider"
-      />
-
-  <!-- Data provider for Dexterity content types -->
-  <adapter
-      for="plone.dexterity.interfaces.IDexterityContent"
-      factory=".dataproviders.DexterityDataProvider"
+      for="ZTUtils.Batch.Batch"
+      factory=".batch.Batch42"
       />
 
 </configure>
