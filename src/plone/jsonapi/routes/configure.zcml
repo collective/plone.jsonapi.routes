@@ -132,7 +132,6 @@
   <!-- Adapter for Relation Fields -->
   <configure zcml:condition="installed z3c.relationfield">
     <adapter
-        zcml:condition="installed z3c.relationfield"
         for="z3c.relationfield.interfaces.IRelationList"
         factory=".fieldmanagers.RelationListFieldManager"
         />
