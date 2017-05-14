@@ -68,7 +68,7 @@ class TestFilesAPI(APITestCase):
         """ Test CRUD file routes
         """
         # Call the files route
-        self.browser.open(self.api_url + "/files")
+        self.browser.open(self.api_url + "/file")
         # There should be no file in the portal
         self.assertEqual(self.get_key("count"), 0)
 
@@ -88,7 +88,7 @@ class TestFilesAPI(APITestCase):
             obj.file = dummy_file()
             transaction.commit()
 
-        self.browser.open(self.api_url + "/files")
+        self.browser.open(self.api_url + "/file")
         # There should be one file in the portal
         self.assertEqual(self.get_key("count"), 1)
 
@@ -100,7 +100,7 @@ class TestFilesAPI(APITestCase):
         self.assertEqual(item.get("uid"), obj.UID())
 
         # Issue #57: Explicitly ask for the filedata
-        self.browser.open(self.api_url + "/files/%s?filedata=yes&complete=yes" % obj.UID())
+        self.browser.open(self.api_url + "/file/%s?filedata=yes&complete=yes" % obj.UID())
 
         # Get the items list from the detail page
         items = self.get_items()
