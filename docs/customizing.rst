@@ -210,9 +210,17 @@ Adapter. This Adapter has a simple interface:
             """ Set the value of the named field
             """
 
+        def json_data(name, default=None):
+            """ Get a JSON compatible structure from the value
+            """
+
 To customize how the data is set to each field of the content, you have to
 register an adapter for a more specific interface on the content.
 This adapter has to implement the `IDataManager` interface.
+
+.. note:: The `json_data` function is called by the Data Provider Adapter
+          (`IInfo`) to get a JSON compatible return Value, e.g.:
+          DateTime('2017/05/14 14:46:18.746800 GMT+2') -> "2017-05-14T14:46:18+02:00"
 
 
 .. important:: Please be aware that you have to implement security for field
@@ -287,10 +295,24 @@ This Adapter has a simple interface:
             """Set the value of the field
             """
 
+        def json_data(instance, default=None):
+            """Get a JSON compatible structure from the value
+            """
+
 To customize how the data is set to each field of the content, you have to
 register a more specific adapter to a field.
 
 This adapter has to implement then the `IFieldManager` interface.
+
+.. note:: The `json_data` function is called by the Data Manager Adapter
+          (`IDataManager`) to get a JSON compatible return Value, e.g.:
+          DateTime('2017/05/14 14:46:18.746800 GMT+2') -> "2017-05-14T14:46:18+02:00"
+
+.. note:: The `json_data` method is defined on context level (`IDataManger`) as
+          well as on field level (`IFieldManager`). This is to handle objects
+          w/o fields, e.g. Catalog Brains, Portal Object etc. and Objects which
+          contain fields and want to delegate the JSON representation to the
+          field.
 
 .. important:: Please be aware that you have to implement security for field
                level access on your own.
@@ -314,6 +336,11 @@ This adapter has to implement then the `IFieldManager` interface.
 
             self._set(instance, value, **kw)
 
+        def json_data(self, instance, default=None):
+            """Get a JSON compatible value
+            """
+            value = self.get(instance)
+            return api.to_iso_date(value) or default
 
 Register the adapter in your `configure.zcml` file for your special interface:
 
