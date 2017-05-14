@@ -7,7 +7,6 @@ from plone.app.testing import setRoles
 
 from plone.jsonapi.routes.tests.base import APITestCase
 from plone.jsonapi.routes import api
-from plone.jsonapi.routes import dataproviders
 from plone.jsonapi.routes.interfaces import IInfo
 
 
