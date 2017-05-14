@@ -70,8 +70,8 @@ def get(key, default=None):
 
 
 def is_true(key, default=False):
-    ''' Check if the value is in TRUE_VALUES
-    '''
+    """ Check if the value is in TRUE_VALUES
+    """
     value = get(key, default)
     if isinstance(value, list):
         value = value[0]
