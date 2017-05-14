@@ -100,6 +100,12 @@
       factory=".fieldmanagers.FileFieldManager"
       />
 
+  <!-- Adapter for Blob File Field -->
+  <adapter
+      for="plone.app.blob.interfaces.IBlobField"
+      factory=".fieldmanagers.FileFieldManager"
+      />
+
   <!-- Adapter for AT Reference Field -->
   <adapter
       for="Products.Archetypes.interfaces.field.IReferenceField"
