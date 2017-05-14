@@ -1017,10 +1017,6 @@ def to_json_value(obj, fieldname, value=_marker, default=None):
     if value is _marker:
         value = IDataManager(obj).get(fieldname)
 
-    # check if the value is callable
-    if callable(value):
-        value = value()
-
     # convert objects
     if isinstance(value, ImplicitAcquisitionWrapper):
         return get_url_info(value)
@@ -1028,6 +1024,10 @@ def to_json_value(obj, fieldname, value=_marker, default=None):
     # convert dates
     if is_date(value):
         return to_iso_date(value)
+
+    # check if the value is callable
+    if callable(value):
+        value = value()
 
     # check if the value is JSON serializable
     if not is_json_serializable(value):
