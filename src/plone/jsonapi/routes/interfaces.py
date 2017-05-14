@@ -31,7 +31,7 @@ class IDataManager(interface.Interface):
         """ Set the value of the named field
         """
 
-    def get_info(name, default=None):
+    def to_dict(name, default=None):
         """ Get a JSON compatible structure from the value
         """
 
@@ -48,7 +48,7 @@ class IFieldManager(interface.Interface):
         """Set the value of the field
         """
 
-    def get_info(instance, default=None):
+    def to_dict(instance, default=None):
         """Get a JSON compatible structure from the value
         """
 

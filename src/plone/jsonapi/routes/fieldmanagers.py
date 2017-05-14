@@ -37,7 +37,7 @@ class ZopeSchemaFieldManager(object):
         """
         return self._set(instance, value, **kw)
 
-    def get_info(self, instance, default=None):
+    def to_dict(self, instance, default=None):
         """Get a JSON compatible value
         """
         value = self.get(instance)
@@ -79,7 +79,7 @@ class RichTextFieldManager(ZopeSchemaFieldManager):
                               outputMimeType=self.field.output_mime_type)
         return self._set(instance, value, **kw)
 
-    def get_info(self, instance, default=None):
+    def to_dict(self, instance, default=None):
         """Get a JSON compatible value
         """
         value = self.get(instance)
@@ -149,7 +149,7 @@ class NamedFileFieldManager(ZopeSchemaFieldManager):
 
         return self.field.set(instance, value)
 
-    def get_info(self, instance, default=None):
+    def to_dict(self, instance, default=None):
         """Get a JSON compatible value
         """
         return api.get_file_info(instance, self.get_field_name())
@@ -166,7 +166,7 @@ class RelationListFieldManager(ZopeSchemaFieldManager):
     """
     interface.implements(IFieldManager)
 
-    def get_info(self, instance, default=None):
+    def to_dict(self, instance, default=None):
         """Get a JSON compatible value
         """
         value = self.get(instance)
@@ -251,6 +251,12 @@ class ATFieldManager(object):
         # return the field value
         return self.field.get(instance)
 
+    def to_dict(self, instance, default=None):
+        """Get a JSON compatible value
+        """
+        value = self.get(instance)
+        return value or default
+
 
 class TextFieldManager(ATFieldManager):
     """Adapter to get/set the value of Text Fields
@@ -331,6 +337,11 @@ class FileFieldManager(ATFieldManager):
             kw["filename"] = kw.get("id") or kw.get("title")
 
         self._set(instance, value, **kw)
+
+    def to_dict(self, instance, default=None):
+        """Get a JSON compatible value
+        """
+        return api.get_file_info(instance, self.get_field_name())
 
 
 class ReferenceFieldManager(ATFieldManager):

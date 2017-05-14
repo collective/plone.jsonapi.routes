@@ -36,7 +36,7 @@ class BaseDataManager(object):
         """
         raise NotImplemented("Setter must be implemented by subclass")
 
-    def get_info(self, name, default=None):
+    def to_dict(self, name, default=None):
         """Get a JSON compatible value of the field
         """
         raise NotImplemented("Get Info must be implemented by subclass")
@@ -60,7 +60,7 @@ class BrainDataManager(BaseDataManager):
         """
         logger.warn("Setting is not allowed on catalog brains")
 
-    def get_info(self, name, default=None):
+    def to_dict(self, name, default=None):
         """Get a JSON compatible value of the field
         """
         value = self.get(name)
@@ -115,7 +115,7 @@ class PortalDataManager(BaseDataManager):
         self.context[name] = value
         return True
 
-    def get_info(self, name, default=None):
+    def to_dict(self, name, default=None):
         """Get a JSON compatible structure for the named attribute
         """
         value = self.get(name)
@@ -159,11 +159,19 @@ class ATDataManager(BaseDataManager):
         fieldmanager = IFieldManager(field)
         return fieldmanager.set(self.context, value, **kw)
 
-    def get_info(self, name):
+    def to_dict(self, name):
         """Get a JSON compatible structure for the named attribute
         """
-        value = self.get(name)
-        return value
+
+        # fetch the field by name
+        field = api.get_field(self.context, name)
+
+        # bail out if we have no field
+        if not field:
+            return None
+
+        fieldmanager = IFieldManager(field)
+        return fieldmanager.to_dict(self.context)
 
 
 class DexterityDataManager(BaseDataManager):
@@ -213,7 +221,7 @@ class DexterityDataManager(BaseDataManager):
         fieldmanager = IFieldManager(field)
         return fieldmanager.set(self.context, value, **kw)
 
-    def get_info(self, name):
+    def to_dict(self, name):
         """Get a JSON compatible structure for the named attribute
         """
 
@@ -230,7 +238,7 @@ class DexterityDataManager(BaseDataManager):
             return None
 
         fieldmanager = IFieldManager(field)
-        return fieldmanager.get_info(self.context)
+        return fieldmanager.to_dict(self.context)
 
     def can_write(self):
         """Check if the field is writeable
