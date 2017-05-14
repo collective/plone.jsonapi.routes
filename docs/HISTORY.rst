@@ -1,6 +1,21 @@
 Changelog
 =========
 
+
+0.9.3 - 2017-05-14
+------------------
+
+**Changes**
+
+- `IDataManager` contain now a `json_data` method to return a JSON suitable
+  return structure or delegate to the `IFieldManager.json_data` method.
+  Please see section "Customizing" in the documentation for more details.
+- Added support for `z3c.relationfield.interfaces.IRelationList` fields
+- Added support for `plone.app.textfield.interfaces.IRichText` fields
+- Added support for `plone.app.blob.interfaces.IBlobField` fields
+- More code cleanup and refactoring (coming closer to a robust 1.0.0 release!)
+
+
 0.9.2 - 2017-05-12
 ------------------
 

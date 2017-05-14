@@ -95,6 +95,8 @@ a Python `<list>` instead of a complete mapping as above.
 
     # http://werkzeug.pocoo.org/docs/0.11/routing/#builtin-converters
     # http://werkzeug.pocoo.org/docs/0.11/routing/#custom-converters
+    @route("/<any(" + ACTIONS + "):action>",
+          "plone.jsonapi.routes.action", methods=["POST"])
     @route("/<any(" + ACTIONS + "):action>/<string(maxlength=32):uid>",
           "plone.jsonapi.routes.action", methods=["POST"])
     @route("/<string:resource>/<any(" + ACTIONS + "):action>",
@@ -104,22 +106,24 @@ a Python `<list>` instead of a complete mapping as above.
     def action(context, request, action=None, resource=None, uid=None):
         """Various HTTP POST actions
 
-        Case 1: <action>/<uid>
+        Case 1: <action>
+        <Plonesite>/@@API/plone/api/1.0/<action>
+
+        Case 2: <action>/<uid>
         -> The actions (cut, copy, update, delete) will performed on the object identified by <uid>
         -> The actions (create, paste) will use the <uid> as the parent folder
         <Plonesite>/@@API/plone/api/1.0/<action>/<uid>
 
-        Case 2: <resource>/<action>
+        Case 3: <resource>/<action>
         -> The "target" object will be located by a location given in the request body (uid, path, parent_path + id)
         -> The actions (cut, copy, update, delete) will performed on the target object
         -> The actions (create) will use the target object as the container
         <Plonesite>/@@API/plone/api/1.0/<resource>/<action>
 
-        Case 3: <resource>/<action>/<uid>
+        Case 4: <resource>/<action>/<uid>
         -> The actions (cut, copy, update, delete) will performed on the object identified by <uid>
         -> The actions (create) will use the <uid> as the parent folder
         <Plonesite>/@@API/plone/api/1.0/<resource>/<action>
-
         """
 
         # Fetch and call the action function of the API
@@ -206,9 +210,17 @@ Adapter. This Adapter has a simple interface:
             """ Set the value of the named field
             """
 
+        def json_data(name, default=None):
+            """ Get a JSON compatible structure from the value
+            """
+
 To customize how the data is set to each field of the content, you have to
 register an adapter for a more specific interface on the content.
 This adapter has to implement the `IDataManager` interface.
+
+.. note:: The `json_data` function is called by the Data Provider Adapter
+          (`IInfo`) to get a JSON compatible return Value, e.g.:
+          DateTime('2017/05/14 14:46:18.746800 GMT+2') -> "2017-05-14T14:46:18+02:00"
 
 
 .. important:: Please be aware that you have to implement security for field
@@ -283,10 +295,24 @@ This Adapter has a simple interface:
             """Set the value of the field
             """
 
+        def json_data(instance, default=None):
+            """Get a JSON compatible structure from the value
+            """
+
 To customize how the data is set to each field of the content, you have to
 register a more specific adapter to a field.
 
 This adapter has to implement then the `IFieldManager` interface.
+
+.. note:: The `json_data` function is called by the Data Manager Adapter
+          (`IDataManager`) to get a JSON compatible return Value, e.g.:
+          DateTime('2017/05/14 14:46:18.746800 GMT+2') -> "2017-05-14T14:46:18+02:00"
+
+.. note:: The `json_data` method is defined on context level (`IDataManger`) as
+          well as on field level (`IFieldManager`). This is to handle objects
+          w/o fields, e.g. Catalog Brains, Portal Object etc. and Objects which
+          contain fields and want to delegate the JSON representation to the
+          field.
 
 .. important:: Please be aware that you have to implement security for field
                level access on your own.
@@ -310,6 +336,11 @@ This adapter has to implement then the `IFieldManager` interface.
 
             self._set(instance, value, **kw)
 
+        def json_data(self, instance, default=None):
+            """Get a JSON compatible value
+            """
+            value = self.get(instance)
+            return api.to_iso_date(value) or default
 
 Register the adapter in your `configure.zcml` file for your special interface:
 

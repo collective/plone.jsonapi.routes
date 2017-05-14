@@ -200,6 +200,24 @@ class TestAPI(APITestCase):
         obj = self.get_document_obj()
         self.assertEqual(api.get_uid(obj), obj.UID())
 
+    def test_is_uid(self):
+        obj = self.get_document_obj()
+        self.assertTrue(api.is_uid(obj.UID()))
+
+    def test_to_iso_date(self):
+        obj = self.get_document_obj()
+        created = obj.created()
+        date = api.to_iso_date(created)
+        self.assertEqual(date, obj.created().ISO8601())
+
+    def test_is_dexterity_content(self):
+        obj = self.get_document_obj()
+        if api.is_plone5():
+            # std. content types are dexterity in plone 5
+            self.assertTrue(api.is_dexterity_content(obj))
+        else:
+            self.assertFalse(api.is_dexterity_content(obj))
+
     def test_get_portal_type(self):
         self.assertEqual(
             api.get_portal_type(self.get_document_brain()),
