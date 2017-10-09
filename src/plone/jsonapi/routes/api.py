@@ -431,6 +431,11 @@ def get_info(brain_or_object, endpoint=None, complete=False):
     :rtype: dict
     """
 
+    # also extract the brain data for objects
+    if not is_brain(brain_or_object):
+        brain_or_object = get_brain(brain_or_object)
+        complete = True
+
     # extract the data from the initial object with the proper adapter
     info = IInfo(brain_or_object).to_dict()
 
@@ -860,6 +865,27 @@ def is_brain(brain_or_object):
     :rtype: bool
     """
     return ICatalogBrain.providedBy(brain_or_object)
+
+
+def get_brain(brain_or_object):
+    """Return a ZCatalog brain for the object
+
+    :param brain_or_object: A single catalog brain or content object
+    :type brain_or_object: ATContentType/DexterityContentType/CatalogBrain
+    :returns: True if the object is a catalog brain
+    :rtype: bool
+    """
+    if is_brain(brain_or_object):
+        return brain_or_object
+    # fetch the brain by UID
+    uid = get_uid(brain_or_object)
+    pc = get_tool("portal_catalog")
+    results = pc({"UID": uid})
+    if len(results) == 0:
+        fail("Object with UID={} not in portal_catalog".format(uid))
+    if len(results) > 1:
+        fail("More than one object with UID={} found in portal_catalog".format(uid))
+    return results[0]
 
 
 def is_root(brain_or_object):
