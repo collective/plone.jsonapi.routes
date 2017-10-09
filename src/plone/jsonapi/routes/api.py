@@ -164,6 +164,16 @@ def create_items(portal_type=None, uid=None, endpoint=None, **kw):
     return make_items_for(results, endpoint=endpoint)
 
 
+# PATCH (alias for update_items)
+def patch_items(portal_type=None, uid=None, endpoint=None, **kw):
+    return update_items(portal_type=portal_type, uid=uid, endpoint=endpoint, **kw)
+
+
+# PUT (alias for update_items)
+def put_items(portal_type=None, uid=None, endpoint=None, **kw):
+    return update_items(portal_type=portal_type, uid=uid, endpoint=endpoint, **kw)
+
+
 # UPDATE
 def update_items(portal_type=None, uid=None, endpoint=None, **kw):
     """ update items

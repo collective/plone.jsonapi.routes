@@ -37,6 +37,10 @@ def get(context, request, resource=None, uid=None):
 # http://werkzeug.pocoo.org/docs/0.11/routing/#custom-converters
 @route("/<any(" + ACTIONS + "):action>",
        "plone.jsonapi.routes.action", methods=["POST"])
+@route("/<string:resource>",
+       "plone.jsonapi.routes.action", methods=["POST"])
+@route("/<string:resource>/<string(maxlength=32):uid>",
+       "plone.jsonapi.routes.action", methods=["POST"])
 @route("/<any(" + ACTIONS + "):action>/<string(maxlength=32):uid>",
        "plone.jsonapi.routes.action", methods=["POST"])
 @route("/<string:resource>/<any(" + ACTIONS + "):action>",
@@ -65,6 +69,10 @@ def action(context, request, action=None, resource=None, uid=None):
     -> The actions (create) will use the <uid> as the parent folder
     <Plonesite>/@@API/plone/api/1.0/<resource>/<action>
     """
+
+    # allow to set the method via the header
+    if action is None:
+        action = request.get_header("HTTP_X_HTTP_METHOD_OVERRIDE", "CREATE").lower()
 
     # Fetch and call the action function of the API
     func_name = "{}_items".format(action)
