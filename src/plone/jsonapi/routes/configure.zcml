@@ -149,6 +149,12 @@
       factory=".fieldmanagers.NamedImageFieldManager"
       />
 
+  <!-- Adapter for Datetime Fields -->
+  <adapter
+      for="zope.schema.interfaces.IDatetime"
+      factory=".fieldmanagers.DatetimeFieldManager"
+      />
+
 
   <!-- DATA PROVIDERS -->
 

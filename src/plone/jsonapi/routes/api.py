@@ -1021,13 +1021,13 @@ def to_json_value(obj, fieldname, value=_marker, default=None):
     if isinstance(value, ImplicitAcquisitionWrapper):
         return get_url_info(value)
 
-    # convert dates
-    if is_date(value):
-        return to_iso_date(value)
-
     # check if the value is callable
     if callable(value):
         value = value()
+
+    # convert dates
+    if is_date(value):
+        return to_iso_date(value)
 
     # check if the value is JSON serializable
     if not is_json_serializable(value):
@@ -1392,8 +1392,11 @@ def get_object_by_path(path):
     """
 
     # nothing to do here
-    if not path:
+    if not isinstance(path, basestring):
         return None
+
+    # path must be a string
+    path = str(path)
 
     portal = get_portal()
     portal_path = get_path(portal)
