@@ -4,6 +4,7 @@ import dateutil
 import mimetypes
 
 from zope import interface
+from zope.schema._bootstrapinterfaces import WrongType
 
 from DateTime import DateTime
 
@@ -58,11 +59,16 @@ class ZopeSchemaFieldManager(object):
         if fieldname == "id":
             value = str(value)
 
-        # Validate
-        self.field.validate(value)
+        try:
+            # Validate
+            self.field.validate(value)
 
-        # TODO: Check security on the field level
-        return self.field.set(instance, value)
+            # TODO: Check security on the field level
+            return self.field.set(instance, value)
+        except WrongType:
+            logger.warn("WrongType: Field={} Value={}".format(self.field, value))
+        except:
+            logger.warn("Unknown Exception: Field={} Value={}".format(self.field, value))
 
     def _get(self, instance, **kw):
         """Get the value of the field
