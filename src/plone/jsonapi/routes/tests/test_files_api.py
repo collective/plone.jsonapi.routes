@@ -62,7 +62,9 @@ class TestFilesAPI(APITestCase):
         """ return the items from the response JSON
         """
         response = self.get_response()
-        return response.get("items")
+        if "items" in respomse:
+            return response.get("items")
+        return response
 
     def test_files_route(self):
         """ Test CRUD file routes
