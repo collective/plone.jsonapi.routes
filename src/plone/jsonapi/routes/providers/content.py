@@ -12,6 +12,8 @@ ACTIONS = "create,update,delete,cut,copy,paste"
        "plone.jsonapi.routes.get", methods=["GET"])
 @route("/<string:resource>/<string(maxlength=32):uid>",
        "plone.jsonapi.routes.get", methods=["GET"])
+@route("/<string(maxlength=32):uid>",
+       "plone.jsonapi.routes.get", methods=["GET"])
 def get(context, request, resource=None, uid=None):
     """Get Plone contents, e.g.
 
@@ -42,6 +44,8 @@ def get(context, request, resource=None, uid=None):
 @route("/<string:resource>/<string(maxlength=32):uid>",
        "plone.jsonapi.routes.action", methods=["POST"])
 @route("/<any(" + ACTIONS + "):action>/<string(maxlength=32):uid>",
+       "plone.jsonapi.routes.action", methods=["POST"])
+@route("/<string(maxlength=32):uid>",
        "plone.jsonapi.routes.action", methods=["POST"])
 @route("/<string:resource>/<any(" + ACTIONS + "):action>",
        "plone.jsonapi.routes.action", methods=["POST"])
