@@ -49,25 +49,6 @@ def get(context, request, resource=None, uid=None):
        "plone.jsonapi.routes.action", methods=["POST"])
 def action(context, request, action=None, resource=None, uid=None):
     """Various HTTP POST actions
-
-    Case 1: <action>
-    <Plonesite>/@@API/plone/api/1.0/<action>
-
-    Case 2: <action>/<uid>
-    -> The actions (cut, copy, update, delete) will performed on the object identified by <uid>
-    -> The actions (create, paste) will use the <uid> as the parent folder
-    <Plonesite>/@@API/plone/api/1.0/<action>/<uid>
-
-    Case 3: <resource>/<action>
-    -> The "target" object will be located by a location given in the request body (uid, path, parent_path + id)
-    -> The actions (cut, copy, update, delete) will performed on the target object
-    -> The actions (create) will use the target object as the container
-    <Plonesite>/@@API/plone/api/1.0/<resource>/<action>
-
-    Case 4: <resource>/<action>/<uid>
-    -> The actions (cut, copy, update, delete) will performed on the object identified by <uid>
-    -> The actions (create) will use the <uid> as the parent folder
-    <Plonesite>/@@API/plone/api/1.0/<resource>/<action>
     """
 
     # allow to set the method via the header
