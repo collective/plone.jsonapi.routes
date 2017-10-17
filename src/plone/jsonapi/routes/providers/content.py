@@ -10,6 +10,8 @@ ACTIONS = "create,update,delete,cut,copy,paste"
 
 @route("/<string:resource>",
        "plone.jsonapi.routes.get", methods=["GET"])
+@route("/<string:resource>/<string(maxlength=32):uid>",
+       "plone.jsonapi.routes.get", methods=["GET"])
 @route("/<string:resource>/<string(length=32):uid>",
        "plone.jsonapi.routes.get", methods=["GET"])
 @route("/<string(length=32):uid>",
@@ -22,7 +24,7 @@ def get(context, request, resource=None, uid=None):
     """
 
     # We have a UID, return the record
-    if uid is not None:
+    if uid and not resource:
         return api.get_record(uid)
 
     # we have a UID as resource, return the record
@@ -46,7 +48,7 @@ def get(context, request, resource=None, uid=None):
        "plone.jsonapi.routes.action", methods=["POST"])
 @route("/<string:resource>",
        "plone.jsonapi.routes.action", methods=["POST"])
-@route("/<string:resource>/<string(length=32):uid>",
+@route("/<string:resource>/<string(maxlength=32):uid>",
        "plone.jsonapi.routes.action", methods=["POST"])
 @route("/<any(" + ACTIONS + "):action>/<string(maxlength=32):uid>",
        "plone.jsonapi.routes.action", methods=["POST"])
