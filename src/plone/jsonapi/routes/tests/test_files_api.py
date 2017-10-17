@@ -62,9 +62,7 @@ class TestFilesAPI(APITestCase):
         """ return the items from the response JSON
         """
         response = self.get_response()
-        if "items" in response:
-            return response.get("items")
-        return response
+        return response.get("items")
 
     def test_files_route(self):
         """ Test CRUD file routes
@@ -104,11 +102,14 @@ class TestFilesAPI(APITestCase):
         # Issue #57: Explicitly ask for the filedata
         self.browser.open(self.api_url + "/file/%s?filedata=yes&complete=yes" % obj.UID())
 
-        # Get the item
-        item = self.get_response()
+        # Get the items list from the detail page
+        items = self.get_items()
+        # There should be exactly one item in the list
+
+        self.assertEqual(len(items), 1)
 
         # Check the file contents
-        file_data = item["file"]
+        file_data = items[0]["file"]
 
         # File contents should be the same (base64 encoded)
         self.assertEqual(
