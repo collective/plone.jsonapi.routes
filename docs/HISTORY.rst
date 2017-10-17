@@ -2,6 +2,16 @@ Changelog
 =========
 
 
+0.9.4 - 2017-10-17
+------------------
+
+**Changes**
+
+- Merge brain data to object info
+- Handle Zope Datetime Fields
+- Support Backbone.js REST API
+
+
 0.9.3 - 2017-05-14
 ------------------
 
