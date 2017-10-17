@@ -10,9 +10,9 @@ ACTIONS = "create,update,delete,cut,copy,paste"
 
 @route("/<string:resource>",
        "plone.jsonapi.routes.get", methods=["GET"])
-@route("/<string:resource>/<string(maxlength=32):uid>",
+@route("/<string:resource>/<string(length=32):uid>",
        "plone.jsonapi.routes.get", methods=["GET"])
-@route("/<string(maxlength=32):uid>",
+@route("/<string(length=32):uid>",
        "plone.jsonapi.routes.get", methods=["GET"])
 def get(context, request, resource=None, uid=None):
     """Get Plone contents, e.g.
@@ -20,6 +20,11 @@ def get(context, request, resource=None, uid=None):
     <Plonesite>/@@API/plone/api/1.0/folder -> returns all folders
     <Plonesite>/@@API/plone/api/1.0/folder/4711 -> returns the folder with UID 4711
     """
+
+    # We have a UID, return the record
+    if uid is not None:
+        return api.get_record(uid)
+
     # we have a UID as resource, return the record
     if api.is_uid(resource):
         return api.get_record(resource)
@@ -41,11 +46,11 @@ def get(context, request, resource=None, uid=None):
        "plone.jsonapi.routes.action", methods=["POST"])
 @route("/<string:resource>",
        "plone.jsonapi.routes.action", methods=["POST"])
-@route("/<string:resource>/<string(maxlength=32):uid>",
+@route("/<string:resource>/<string(length=32):uid>",
        "plone.jsonapi.routes.action", methods=["POST"])
 @route("/<any(" + ACTIONS + "):action>/<string(maxlength=32):uid>",
        "plone.jsonapi.routes.action", methods=["POST"])
-@route("/<string(maxlength=32):uid>",
+@route("/<string(length=32):uid>",
        "plone.jsonapi.routes.action", methods=["POST"])
 @route("/<string:resource>/<any(" + ACTIONS + "):action>",
        "plone.jsonapi.routes.action", methods=["POST"])
