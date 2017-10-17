@@ -62,7 +62,7 @@ class TestFilesAPI(APITestCase):
         """ return the items from the response JSON
         """
         response = self.get_response()
-        if "items" in respomse:
+        if "items" in response:
             return response.get("items")
         return response
 
