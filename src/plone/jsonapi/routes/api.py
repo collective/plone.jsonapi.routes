@@ -887,14 +887,16 @@ def get_brain(brain_or_object):
     """
     if is_brain(brain_or_object):
         return brain_or_object
+    if is_root(brain_or_object):
+        return brain_or_object
     # fetch the brain by UID
     uid = get_uid(brain_or_object)
     pc = get_tool("portal_catalog")
     results = pc({"UID": uid})
     if len(results) == 0:
-        fail("Object with UID={} not in portal_catalog".format(uid))
+        fail(500, "Object with UID={} not in portal_catalog".format(uid))
     if len(results) > 1:
-        fail("More than one object with UID={} found in portal_catalog".format(uid))
+        fail(500, "More than one object with UID={} found in portal_catalog".format(uid))
     return results[0]
 
 
